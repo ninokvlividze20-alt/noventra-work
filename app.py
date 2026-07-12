@@ -8,7 +8,8 @@ import os
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SAMESITE='None', # შეცვალე Lax -> None
+    SESSION_COOKIE_SECURE=True,     # დაამატე ეს, რადგან HTTPS გვაქვს
 )
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_o6plSifKNIc9@ep-damp-thunder-asbmmuxu.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require'
