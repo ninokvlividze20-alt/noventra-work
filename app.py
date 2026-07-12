@@ -87,8 +87,7 @@ def register():
             return redirect(url_for('dashboard'))
         except Exception as e:
             db.session.rollback()
-            flash("რეგისტრაციისას დაფიქსირდა შეცდომა ბაზასთან კავშირში.", "danger")
-            return redirect(url_for('register'))
+            return f"ბაზის შეცდომა: {str(e)}" # ეს პირდაპირ დაწერს ეკრანზე შეცდომის მიზეზს
             
     return render_template('signup_new.html')
 
