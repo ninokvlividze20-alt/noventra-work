@@ -2,11 +2,11 @@
 from flask import Flask, render_template, request, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
-import os
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -65,9 +65,7 @@ def register():
         db.session.commit()
         login_user(new_user)
         return redirect(url_for('dashboard'))
-    return render_template('signup.html')
-
-from werkzeug.security import check_password_hash
+    return render_template('signup_new.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
