@@ -1,0 +1,26 @@
+cat <<'EOF' > templates/signup_new.html
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <title>Noventra - რეგისტრაცია</title>
+    <style>
+        body { background-color: #050505; color: #ffffff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-container { background-color: #121212; padding: 30px; border-radius: 15px; border: 1px solid #00ffcc; width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #00ffcc; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>რეგისტრაცია</h2>
+        <form method="POST" autocomplete="off">
+            <input type="text" name="username" placeholder="სახელი" required>
+            <input type="email" name="email" placeholder="ელ-ფოსტა" required>
+            <input type="password" name="password" placeholder="პაროლი" required>
+            <button type="submit">დარეგისტრირება</button>
+        </form>
+    </div>
+</body>
+</html>
+EOF
