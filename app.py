@@ -66,14 +66,23 @@ def register():
             
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
-        # ვქმნით მხოლოდ აუცილებელ ველებს
-        new_user = User(username=username, email=email, password=hashed_password)
+        # ვქმნით ობიექტს მხოლოდ იმ ველებით, რომლებიც ბაზამ 100% იცის
+        new_user = User(
+            username=username, 
+            email=email, 
+            password=hashed_password
+        )
         
-        db.session.add(new_user)
-        db.session.commit() # აქ შეიძლება ბაზამ თავად მიანიჭოს default მნიშვნელობები balance-სა და reputation-ს
-        
-        login_user(new_user)
-        return redirect(url_for('dashboard'))
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash("რეგისტრაციისას დაფიქსირდა შეცდომა ბაზასთან კავშირში.", "danger")
+            return redirect(url_for('register'))
+            
     return render_template('signup_new.html')
 
 @app.route('/login', methods=['GET', 'POST'])
