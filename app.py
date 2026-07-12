@@ -15,9 +15,15 @@ app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_o6plSifKNIc9@ep-damp-thunder-asbmmuxu.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# აქ ჩავსვით ჩვენი "ჯადოსნური" პარამეტრები
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+}
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login' # გამოსწორდა: იყო 'register'
+login_manager.login_view = 'login'
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
