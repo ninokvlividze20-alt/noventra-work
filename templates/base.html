@@ -1,3 +1,4 @@
+cat <<'EOF' > templates/base.html
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -5,11 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noventra</title>
     <style>
-        /* აქ ვწერთ საერთო სტილებს ყველა გვერდისთვის */
-        body { background-color: #050505; color: #ffffff; font-family: sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 400px; margin: auto; }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; }
-        button { background-color: #00ffcc; border: none; cursor: pointer; }
+        body { background-color: #050505; color: #ffffff; font-family: sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 400px; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
+        button { background-color: #00ffcc; color: #000; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -18,3 +18,4 @@
     </div>
 </body>
 </html>
+EOF
