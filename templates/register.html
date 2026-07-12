@@ -7,7 +7,7 @@ cat <<'EOF' > templates/register.html
     <style>
         body { background-color: #050505; color: #ffffff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .form-container { background-color: #121212; padding: 30px; border-radius: 15px; border: 1px solid #00ffcc; width: 300px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; box-sizing: border-box; }
         button { width: 100%; padding: 10px; background-color: #00ffcc; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -15,11 +15,11 @@ cat <<'EOF' > templates/register.html
     <div class="form-container">
         <h2>რეგისტრაცია</h2>
         <form method="POST" autocomplete="off">
-    <input type="text" name="username" placeholder="სახელი" required autocomplete="off">
-    <input type="email" name="email" placeholder="ელ-ფოსტა" required autocomplete="off">
-    <input type="password" name="password" placeholder="პაროლი" required autocomplete="new-password">
-    <button type="submit">რეგისტრაცია</button>
-</form>
+            <input type="text" name="username" placeholder="სახელი" required autocomplete="off">
+            <input type="email" name="email" placeholder="ელ-ფოსტა" required autocomplete="off">
+            <input type="password" name="password" placeholder="პაროლი" required autocomplete="new-password">
+            <button type="submit">რეგისტრაცია</button>
+        </form>
     </div>
 </body>
 </html>
