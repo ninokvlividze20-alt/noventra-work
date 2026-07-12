@@ -35,6 +35,7 @@ class User(db.Model, UserMixin):
     reputation = db.Column(db.Integer, default=100)
     is_admin = db.Column(db.Boolean, default=False)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
+    withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -51,6 +52,14 @@ class Transaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     task_title = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+
+class WithdrawalRequest(db.Model):
+    __tablename__ = 'withdrawal_requests' # სახელი დავარქვათ ცხრილს
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -182,21 +191,6 @@ def admin_users():
     
     users = User.query.all()
     return render_template('admin_users.html', users=users)
-
-class User(db.Model, UserMixin):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # ... დანარჩენი ველები ...
-    transactions = db.relationship('Transaction', backref='user', lazy=True)
-    withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True) # ეს დაამატე
-
-class WithdrawalRequest(db.Model):
-    __tablename__ = 'withdrawal_requests' # სახელი დავარქვათ ცხრილს
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 with app.app_context():
     db.create_all()
