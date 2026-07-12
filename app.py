@@ -65,9 +65,13 @@ def register():
             return redirect(url_for('register'))
             
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        
+        # ვქმნით მხოლოდ აუცილებელ ველებს
         new_user = User(username=username, email=email, password=hashed_password)
+        
         db.session.add(new_user)
-        db.session.commit()
+        db.session.commit() # აქ შეიძლება ბაზამ თავად მიანიჭოს default მნიშვნელობები balance-სა და reputation-ს
+        
         login_user(new_user)
         return redirect(url_for('dashboard'))
     return render_template('signup_new.html')
@@ -81,10 +85,10 @@ def login():
         
         if user and check_password_hash(user.password, password):
             login_user(user)
+            # დაამატე ეს ხაზი, რომ დავრწმუნდეთ სესია გააქტიურდა
             return redirect(url_for('dashboard'))
         
         flash("მომხმარებლის სახელი ან პაროლი არასწორია!", "danger")
-        return redirect(url_for('login'))
     return render_template('login.html')
 
 @app.route('/dashboard')
