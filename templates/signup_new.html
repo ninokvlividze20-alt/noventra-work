@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html lang="ka">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noventra - რეგისტრაცია</title>
-    <style>
-        body { background-color: #050505; color: #ffffff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
-        .form-container { background-color: #121212; padding: 25px; border-radius: 15px; border: 1px solid #00ffcc; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 4px 15px rgba(0,255,204,0.2); }
-        h2 { margin-bottom: 20px; color: #00ffcc; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; margin-top: 10px; background-color: #00ffcc; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #000; font-size: 16px; }
-    </style>
-</head>
-<body>
-    <div class="form-container">
-        <h2>რეგისტრაცია</h2>
-        <form method="POST">
-            <input type="text" name="username" placeholder="სახელი" required>
-            <input type="email" name="email" placeholder="ელ-ფოსტა" required>
-            <input type="password" name="password" placeholder="პაროლი" required>
-            <button type="submit">დარეგისტრირება</button>
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 60vh; padding: 20px;">
+    <div class="form-container" style="background-color: #121212; padding: 25px; border-radius: 15px; border: 1px solid #00ffcc; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 4px 15px rgba(0,255,204,0.2);">
+        <h2 style="color: #00ffcc; margin-bottom: 20px;">რეგისტრაცია</h2>
+        <form method="POST" action="{{ url_for('register') }}">
+            <input type="text" name="username" placeholder="სახელი" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-size: 16px;">
+            <input type="email" name="email" placeholder="ელ-ფოსტა" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-size: 16px;">
+            <input type="password" name="password" placeholder="პაროლი" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-size: 16px;">
+            <button type="submit" style="width: 100%; padding: 12px; margin-top: 10px; background-color: #00ffcc; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #000; font-size: 16px;">დარეგისტრირება</button>
         </form>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
