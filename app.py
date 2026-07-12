@@ -55,16 +55,17 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
-        # აქ ვაკეთებთ "ხელით" შემოწმებას: თუ მომხმარებლის სახელი არის 'nino', მაშინ გახდეს ადმინი
-        is_admin_flag = True if username == 'nino' else False
+        if User.query.filter_by(username=username).first():
+            return "მომხმარებელი ამ სახელით უკვე არსებობს!"
             
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        is_admin_flag = True if username == 'nino' else False
         new_user = User(username=username, email=email, password=hashed_password, is_admin=is_admin_flag)
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('dashboard')) # აქ გადამისამართება უნდა იყოს dashboard-ზე
     return render_template('signup_new.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -76,7 +77,9 @@ def login():
         
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('dashboard')) # გადამისამართება dashboard-ზე
+        else:
+            return "მომხმარებლის სახელი ან პაროლი არასწორია!"
     return render_template('login.html')
 
 @app.route('/dashboard')
