@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_o6plSifKNIc9@ep-damp-thunder-asbmmuxu.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'register'
+login_manager.login_view = 'login' # გამოსწორდა: იყო 'register'
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -57,15 +61,15 @@ def register():
         password = request.form.get('password')
         
         if User.query.filter_by(username=username).first():
-            return "მომხმარებელი ამ სახელით უკვე არსებობს!"
+            flash("მომხმარებელი ამ სახელით უკვე არსებობს!", "danger")
+            return redirect(url_for('register'))
             
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        is_admin_flag = True if username == 'nino' else False
-        new_user = User(username=username, email=email, password=hashed_password, is_admin=is_admin_flag)
+        new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
-        return redirect(url_for('dashboard')) # აქ გადამისამართება უნდა იყოს dashboard-ზე
+        return redirect(url_for('dashboard'))
     return render_template('signup_new.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -77,9 +81,10 @@ def login():
         
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('dashboard')) # გადამისამართება dashboard-ზე
-        else:
-            return "მომხმარებლის სახელი ან პაროლი არასწორია!"
+            return redirect(url_for('dashboard'))
+        
+        flash("მომხმარებლის სახელი ან პაროლი არასწორია!", "danger")
+        return redirect(url_for('login'))
     return render_template('login.html')
 
 @app.route('/dashboard')
@@ -103,7 +108,6 @@ def complete_task(task_id):
 @app.route('/leaderboard')
 @login_required
 def leaderboard():
-    # მომხმარებლები დავალაგოთ ბალანსის კლებადობის მიხედვით
     top_users = User.query.order_by(User.balance.desc()).limit(10).all()
     return render_template('leaderboard.html', users=top_users)
 
@@ -111,7 +115,7 @@ def leaderboard():
 @login_required
 def add_task():
     if not current_user.is_admin:
-        abort(403) # წვდომა აკრძალულია
+        abort(403)
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
@@ -127,7 +131,6 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-# ცხრილების შექმნა აპლიკაციის გაშვებამდე
 with app.app_context():
     db.create_all()
 
