@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <title>ტოპ მომხმარებლები</title>
+    <style>
+        body { background-color: #050505; color: #fff; padding: 40px; font-family: sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; border-bottom: 1px solid #333; text-align: left; }
+        .highlight { color: #00ffcc; }
+    </style>
+</head>
+<body>
+    <h1>საუკეთესო მონაწილეები</h1>
+    <table>
+        <tr><th>ადგილი</th><th>მომხმარებელი</th><th>ბალანსი</th></tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td class="highlight">{{ user.username }}</td>
+            <td>{{ user.balance }} ლარი</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/dashboard" style="color: #00ffcc;">დაშბორდზე დაბრუნება</a>
+</body>
+</html>
