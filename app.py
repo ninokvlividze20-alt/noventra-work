@@ -65,7 +65,7 @@ def register():
         db.session.commit()
         login_user(new_user)
         return redirect(url_for('dashboard'))
-    return render_template('register.html')
+    return render_template('signup.html')
 
 from werkzeug.security import check_password_hash
 
