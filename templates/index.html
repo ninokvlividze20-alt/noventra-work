@@ -1,34 +1,45 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="hero">
-        <h1>Noventra Work</h1>
-        <p>შენი დრო და უნარები რეალურ ღირებულებას იძენს.</p>
-        <a href="{{ url_for('login') }}" class="btn">შესვლა</a>
-        <a href="{{ url_for('register') }}" class="btn" style="background: #333; color: #fff;">რეგისტრაცია</a>
-    </div>
+<style>
+    /* შენი თავდაპირველი დიზაინი */
+    .hero { text-align: center; margin-bottom: 60px; }
+    .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto; }
+    .card { background: #121212; padding: 25px; border-radius: 15px; border: 1px solid #333; width: 260px; text-align: left; transition: 0.3s; }
+    .card:hover { border-color: #00ffcc; }
+    .card h3 { color: #00ffcc; margin-top: 0; }
+    .btn { background: #00ffcc; color: #000; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 10px; display: inline-block; }
+    .footer { margin-top: 80px; padding-top: 40px; border-top: 1px solid #333; text-align: center; }
+</style>
 
-    <div class="container">
-        <div class="card">
-            <h3>დავალებები</h3>
-            <p>Noventra არის ციფრული ეკოსისტემა, რომელიც თანამშრომლობს საერთაშორისო კომპანიებთან. ჩვენ შევარჩიეთ მარტივი დავალებები მაქსიმალურად მაღალი ანაზღაურებით!</p>
-        </div>
-        <div class="card">
-            <h3>გამჭვირვალობა</h3>
-            <p>თითოეულ დავალებას აქვს ფიქსირებული ანაზღაურება. შენ ყოველთვის ზუსტად იცი, რამდენს გამოიმუშავებ. თავად განსაზღვრე შენი სამუშაო გრაფიკი დღის განმავლობაში.</p>
-        </div>
-        <div class="card">
-            <h3>ანაზღაურება</h3>
-            <p>შენი შრომა ყოველთვის ფასდება. თანხა გროვდება საფულეში და გაიცემა ყოველ 15 დღეში. აკონტროლე საკუთარი რეიტინგი, რადგან ეს გაგიხსნის გზას უფრო მასშტაბური შესაძლებლობებისკენ.</p>
-        </div>
-        <div class="card">
-            <h3>პრინციპი</h3>
-            <p>ნოვენტრა არ არის რეფერალური სისტემა! რეგისტრირდები და იწყებ გამომუშავებას პერსონალურად. აკონტროლე რეიტინგი და შეასრულე დავალებები პასუხისმგებლობით.</p>
-        </div>
-    </div>
+<div class="hero">
+    <h1>Noventra Work</h1>
+    <p>შენი დრო და უნარები რეალურ ღირებულებას იძენს.</p>
+    <a href="{{ url_for('login') }}" class="btn">შესვლა</a>
+    <a href="{{ url_for('register') }}" class="btn" style="background: #333; color: #fff;">რეგისტრაცია</a>
+</div>
 
-    <div class="footer">
-        <h3>ხართ კომპანია?</h3>
-        <p>Noventra არის ბიზნესის ზრდის მექანიზმი. დაგვიკავშირდით: <b>partner@noventra.ge</b></p>
+<div class="container">
+    <div class="card">
+        <h3>დავალებები</h3>
+        <p>Noventra არის ციფრული ეკოსისტემა, რომელიც თანამშრომლობს საერთაშორისო კომპანიებთან. ჩვენ შევარჩიეთ მარტივი დავალებები მაქსიმალურად მაღალი ანაზღაურებით!</p>
     </div>
+    <div class="card">
+        <h3>გამჭვირვალობა</h3>
+        <p>თითოეულ დავალებას აქვს ფიქსირებული ანაზღაურება. შენ ყოველთვის ზუსტად იცი, რამდენს გამოიმუშავებ. თავად განსაზღვრე შენი სამუშაო გრაფიკი დღის განმავლობაში.</p>
+    </div>
+    <div class="card">
+        <h3>ანაზღაურება</h3>
+        <p>შენი შრომა ყოველთვის ფასდება. თანხა გროვდება საფულეში და გაიცემა ყოველ 15 დღეში. აკონტროლე საკუთარი რეიტინგი, რადგან ეს გაგიხსნის გზას უფრო მასშტაბური შესაძლებლობებისკენ.</p>
+    </div>
+    <div class="card">
+        <h3>პრინციპი</h3>
+        <p>ნოვენტრა არ არის რეფერალური სისტემა! რეგისტრირდები და იწყებ გამომუშავებას პერსონალურად. აკონტროლე რეიტინგი და შეასრულე დავალებები პასუხისმგებლობით.</p>
+    </div>
+</div>
+
+<div class="footer">
+    <h3>ხართ კომპანია?</h3>
+    <p>Noventra არის ბიზნესის ზრდის მექანიზმი. დაგვიკავშირდით: <b>partner@noventra.ge</b></p>
+</div>
 {% endblock %}
