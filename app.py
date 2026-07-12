@@ -130,6 +130,15 @@ def leaderboard():
     top_users = User.query.order_by(User.balance.desc()).limit(10).all()
     return render_template('leaderboard.html', users=top_users)
 
+@app.route('/admin/withdrawals')
+@login_required
+def admin_withdrawals():
+    if not current_user.is_admin:
+        return redirect(url_for('dashboard'))
+    
+    requests = WithdrawalRequest.query.filter_by(status='pending').all()
+    return render_template('admin_withdrawals.html', requests=requests)
+
 @app.route('/add_task', methods=['GET', 'POST'])
 @login_required
 def add_task():
@@ -149,6 +158,45 @@ def add_task():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+@app.route('/request_withdrawal', methods=['POST'])
+@login_required
+def request_withdrawal():
+    amount = float(request.form.get('amount'))
+    if amount > current_user.balance:
+        flash("ბალანსი არასაკმარისია!", "danger")
+        return redirect(url_for('dashboard'))
+    
+    new_request = WithdrawalRequest(user_id=current_user.id, amount=amount)
+    db.session.add(new_request)
+    db.session.commit()
+    flash("მოთხოვნა გაგზავნილია ადმინისტრატორთან!", "success")
+    return redirect(url_for('dashboard'))
+
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    if not current_user.is_admin:
+        flash("წვდომა აკრძალულია!", "danger")
+        return redirect(url_for('dashboard'))
+    
+    users = User.query.all()
+    return render_template('admin_users.html', users=users)
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # ... დანარჩენი ველები ...
+    transactions = db.relationship('Transaction', backref='user', lazy=True)
+    withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True) # ეს დაამატე
+
+class WithdrawalRequest(db.Model):
+    __tablename__ = 'withdrawal_requests' # სახელი დავარქვათ ცხრილს
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 with app.app_context():
     db.create_all()

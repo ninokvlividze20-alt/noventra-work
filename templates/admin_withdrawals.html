@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>თანხის გატანის მოთხოვნები</h2>
+{% for req in requests %}
+    <div class="card" style="margin-top: 10px;">
+        <p>მომხმარებელი: {{ req.user.username }}</p>
+        <p>თანხა: {{ req.amount }} ლარი</p>
+        <p>თარიღი: {{ req.created_at }}</p>
+    </div>
+{% endfor %}
+<a href="{{ url_for('dashboard') }}">დაბრუნება</a>
+{% endblock %}

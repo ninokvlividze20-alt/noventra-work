@@ -16,6 +16,11 @@
         <p>რეპუტაცია: {{ current_user.reputation }}</p>
     </div>
 
+    <form action="/request_withdrawal" method="POST" style="margin: 15px 0;">
+        <input type="number" name="amount" placeholder="თანხა (ლარი)" required min="1" style="padding: 5px; border-radius: 5px; border: none;">
+        <button type="submit" style="background: #ff5555; color: white; border: none; padding: 5px 15px; cursor: pointer; border-radius: 5px;">თანხის გატანა</button>
+    </form>
+
     <div class="card" style="margin-top: 20px;">
         <h3>ხელმისაწვდომი დავალებები</h3>
         {% for task in tasks %}
@@ -47,7 +52,8 @@
     {% if current_user.is_admin %}
         <div class="card" style="margin-top: 20px; border: 2px dashed #00ffcc;">
             <h3>ადმინისტრატორის პანელი</h3>
-            <a href="/add_task" style="color: #00ffcc; font-weight: bold; text-decoration: none;">+ ახალი დავალების დამატება</a>
+            <a href="/add_task" style="color: #00ffcc; text-decoration: none;">+ ახალი დავალების დამატება</a><br>
+            <a href="{{ url_for('admin_users') }}" style="color: #00ffcc; text-decoration: none;">📋 მომხმარებელთა სიის ნახვა</a>
         </div>
     {% endif %}
 

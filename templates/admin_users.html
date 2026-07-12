@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>მომხმარებელთა სია</h2>
+<table border="1" style="width:100%; border-collapse: collapse; color: white;">
+    <tr style="background-color: #333;">
+        <th>მომხმარებელი</th>
+        <th>ელ-ფოსტა</th>
+        <th>ბალანსი</th>
+        <th>რეპუტაცია</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.balance }}</td>
+        <td>{{ user.reputation }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{{ url_for('dashboard') }}">დაბრუნება დაშბორდზე</a>
+{% endblock %}
