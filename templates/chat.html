@@ -2,23 +2,42 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NOVENTRA | Chat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
+        * { box-sizing: border-box; }
         :root { --primary: #4a90e2; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        #chat-container { width: 100%; max-width: 600px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
-        #messages { height: 500px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
-        .msg { margin-bottom: 15px; padding: 10px; border-radius: 8px; background: #eef2f5; }
+        body, html { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); overflow: hidden; }
+        
+        #chat-container { 
+            display: flex; flex-direction: column; height: 100vh; width: 100%; 
+            max-width: 600px; margin: 0 auto; background: white; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+
+        .header { padding: 10px; background: #eee; text-align: center; border-bottom: 1px solid #ddd; }
+        .header a { text-decoration: none; color: var(--primary); font-weight: bold; }
+        
+        #messages { 
+            flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;
+            -webkit-overflow-scrolling: touch; 
+        }
+        
+        .msg { margin-bottom: 15px; padding: 10px; border-radius: 8px; background: #eef2f5; font-size: 16px; }
         .msg b { color: var(--primary); }
         .admin-mention { border-left: 4px solid #e74c3c; background: #fff5f5; }
-        form { display: flex; padding: 20px; border-top: 1px solid #eee; }
-        input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-        button { margin-left: 10px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; }
+        
+        form { display: flex; padding: 15px; background: #fff; border-top: 1px solid #eee; }
+        input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 16px; }
+        button { margin-left: 10px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
     </style>
 </head>
 <body>
     <div id="chat-container">
+        <div class="header">
+            <a href="/dashboard">← კაბინეტში დაბრუნება</a>
+        </div>
         <div id="messages">
             {% for msg in messages %}
                 <p class="msg {{ 'admin-mention' if '@admin' in msg.text.lower() }}">
@@ -31,6 +50,7 @@
             <button type="submit">გაგზავნა</button>
         </form>
     </div>
+
     <script>
         var socket = io();
         var form = document.getElementById('chat-form');
@@ -47,6 +67,7 @@
         socket.on('new_message', function(data) {
             var msgs = document.getElementById('messages');
             var div = document.createElement('p');
+            // ვიყენებთ სერვერიდან მოსულ is_admin_mention სტატუსს
             div.className = 'msg' + (data.is_admin_mention ? ' admin-mention' : '');
             div.innerHTML = '<b>' + data.sender + ':</b> ' + data.text;
             msgs.appendChild(div);

@@ -84,10 +84,16 @@ def is_safe(text):
 def handle_message(data):
     text = data.get('text')
     if text and is_safe(text):
+        # ადმინის მონიშვნის ლოგიკა
+        is_admin_mention = True if "@admin" in text.lower() else False
         msg = Message(text=text, sender=current_user.username)
         db.session.add(msg)
         db.session.commit()
-        emit('new_message', {'text': text, 'sender': current_user.username}, broadcast=True)
+        emit('new_message', {
+            'text': text, 
+            'sender': current_user.username, 
+            'is_admin_mention': is_admin_mention
+        }, broadcast=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -110,8 +116,8 @@ def profile():
 @app.route('/chat', methods=['GET'])
 @login_required
 def chat():
-    # .limit(50) აჩქარებს საიტს
-    messages = Message.query.order_by(Message.id.desc()).limit(50).all()[::-1]
+    messages = Message.query.order_by(Message.id.desc()).limit(20).all()[::-1]
+    db.session.close()
     return render_template('chat.html', messages=messages)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -151,6 +157,7 @@ def login():
 @login_required
 def dashboard():
     all_tasks = Task.query.all()
+    db.session.close()
     return render_template('dashboard.html', tasks=all_tasks)
 
 @app.route('/complete_task/<int:task_id>')
@@ -230,4 +237,4 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, log_output=True)
