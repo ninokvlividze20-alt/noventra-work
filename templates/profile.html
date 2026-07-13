@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>პროფილის რედაქტირება</h2>
+<form method="POST">
+    <label>საკონტაქტო ნომერი:</label><br>
+    <input type="text" name="phone" value="{{ current_user.phone }}" required><br>
+    
+    <label>ბანკის ანგარიშის ნომერი (IBAN):</label><br>
+    <input type="text" name="bank_account" value="{{ current_user.bank_account }}" required><br>
+    
+    <button type="submit" style="margin-top: 10px;">მონაცემების შენახვა</button>
+</form>
+<a href="{{ url_for('dashboard') }}">დაბრუნება დაშბორდზე</a>
+{% endblock %}

@@ -2,10 +2,11 @@
 {% block content %}
 <h2>თანხის გატანის მოთხოვნები</h2>
 {% for req in requests %}
-    <div class="card" style="margin-top: 10px;">
-        <p>მომხმარებელი: {{ req.user.username }}</p>
-        <p>თანხა: {{ req.amount }} ლარი</p>
-        <p>თარიღი: {{ req.created_at }}</p>
+    <div class="card" style="margin-top: 15px; border: 1px solid #ff5555; padding: 15px;">
+        <p><strong>მომხმარებელი:</strong> {{ req.user.username }}</p>
+        <p><strong>თანხა:</strong> {{ req.amount }} ლარი</p>
+        <p><strong>ტელეფონი:</strong> {{ req.phone }}</p>
+        <p><strong>ანგარიში:</strong> {{ req.bank_account }}</p>
     </div>
 {% endfor %}
 <a href="{{ url_for('dashboard') }}">დაბრუნება</a>
