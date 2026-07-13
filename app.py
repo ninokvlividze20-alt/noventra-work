@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, abort, fla
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_socketio import SocketIO, emit
 import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -22,6 +23,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 }
 
 db = SQLAlchemy(app)
+socketio = SocketIO(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -71,12 +73,20 @@ class Message(db.Model):
     sender = db.Column(db.String(50))
 
 def is_safe(text):
-    # ლინკების და ტელეფონის ნომრების ფილტრი
     if re.search(r'(http|https|www|\.com|\.ge|\.org)', text, re.IGNORECASE):
         return False
     if re.search(r'\d{7,12}', text):
         return False
     return True
+
+@socketio.on('message')
+def handle_message(data):
+    text = data.get('text')
+    if text and is_safe(text):
+        msg = Message(text=text, sender=current_user.username)
+        db.session.add(msg)
+        db.session.commit()
+        emit('new_message', {'text': text, 'sender': current_user.username}, broadcast=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -99,17 +109,6 @@ def profile():
 @app.route('/chat', methods=['GET', 'POST'])
 @login_required
 def chat():
-    if request.method == 'POST':
-        text = request.form.get('text')
-        if text:
-            if is_safe(text):
-                msg = Message(text=text, sender=current_user.username)
-                db.session.add(msg)
-                db.session.commit()
-            else:
-                flash("შეტყობინება შეიცავს აკრძალულ სიმბოლოებს (ლინკები ან ნომრები).", "danger")
-        return redirect(url_for('chat'))
-    
     messages = Message.query.all()
     return render_template('chat.html', messages=messages)
 
@@ -229,4 +228,4 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
