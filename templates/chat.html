@@ -30,7 +30,7 @@
         
         form { display: flex; padding: 15px; background: #fff; border-top: 1px solid #eee; }
         input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 16px; }
-        button { margin-left: 10px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button { margin-left: 10px; padding: 10px 20px; background: #4a90e2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -52,7 +52,8 @@
     </div>
 
     <script>
-        var socket = io();
+        // დამატებულია transports: ['websocket'] კავშირის სტაბილურობისთვის
+        var socket = io({transports: ['websocket']});
         var form = document.getElementById('chat-form');
         
         form.onsubmit = function(e) {
