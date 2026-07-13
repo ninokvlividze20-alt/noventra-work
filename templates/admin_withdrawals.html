@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>თანხის გატანის მოთხოვნები</h2>
-{% for req in requests %}
-    <div class="card" style="margin-top: 15px; border: 1px solid #ff5555; padding: 15px;">
-        <p><strong>მომხმარებელი:</strong> {{ req.user.username }}</p>
-        <p><strong>თანხა:</strong> {{ req.amount }} ლარი</p>
-        <p><strong>ტელეფონი:</strong> {{ req.phone }}</p>
-        <p><strong>ანგარიში:</strong> {{ req.bank_account }}</p>
-    </div>
-{% endfor %}
+<h2>ახალი შეტყობინებები (გატანის მოთხოვნები)</h2>
+<div style="margin-top: 20px;">
+    {% for req in requests %}
+        <div style="background: #222; border: 1px solid #ff5555; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+            <p><strong>მომხმარებელი:</strong> {{ req.user.username }}</p>
+            <p><strong>თანხა:</strong> {{ req.amount }} ლარი</p>
+            <p><strong>ტელეფონი:</strong> {{ req.phone }}</p>
+            <p><strong>ანგარიში:</strong> {{ req.bank_account }}</p>
+            <p><small>სტატუსი: {{ req.status }}</small></p>
+        </div>
+    {% else %}
+        <p>ახალი მოთხოვნები არ არის.</p>
+    {% endfor %}
+</div>
 <a href="{{ url_for('dashboard') }}">დაბრუნება</a>
 {% endblock %}
