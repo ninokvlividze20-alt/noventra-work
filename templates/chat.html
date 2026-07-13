@@ -1,37 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="ka">
 <head>
-    <title>NOVENTRA Chat</title>
+    <meta charset="UTF-8">
+    <title>NOVENTRA | Chat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        :root { --primary: #4a90e2; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        #chat-container { width: 100%; max-width: 600px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        #messages { height: 500px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+        .msg { margin-bottom: 15px; padding: 10px; border-radius: 8px; background: #eef2f5; }
+        .msg b { color: var(--primary); }
+        .admin-mention { border-left: 4px solid #e74c3c; background: #fff5f5; }
+        form { display: flex; padding: 20px; border-top: 1px solid #eee; }
+        input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        button { margin-left: 10px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <div id="messages">
-        {% for msg in messages %}
-            <p><b>{{ msg.sender }}:</b> {{ msg.text }}</p>
-        {% endfor %}
+    <div id="chat-container">
+        <div id="messages">
+            {% for msg in messages %}
+                <p class="msg {{ 'admin-mention' if '@admin' in msg.text.lower() }}">
+                    <b>{{ msg.sender }}:</b> {{ msg.text }}
+                </p>
+            {% endfor %}
+        </div>
+        <form id="chat-form">
+            <input type="text" id="text" placeholder="დაწერე შეტყობინება..." autocomplete="off">
+            <button type="submit">გაგზავნა</button>
+        </form>
     </div>
-
-    <form id="chat-form">
-        <input type="text" id="text" placeholder="დაწერე შეტყობინება..." required>
-        <button type="submit">გაგზავნა</button>
-    </form>
-
     <script>
         var socket = io();
+        var form = document.getElementById('chat-form');
         
-        // როცა ახალი მესიჯი მოდის სერვერიდან
-        socket.on('new_message', function(data) {
-            var msgDiv = document.getElementById('messages');
-            msgDiv.innerHTML += '<p><b>' + data.sender + ':</b> ' + data.text + '</p>';
-        });
-
-        // მესიჯის გაგზავნა
-        document.getElementById('chat-form').onsubmit = function(e) {
+        form.onsubmit = function(e) {
             e.preventDefault();
-            var text = document.getElementById('text').value;
-            socket.emit('message', {text: text});
-            document.getElementById('text').value = '';
+            var input = document.getElementById('text');
+            if(input.value.trim() !== "") {
+                socket.emit('message', {text: input.value});
+                input.value = '';
+            }
         };
+
+        socket.on('new_message', function(data) {
+            var msgs = document.getElementById('messages');
+            var div = document.createElement('p');
+            div.className = 'msg' + (data.is_admin_mention ? ' admin-mention' : '');
+            div.innerHTML = '<b>' + data.sender + ':</b> ' + data.text;
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        });
     </script>
 </body>
 </html>

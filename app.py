@@ -13,6 +13,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='None',
     SESSION_COOKIE_SECURE=True,
 )
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300 
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_o6plSifKNIc9@ep-damp-thunder-asbmmuxu.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -106,10 +107,11 @@ def profile():
         flash("მონაცემები დამახსოვრებულია!")
     return render_template('profile.html')
 
-@app.route('/chat', methods=['GET', 'POST'])
+@app.route('/chat', methods=['GET'])
 @login_required
 def chat():
-    messages = Message.query.all()
+    # .limit(50) აჩქარებს საიტს
+    messages = Message.query.order_by(Message.id.desc()).limit(50).all()[::-1]
     return render_template('chat.html', messages=messages)
 
 @app.route('/register', methods=['GET', 'POST'])
