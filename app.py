@@ -83,8 +83,8 @@ def is_safe(text):
 @socketio.on('message')
 def handle_message(data):
     text = data.get('text')
-    # ვამოწმებთ მესიჯის უსაფრთხოებას და ადმინის მონიშვნას
     if text and is_safe(text):
+        # ადმინის მონიშვნის ლოგიკა
         is_admin_mention = "@admin" in text.lower()
         
         # 1. ჯერ ვუგზავნით ყველას მყისიერად, რომ არ დაელოდოს ბაზას
@@ -120,6 +120,7 @@ def profile():
 @app.route('/chat', methods=['GET'])
 @login_required
 def chat():
+    # ოპტიმიზაცია: მხოლოდ ბოლო 20 მესიჯი საიტის ასაჩქარებლად
     messages = Message.query.order_by(Message.id.desc()).limit(20).all()[::-1]
     db.session.close()
     return render_template('chat.html', messages=messages)
