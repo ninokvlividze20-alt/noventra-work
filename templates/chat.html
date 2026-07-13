@@ -57,16 +57,26 @@
     </div>
 
     <script>
-        // დამატებულია transports: ['websocket'] კავშირის სტაბილურობისთვის
-        var socket = io({transports: ['websocket']});
+        // WebSocket-ის კავშირის სტაბილურობისთვის ავტომატური ხელახალი დაკავშირების ლოგიკა
+        var socket = io({
+            transports: ['websocket'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
+        
         var form = document.getElementById('chat-form');
         
         form.onsubmit = function(e) {
             e.preventDefault();
             var input = document.getElementById('text');
             if(input.value.trim() !== "") {
-                socket.emit('message', {text: input.value});
-                input.value = '';
+                if (socket.connected) {
+                    socket.emit('message', {text: input.value});
+                    input.value = '';
+                } else {
+                    console.log("კავშირი გაწყვეტილია, ცდა მიმდინარეობს...");
+                }
             }
         };
 
@@ -78,6 +88,10 @@
             div.innerHTML = '<b>' + data.sender + ':</b> ' + data.text;
             msgs.appendChild(div);
             msgs.scrollTop = msgs.scrollHeight;
+        });
+
+        socket.on('connect_error', function(err) {
+            console.log("დაკავშირების შეცდომა:", err);
         });
     </script>
 </body>
