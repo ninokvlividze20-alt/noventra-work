@@ -9,12 +9,33 @@
 
     <h1>გამარჯობა, {{ current_user.username }}!</h1>
     
+{% if current_user.is_admin %}
+        <div class="card" style="margin-top: 20px; border: 2px dashed #00ffcc; background-color: #0d0d0d;">
+            <h2 style="color: #00ffcc;">ადმინისტრატორის კაბინეტი</h2>
+            <hr style="border: 0; border-top: 1px solid #333;">
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin: 15px 0;">
+                    <a href="/add_task" style="color: #ffffff; text-decoration: none; font-size: 18px;">➕ ახალი დავალების დამატება</a>
+                </li>
+                <li style="margin: 15px 0;">
+                    <a href="{{ url_for('admin_users') }}" style="color: #ffffff; text-decoration: none; font-size: 18px;">📋 მომხმარებელთა მართვა</a>
+                </li>
+                <li style="margin: 15px 0;">
+                    <a href="{{ url_for('admin_withdrawals') }}" style="color: #ff5555; text-decoration: none; font-size: 18px;">🔔 გატანის მოთხოვნები (შეტყობინებები)</a>
+                </li>
+                <li style="margin: 15px 0;">
+                    <a href="{{ url_for('chat') }}" style="color: #00ffcc; text-decoration: none; font-size: 18px;">💬 ადმინისტრაციული ჩატი</a>
+                </li>
+            </ul>
+        </div>
+    {% endif %}
+
     <div class="card">
         <h3>შენი ციფრული საფულე</h3>
         <p>მიმდინარე ბალანსი:</p>
         <div class="balance">{{ current_user.balance }} ლარი</div>
         <p>რეპუტაცია: {{ current_user.reputation }}</p>
-        
+         
         <a href="{{ url_for('profile') }}" style="color: #00ffcc; display: block; margin-top: 10px;">პროფილის რედაქტირება</a>
         <a href="{{ url_for('chat') }}" style="color: #00ffcc; display: block; margin-top: 5px;">ადმინთან საუბარი (ჩატი)</a>
     </div>
@@ -30,11 +51,11 @@
             <div style="border-bottom: 1px solid #333; padding: 10px 0;">
                 <p><strong>{{ task.title }}</strong> - {{ task.reward }} ლარი</p>
                 <p style="font-size: 0.8em;">{{ task.description }}</p>
-                
+                 
                 {% if not task.is_completed %}
                     <a href="{{ url_for('complete_task', task_id=task.id) }}" 
-                       style="background: #00ffcc; color: #000; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
-                       შესრულება
+                        style="background: #00ffcc; color: #000; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
+                        შესრულება
                     </a>
                 {% else %}
                     <span style="color: #555;">უკვე შესრულებულია</span>
@@ -51,14 +72,6 @@
             {% endfor %}
         </ul>
     </div>
-
-    {% if current_user.is_admin %}
-    <div class="card" style="margin-top: 20px; border: 2px dashed #00ffcc;">
-        <h3>ადმინისტრატორის პანელი</h3>
-        <a href="/add_task" style="color: #00ffcc; text-decoration: none;">+ ახალი დავალება</a><br>
-        <a href="{{ url_for('admin_withdrawals') }}" style="color: #ff5555; text-decoration: none;">🔔 გატანის მოთხოვნები (შეტყობინებები)</a>
-    </div>
-{% endif %}
 
     <a href="/leaderboard" style="display:block; margin-top: 15px; color: #fff;">რეიტინგების ნახვა</a>
 
