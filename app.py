@@ -83,17 +83,21 @@ def is_safe(text):
 @socketio.on('message')
 def handle_message(data):
     text = data.get('text')
+    # ვამოწმებთ მესიჯის უსაფრთხოებას და ადმინის მონიშვნას
     if text and is_safe(text):
-        # ადმინის მონიშვნის ლოგიკა
-        is_admin_mention = True if "@admin" in text.lower() else False
-        msg = Message(text=text, sender=current_user.username)
-        db.session.add(msg)
-        db.session.commit()
+        is_admin_mention = "@admin" in text.lower()
+        
+        # 1. ჯერ ვუგზავნით ყველას მყისიერად, რომ არ დაელოდოს ბაზას
         emit('new_message', {
             'text': text, 
             'sender': current_user.username, 
             'is_admin_mention': is_admin_mention
         }, broadcast=True)
+        
+        # 2. შემდეგ ვწერთ ბაზაში ფონურ რეჟიმში
+        msg = Message(text=text, sender=current_user.username)
+        db.session.add(msg)
+        db.session.commit()
 
 @login_manager.user_loader
 def load_user(user_id):

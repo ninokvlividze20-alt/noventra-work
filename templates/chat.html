@@ -19,18 +19,23 @@
         .header { padding: 10px; background: #eee; text-align: center; border-bottom: 1px solid #ddd; }
         .header a { text-decoration: none; color: var(--primary); font-weight: bold; }
         
+        /* მესიჯების კონტეინერს დაემატა padding-bottom, რომ ველი არ ეფარებოდეს */
         #messages { 
-            flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;
-            -webkit-overflow-scrolling: touch; 
+            flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px;
+            display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; 
         }
         
         .msg { margin-bottom: 15px; padding: 10px; border-radius: 8px; background: #eef2f5; font-size: 16px; }
         .msg b { color: var(--primary); }
         .admin-mention { border-left: 4px solid #e74c3c; background: #fff5f5; }
         
-        form { display: flex; padding: 15px; background: #fff; border-top: 1px solid #eee; }
+        /* დაფიქსირებული ველი მობილურისთვის */
+        form { 
+            display: flex; padding: 15px; background: #fff; border-top: 1px solid #eee; 
+            position: fixed; bottom: 0; width: 100%; max-width: 600px;
+        }
         input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 16px; }
-        button { margin-left: 10px; padding: 10px 20px; background: #4a90e2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button { margin-left: 10px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
     </style>
 </head>
 <body>
