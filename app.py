@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from flask import Flask, render_template, request, redirect, url_for, abort, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
@@ -69,6 +70,14 @@ class Message(db.Model):
     text = db.Column(db.Text, nullable=False)
     sender = db.Column(db.String(50))
 
+def is_safe(text):
+    # ლინკების და ტელეფონის ნომრების ფილტრი
+    if re.search(r'(http|https|www|\.com|\.ge|\.org)', text, re.IGNORECASE):
+        return False
+    if re.search(r'\d{7,12}', text):
+        return False
+    return True
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -91,9 +100,18 @@ def profile():
 @login_required
 def chat():
     if request.method == 'POST':
-        msg = Message(text=request.form.get('text'), sender=current_user.username)
-        db.session.add(msg); db.session.commit()
-    return render_template('chat.html', messages=Message.query.all())
+        text = request.form.get('text')
+        if text:
+            if is_safe(text):
+                msg = Message(text=text, sender=current_user.username)
+                db.session.add(msg)
+                db.session.commit()
+            else:
+                flash("შეტყობინება შეიცავს აკრძალულ სიმბოლოებს (ლინკები ან ნომრები).", "danger")
+        return redirect(url_for('chat'))
+    
+    messages = Message.query.all()
+    return render_template('chat.html', messages=messages)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
