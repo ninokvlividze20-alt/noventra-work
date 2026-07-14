@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import datetime
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config.update(
@@ -39,6 +40,7 @@ class User(db.Model, UserMixin):
     bank_account = db.Column(db.String(50), default="")
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
+    last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -72,6 +74,7 @@ class Question(db.Model):
     text = db.Column(db.Text, nullable=False)
     username = db.Column(db.String(50))
     user_phone = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 def is_safe(text):
     if re.search(r'(http|https|www|\.com|\.ge|\.org)', text, re.IGNORECASE):
@@ -110,6 +113,11 @@ def board():
             db.session.commit()
         else:
             flash("მესიჯი არღვევს წესებს!", "danger")
+    
+    # მომხმარებელმა ნახა დაფა, ვაახლებთ დროს
+    current_user.last_seen_board = db.func.current_timestamp()
+    db.session.commit()
+    
     questions = Question.query.order_by(Question.id.desc()).all()
     return render_template('board.html', questions=questions)
 
@@ -150,7 +158,9 @@ def login():
 @login_required
 def dashboard():
     all_tasks = Task.query.all()
-    return render_template('dashboard.html', tasks=all_tasks)
+    # ვითვლით ახალ კითხვებს
+    new_questions_count = Question.query.filter(Question.created_at > current_user.last_seen_board).count()
+    return render_template('dashboard.html', tasks=all_tasks, new_questions_count=new_questions_count)
 
 @app.route('/complete_task/<int:task_id>')
 @login_required

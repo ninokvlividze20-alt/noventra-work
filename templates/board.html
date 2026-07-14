@@ -69,7 +69,12 @@
     
     {% for q in questions %}
     <div class="post">
-        <div class="post-meta" style="color: #888; font-size: 0.8rem;">ავტორი: {{ q.username }}</div>
+        <div class="post-meta" style="color: #888; font-size: 0.8rem;">
+            ავტორი: {{ q.username }} 
+            {% if q.created_at %}
+                | {{ q.created_at.strftime('%d.%m.%Y %H:%M') }}
+            {% endif %}
+        </div>
         <div class="post-text">{{ q.text }}</div>
         <a href="https://wa.me/{{ q.user_phone }}" class="btn-wa">WhatsApp-ით დაკავშირება</a>
     </div>
