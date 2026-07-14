@@ -158,9 +158,24 @@ def login():
 @login_required
 def dashboard():
     all_tasks = Task.query.all()
+    
+    # ვითვლით სტატისტიკას ადმინისტრატორისთვის
+    total_tasks = Task.query.count()
+    completed_tasks = Task.query.filter_by(is_completed=True).count()
+    
+    # ვითვლით შესრულების პროცენტს (თუ დავალებები არსებობს)
+    completion_rate = 0
+    if total_tasks > 0:
+        completion_rate = int((completed_tasks / total_tasks) * 100)
+    
     # ვითვლით ახალ კითხვებს
     new_questions_count = Question.query.filter(Question.created_at > current_user.last_seen_board).count()
-    return render_template('dashboard.html', tasks=all_tasks, new_questions_count=new_questions_count)
+    
+    return render_template('dashboard.html', 
+                           tasks=all_tasks, 
+                           new_questions_count=new_questions_count,
+                           total_tasks=total_tasks,
+                           completion_rate=completion_rate)
 
 @app.route('/complete_task/<int:task_id>')
 @login_required

@@ -42,30 +42,36 @@
     {% if current_user.is_admin %}
     <div class="card" style="border: 1px solid #00ffcc;">
         <h3 style="color: #00ffcc;">⚙️ ადმინისტრაცია</h3>
+        
+        <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #00ffcc;">
+            <p style="margin: 0; font-size: 14px;"><strong>სულ დავალებები:</strong> {{ total_tasks }}</p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;"><strong>შესრულების დონე:</strong> {{ completion_rate }}%</p>
+        </div>
+
         <ul style="list-style: none; padding: 0;">
-            <li><a href="/add_task" style="color: #fff;">➕ ახალი დავალება</a></li>
-            <li><a href="{{ url_for('admin_users') }}" style="color: #fff;">📋 მომხმარებლები</a></li>
-            <li><a href="{{ url_for('admin_withdrawals') }}" style="color: #fff;">🔔 გატანის მოთხოვნები</a></li>
+            <li style="margin-bottom: 8px;"><a href="/add_task" style="color: #fff; text-decoration: none;">➕ ახალი დავალება</a></li>
+            <li style="margin-bottom: 8px;"><a href="{{ url_for('admin_users') }}" style="color: #fff; text-decoration: none;">📋 მომხმარებლები</a></li>
+            <li style="margin-bottom: 8px;"><a href="{{ url_for('admin_withdrawals') }}" style="color: #fff; text-decoration: none;">🔔 გატანის მოთხოვნები</a></li>
         </ul>
     </div>
-    {% endif %}
+{% endif %}
 
     <div class="card" style="grid-column: span 1;">
-        <h3>🎯 ხელმისაწვდომი დავალებები</h3>
-        {% for task in tasks %}
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding: 10px 0;">
-                <div>
-                    <strong>{{ task.title }}</strong><br>
-                    <small style="color: #888;">{{ task.reward }} ლარი</small>
-                </div>
-                {% if not task.is_completed %}
-                    <a href="{{ url_for('complete_task', task_id=task.id) }}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">შესრულება</a>
-                {% else %}
-                    <span style="color: #555; font-size: 12px;">შესრულებულია</span>
-                {% endif %}
+    <h3>🎯 აქტიური სამუშაო ნაკადი</h3>
+    {% for task in tasks %}
+        <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid {% if task.is_completed %}#00ffcc{% else %}#ffcc00{% endif %};">
+            <div style="display: flex; justify-content: space-between;">
+                <strong>{{ task.title }}</strong>
+                <span style="font-size: 10px; text-transform: uppercase; color: #888;">
+                    {% if task.is_completed %}QA Approved{% else %}In Progress{% endif %}
+                </span>
             </div>
-        {% endfor %}
-    </div>
+            <p style="font-size: 12px; color: #aaa; margin: 5px 0;">ID: #{{ task.id }} | Reward: {{ task.reward }} GEL</p>
+            {% if not task.is_completed %}
+                <a href="{{ url_for('complete_task', task_id=task.id) }}" class="btn btn-primary" style="padding: 5px 10px; font-size: 11px;">სტატუსის განახლება</a>
+            {% endif %}
+        </div>
+    {% endfor %}
 </div>
 
 <div class="board-card">
