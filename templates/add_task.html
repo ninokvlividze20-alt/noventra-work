@@ -1,21 +1,23 @@
-<!DOCTYPE html>
-<html lang="ka">
-<head>
-    <meta charset="UTF-8">
-    <title>დავალების დამატება</title>
-    <style>
-        body { background-color: #050505; color: #fff; padding: 40px; }
-        input, textarea { display: block; width: 100%; margin: 10px 0; padding: 10px; background: #121212; border: 1px solid #00ffcc; color: white; }
-    </style>
-</head>
-<body>
-    <h1>ახალი დავალების შექმნა</h1>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="padding: 20px; background: #0d0d0d; border: 1px solid #333; border-radius: 10px; max-width: 600px; margin: 20px auto;">
+    <h1 style="color: #00ffcc; text-align: center;">➕ ახალი დავალების შექმნა</h1>
+    
     <form method="POST">
-        <input type="text" name="title" placeholder="დავალების სახელი" required>
-        <textarea name="description" placeholder="აღწერა"></textarea>
-        <input type="number" step="0.01" name="reward" placeholder="ჯილდო (ლარი)" required>
-        <button type="submit" style="background: #00ffcc; padding: 10px 20px;">დამატება</button>
+        <input type="text" name="title" placeholder="დავალების სახელი" required 
+               style="display: block; width: 100%; margin: 10px 0; padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 5px;">
+        
+        <textarea name="description" placeholder="აღწერა" 
+                  style="display: block; width: 100%; margin: 10px 0; padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 5px; height: 100px;"></textarea>
+        
+        <input type="number" step="0.01" name="reward" placeholder="ჯილდო (ლარი)" required 
+               style="display: block; width: 100%; margin: 10px 0; padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 5px;">
+        
+        <button type="submit" 
+                style="display: block; width: 100%; background: #00ffcc; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+            დავალების დამატება
+        </button>
     </form>
-</body>
-</html>
+</div>
 {% endblock %}
