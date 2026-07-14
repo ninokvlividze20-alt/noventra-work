@@ -1,30 +1,78 @@
-<!DOCTYPE html>
-<html lang="ka">
-<head>
-    <meta charset="UTF-8">
-    <title>NOVENTRA | დაფა</title>
-    <style>
-        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .post { border-bottom: 1px solid #eee; padding: 15px 0; }
-        textarea { width: 100%; height: 80px; margin-bottom: 10px; }
-        .btn-wa { background: #25D366; color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px; font-size: 14px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h3>საჯარო დაფა</h3>
-        <form method="POST">
-            <textarea name="text" required placeholder="დასვი კითხვა აქ..."></textarea>
-            <button type="submit">გაგზავნა</button>
-        </form>
-        <hr>
-        {% for q in questions %}
-        <div class="post">
-            <p><b>{{ q.username }}:</b> {{ q.text }}</p>
-            <a href="https://wa.me/{{ q.user_phone }}" class="btn-wa">WhatsApp-ით დაკავშირება</a>
-        </div>
-        {% endfor %}
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    /* სრული ადაპტაცია ნებისმიერი მობილურისთვის */
+    .board-container { 
+        width: 95vw;          /* ეკრანის სიგანის 95% */
+        max-width: 500px;     /* მაქსიმალური სიგანე */
+        margin: 0 auto;       /* ცენტრირება */
+        padding: 5px; 
+    }
+    
+    h3 { color: #00ffcc; font-size: 1.5rem; text-align: center; }
+    
+    .back-btn { 
+        display: inline-block; 
+        color: #888; 
+        text-decoration: none; 
+        margin-bottom: 20px; 
+        font-size: 14px; 
+    }
+
+    .post { 
+        background: #1a1a1a; 
+        border: 1px solid #333; 
+        padding: 3% 5%;       /* პროცენტული პადინგი */
+        margin-bottom: 15px; 
+        border-radius: 12px; 
+        word-wrap: break-word;
+    }
+    
+    .post-text { color: #fff; font-size: 1rem; margin-bottom: 10px; }
+    
+    .btn-wa { 
+        display: block; 
+        width: 100%; 
+        background: #25D366; 
+        color: #000; 
+        padding: 10px 0; 
+        text-align: center;
+        text-decoration: none; 
+        border-radius: 8px; 
+        font-weight: bold; 
+        font-size: 0.9rem;
+    }
+
+    textarea { 
+        width: 100%; 
+        min-height: 80px; 
+        background: #000; 
+        color: #fff; 
+        border: 1px solid #00ffcc; 
+        border-radius: 8px; 
+        padding: 10px;
+        box-sizing: border-box; /* ეკრანის გარეთ არ გავა */
+        font-size: 1rem;       /* 16px - მობილურზე ავტომატურად არ გაადიდებს ეკრანს */
+    }
+</style>
+
+<div class="board-container">
+    <a href="{{ url_for('dashboard') }}" class="back-btn">← უკან დაშბორდზე</a>
+    <h3>💬 საჯარო დაფა</h3>
+    
+    <form method="POST">
+        <textarea name="text" required placeholder="დასვი კითხვა..."></textarea>
+        <button type="submit">გაგზავნა</button>
+    </form>
+    
+    <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+    
+    {% for q in questions %}
+    <div class="post">
+        <div class="post-meta" style="color: #888; font-size: 0.8rem;">ავტორი: {{ q.username }}</div>
+        <div class="post-text">{{ q.text }}</div>
+        <a href="https://wa.me/{{ q.user_phone }}" class="btn-wa">WhatsApp-ით დაკავშირება</a>
     </div>
-</body>
-</html>
+    {% endfor %}
+</div>
+{% endblock %}
