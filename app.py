@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import re
-from flask import Flask, render_template, request, redirect, url_for, abort, flash
+from flask import Flask, render_template, request, redirect, url_for, abort, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_socketio import SocketIO, emit
 import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -24,7 +23,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 }
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -68,10 +66,13 @@ class WithdrawalRequest(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-class Message(db.Model):
+# ახალი მოდელი საჯარო დაფისთვის
+class Question(db.Model):
+    __tablename__ = 'questions'
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
-    sender = db.Column(db.String(50))
+    username = db.Column(db.String(50))
+    user_phone = db.Column(db.String(20))
 
 def is_safe(text):
     if re.search(r'(http|https|www|\.com|\.ge|\.org)', text, re.IGNORECASE):
@@ -79,25 +80,6 @@ def is_safe(text):
     if re.search(r'\d{7,12}', text):
         return False
     return True
-
-@socketio.on('message')
-def handle_message(data):
-    text = data.get('text')
-    if text and is_safe(text):
-        # ადმინის მონიშვნის ლოგიკა
-        is_admin_mention = "@admin" in text.lower()
-        
-        # 1. ჯერ ვუგზავნით ყველას მყისიერად, რომ არ დაელოდოს ბაზას
-        emit('new_message', {
-            'text': text, 
-            'sender': current_user.username, 
-            'is_admin_mention': is_admin_mention
-        }, broadcast=True)
-        
-        # 2. შემდეგ ვწერთ ბაზაში ფონურ რეჟიმში
-        msg = Message(text=text, sender=current_user.username)
-        db.session.add(msg)
-        db.session.commit()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -115,15 +97,24 @@ def profile():
         current_user.bank_account = request.form.get('bank_account')
         db.session.commit()
         flash("მონაცემები დამახსოვრებულია!")
+        return redirect(url_for('profile'))
     return render_template('profile.html')
 
-@app.route('/chat', methods=['GET'])
+# საჯარო დაფის ფუნქციონალი
+@app.route('/board', methods=['GET', 'POST'])
 @login_required
-def chat():
-    # ოპტიმიზაცია: მხოლოდ ბოლო 20 მესიჯი საიტის ასაჩქარებლად
-    messages = Message.query.order_by(Message.id.desc()).limit(20).all()[::-1]
-    db.session.close()
-    return render_template('chat.html', messages=messages)
+def board():
+    if request.method == 'POST':
+        text = request.form.get('text')
+        if is_safe(text):
+            new_q = Question(text=text, username=current_user.username, user_phone=current_user.phone)
+            db.session.add(new_q)
+            db.session.commit()
+        else:
+            flash("მესიჯი შეიცავს აკრძალულ ინფორმაციას!", "danger")
+        return redirect(url_for('board'))
+    questions = Question.query.order_by(Question.id.desc()).all()
+    return render_template('board.html', questions=questions)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -162,7 +153,6 @@ def login():
 @login_required
 def dashboard():
     all_tasks = Task.query.all()
-    db.session.close()
     return render_template('dashboard.html', tasks=all_tasks)
 
 @app.route('/complete_task/<int:task_id>')
@@ -186,27 +176,26 @@ def leaderboard():
 @app.route('/request_withdrawal', methods=['POST'])
 @login_required
 def request_withdrawal():
-    amount = float(request.form.get('amount'))
+    amount = float(request.form.get('amount', 0))
     if amount > current_user.balance:
         flash("ბალანსი არასაკმარისია!", "danger")
-        return redirect(url_for('dashboard'))
-    new_request = WithdrawalRequest(
-        user_id=current_user.id, 
-        amount=amount, 
-        phone=current_user.phone, 
-        bank_account=current_user.bank_account
-    )
-    db.session.add(new_request)
-    db.session.commit()
-    flash("მოთხოვნა გაგზავნილია ადმინისტრატორთან!", "success")
+    else:
+        new_request = WithdrawalRequest(
+            user_id=current_user.id, 
+            amount=amount, 
+            phone=current_user.phone, 
+            bank_account=current_user.bank_account
+        )
+        db.session.add(new_request)
+        db.session.commit()
+        flash("მოთხოვნა გაგზავნილია ადმინისტრატორთან!", "success")
     return redirect(url_for('dashboard'))
 
 @app.route('/admin/users')
 @login_required
 def admin_users():
     if not current_user.is_admin:
-        flash("წვდომა აკრძალულია!", "danger")
-        return redirect(url_for('dashboard'))
+        abort(403)
     users = User.query.all()
     return render_template('admin_users.html', users=users)
 
@@ -214,7 +203,7 @@ def admin_users():
 @login_required
 def admin_withdrawals():
     if not current_user.is_admin:
-        return redirect(url_for('dashboard'))
+        abort(403)
     requests = WithdrawalRequest.query.filter_by(status='pending').all()
     return render_template('admin_withdrawals.html', requests=requests)
 
@@ -242,4 +231,4 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, log_output=True)
+    app.run(debug=True)
