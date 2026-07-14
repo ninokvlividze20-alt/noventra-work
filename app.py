@@ -91,6 +91,10 @@ def load_user(user_id):
 def home():
     return render_template('index.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .about-container { max-width: 800px; margin: 40px auto; padding: 30px; background: #0d0d0d; border-radius: 20px; border: 1px solid #333; }
+    .about-container h2 { color: #00ffcc; margin-bottom: 20px; text-align: center; }
+    .about-container h3 { color: #fff; margin-top: 30px; border-bottom: 1px solid #00ffcc; padding-bottom: 10px; }
+    .about-container p { color: #ccc; line-height: 1.6; margin-bottom: 15px; }
+    .about-container ul { color: #ccc; padding-left: 20px; }
+    .about-container li { margin-bottom: 10px; }
+    .highlight { color: #00ffcc; font-weight: bold; }
+    .lang-section { margin-bottom: 25px; padding-bottom: 10px; border-bottom: 1px solid #222; }
+</style>
+
+<div class="about-container">
+    <h2>🎯 NOVENTRA - Capabilities Statement</h2>
+
+    <h3>1. Who We Are / ვინ ვართ ჩვენ</h3>
+    <p><strong>EN:</strong> NOVENTRA is a specialized Data Operations platform built for high-precision AI data annotation, linguistic evaluation, and scalable quality control. Based in Georgia, we bridge the gap between complex AI model requirements and high-quality human-annotated data.</p>
+    <p><strong>GE:</strong> NOVENTRA არის მონაცემთა მართვის სპეციალიზებული პლატფორმა, რომელიც შექმნილია AI-სთვის მონაცემთა მაღალი სიზუსტით მარკირების, ლინგვისტური შეფასებისა და ხარისხის კონტროლისთვის. საქართველოდან ჩვენ ვქმნით ხიდს კომპლექსურ AI მოდელებსა და ადამიანის მიერ დამუშავებულ მაღალი ხარისხის მონაცემებს შორის.</p>
+
+    <h3>2. Core Competencies / ჩვენი კომპეტენციები</h3>
+    <ul>
+        <li><span class="highlight">AI Data Annotation:</span> Expertise in complex data labeling, sentiment analysis, and entity recognition. <br> <em>(AI მონაცემთა მარკირება: გამოცდილება მონაცემთა კომპლექსურ კლასიფიკაციაში, სენტიმენტ ანალიზსა და ობიექტთა ამოცნობაში.)</em></li>
+        <li><span class="highlight">Scalable QC Workflows:</span> Our platform, built on a robust PostgreSQL infrastructure, automates task distribution and ensures rigorous quality control. <br> <em>(მასშტაბირებადი ხარისხის კონტროლი: PostgreSQL ინფრასტრუქტურაზე აგებული ჩვენი პლატფორმა ავტომატიზირებს დავალებების განაწილებას და უზრუნველყოფს მკაცრ ხარისხის კონტროლს.)</em></li>
+        <li><span class="highlight">Linguistic Precision:</span> We maintain high standards for linguistic data processing, ensuring accuracy that meets global enterprise expectations. <br> <em>(ლინგვისტური სიზუსტე: ჩვენ ვიცავთ მაღალ სტანდარტებს ლინგვისტური მონაცემების დამუშავებისას, რაც უზრუნველყოფს გლობალური სტანდარტების შესაბამის სიზუსტეს.)</em></li>
+    </ul>
+
+    <h3>3. Technology & Security / ტექნოლოგიები და უსაფრთხოება</h3>
+    <p><strong>EN:</strong> Architecture: End-to-end task lifecycle management powered by Python/Flask and PostgreSQL. Data Integrity: Automated workflow tracking and versioning. Security: We follow strict internal protocols to ensure data privacy and confidentiality.</p>
+    <p><strong>GE:</strong> არქიტექტურა: დავალების სრული ციკლის მართვა Python/Flask და PostgreSQL-ის გამოყენებით. მონაცემთა მთლიანობა: სამუშაო პროცესის ავტომატური თრექინგი და ვერსიების მართვა. უსაფრთხოება: ჩვენ ვიცავთ შიდა მკაცრ პროტოკოლებს მონაცემთა კონფიდენციალურობის უზრუნველსაყოფად.</p>
+
+    <h3>4. Why Partner With Us? / რატომ ვითანამშრომლოთ ჩვენთან?</h3>
+    <p><strong>EN:</strong> Unlike traditional crowdsourcing, NOVENTRA offers a managed, high-precision environment. We don't just provide "labor"—we provide a controlled, auditable, and scalable data pipeline that integrates seamlessly into AI development workflows.</p>
+    <p><strong>GE:</strong> ტრადიციული ქრაუდსორსინგისგან განსხვავებით, NOVENTRA გვთავაზობს მართულ, მაღალი სიზუსტის გარემოს. ჩვენ მხოლოდ "მუშახელს" კი არ ვაწვდით, არამედ კონტროლირებად, აუდიტორად და მასშტაბირებად მონაცემთა ნაკადს, რომელიც მარტივად ინტეგრირდება AI-ს განვითარების პროცესებში.</p>
+</div>
+{% endblock %}
