@@ -66,7 +66,6 @@ class WithdrawalRequest(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-# ახალი მოდელი საჯარო დაფისთვის
 class Question(db.Model):
     __tablename__ = 'questions'
     id = db.Column(db.Integer, primary_key=True)
@@ -100,7 +99,6 @@ def profile():
         return redirect(url_for('profile'))
     return render_template('profile.html')
 
-# საჯარო დაფის ფუნქციონალი
 @app.route('/board', methods=['GET', 'POST'])
 @login_required
 def board():
@@ -111,8 +109,7 @@ def board():
             db.session.add(new_q)
             db.session.commit()
         else:
-            flash("მესიჯი შეიცავს აკრძალულ ინფორმაციას!", "danger")
-        return redirect(url_for('board'))
+            flash("მესიჯი არღვევს წესებს!", "danger")
     questions = Question.query.order_by(Question.id.desc()).all()
     return render_template('board.html', questions=questions)
 
