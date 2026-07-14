@@ -1,18 +1,26 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>ახალი შეტყობინებები (გატანის მოთხოვნები)</h2>
+<style>
+    .request-card { background: #1a1a1a; border: 1px solid #ff5555; padding: 20px; margin-bottom: 15px; border-radius: 15px; color: #fff; }
+    .status-badge { color: #ff5555; font-weight: bold; }
+    .back-link { color: #888; text-decoration: none; display: inline-block; margin-top: 20px; }
+</style>
+
+<h2 style="color: #fff;">🔔 გატანის მოთხოვნები</h2>
+
 <div style="margin-top: 20px;">
     {% for req in requests %}
-        <div style="background: #222; border: 1px solid #ff5555; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+        <div class="request-card">
             <p><strong>მომხმარებელი:</strong> {{ req.user.username }}</p>
-            <p><strong>თანხა:</strong> {{ req.amount }} ლარი</p>
+            <p><strong>თანხა:</strong> <span style="color: #00ffcc;">{{ req.amount }} ლარი</span></p>
             <p><strong>ტელეფონი:</strong> {{ req.phone }}</p>
-            <p><strong>ანგარიში:</strong> {{ req.bank_account }}</p>
-            <p><small>სტატუსი: {{ req.status }}</small></p>
+            <p><strong>ანგარიში (IBAN):</strong> {{ req.bank_account }}</p>
+            <p><small class="status-badge">სტატუსი: {{ req.status }}</small></p>
         </div>
     {% else %}
-        <p>ახალი მოთხოვნები არ არის.</p>
+        <p style="color: #888;">ამჟამად ახალი მოთხოვნები არ არის.</p>
     {% endfor %}
 </div>
-<a href="{{ url_for('dashboard') }}">დაბრუნება</a>
+
+<a href="{{ url_for('dashboard') }}" class="back-link">← დაბრუნება დაშბორდზე</a>
 {% endblock %}

@@ -7,12 +7,35 @@
     <style>
         body { background-color: #050505; color: #ffffff; font-family: sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 400px; }
+        /* მენიუს სტილი */
+        nav { margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; font-size: 14px; }
+        nav a { color: #00ffcc; text-decoration: none; }
+        
         input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
-        button { background-color: #00ffcc; color: #000; font-weight: bold; cursor: pointer; }
+        button { background-color: #00ffcc; color: #000; font-weight: bold; cursor: pointer; border: none; }
+        
+        /* ფლეშ შეტყობინებების სტილი (წითელი/მწვანე) */
+        .flash { padding: 10px; border-radius: 5px; margin-bottom: 10px; text-align: center; }
     </style>
 </head>
 <body>
     <div class="container">
+        {% if current_user.is_authenticated %}
+        <nav>
+            <a href="{{ url_for('dashboard') }}">დაშბორდი</a>
+            <a href="{{ url_for('board') }}">დაფა</a>
+            <a href="{{ url_for('profile') }}">პროფილი</a>
+        </nav>
+        {% endif %}
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash" style="border: 1px solid #00ffcc;">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 </body>

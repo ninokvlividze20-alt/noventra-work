@@ -1,14 +1,24 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h2>პროფილის რედაქტირება</h2>
-<form method="POST">
-    <label>საკონტაქტო ნომერი:</label><br>
-    <input type="text" name="phone" value="{{ current_user.phone }}" required><br>
-    
-    <label>ბანკის ანგარიშის ნომერი (IBAN):</label><br>
-    <input type="text" name="bank_account" value="{{ current_user.bank_account }}" required><br>
-    
-    <button type="submit" style="margin-top: 10px;">მონაცემების შენახვა</button>
-</form>
-<a href="{{ url_for('dashboard') }}">დაბრუნება დაშბორდზე</a>
+<style>
+    .profile-card { background: #0d0d0d; padding: 25px; border-radius: 20px; border: 1px solid #333; max-width: 500px; margin: 20px auto; color: #fff; }
+    input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; }
+    .btn-save { background: #00ffcc; color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+</style>
+
+<div class="profile-card">
+    <h2 style="color: #00ffcc;">პროფილის რედაქტირება</h2>
+    <form method="POST">
+        <label>საკონტაქტო ნომერი (WhatsApp-ისთვის):</label>
+        <input type="text" name="phone" value="{{ current_user.phone }}" placeholder="მაგ: 9955XXXXXXXX" required>
+
+        <label>ბანკის ანგარიშის ნომერი (IBAN):</label>
+        <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000">
+
+        <button type="submit" class="btn-save">მონაცემების შენახვა</button>
+    </form>
+    <br>
+    <a href="{{ url_for('dashboard') }}" style="color: #888;">← დაბრუნება დაშბორდზე</a>
+</div>
 {% endblock %}
