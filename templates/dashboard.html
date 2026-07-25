@@ -160,22 +160,18 @@
 
         <!-- 🎬 მოდალური ფანჯარა ვიდეო რეკლამისათვის -->
         <div id="adModal" class="ad-modal">
-            <div class="ad-modal-content" style="max-width: 600px;">
+            <div class="ad-modal-content">
                 <h3 id="adTitle" style="color: #ffcc00; margin-top: 0;">⚡ ენერგია ამოიწურა!</h3>
-                <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 15px;">
-                    ენერგიის აღსადგენად უყურე სარეკლამო ვიდეოს ბოლომდე:
+                <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 15px;" id="adDescText">
+                    ენერგიის აღსადგენად გახსენი სარეკლამო ბმული, უყურე და მიიღე ენერგია:
                 </p>
                 
-                <!-- ვიდეო პლეერი იქვე, გვერდიდან გაუსვლელად -->
-                <div id="videoContainer" style="position: relative; width: 100%; height: 280px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 15px;">
-                    <iframe id="adIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <!-- რეკლამის ბმულის ღილაკი -->
+                <div style="margin-bottom: 20px;">
+                    <a id="adLinkBtn" href="#" target="_blank" onclick="startAdTimer()" class="btn btn-warning" style="display: inline-block; text-decoration: none; width: 100%; box-sizing: border-box; color: #000;">
+                        🔗 სარეკლამო ბმულის გახსნა
+                    </a>
                 </div>
-
-                <div id="adProgressText" style="color: #00ffcc; font-weight: bold; margin-bottom: 15px; font-size: 13px;"></div>
-                
-                <button onclick="confirmAdWatched()" class="btn btn-primary" id="claimEnergyBtn" style="display: none;">✅ ვიდეო ვნახე - ენერგიის აღდგენა</button>
-            </div>
-        </div>
 
                 <div id="adProgressText" style="color: #00ffcc; font-weight: bold; margin-bottom: 15px; font-size: 13px;"></div>
                 
@@ -273,6 +269,7 @@
 let clickLimit = 100; 
 let adsWatched = 0;   
 let pendingPoints = 0; 
+let currentAdUrl = "";
 
 function boostRegion(event) {
     let regionId = document.getElementById('userRegionSelect').value;
@@ -322,9 +319,11 @@ function boostRegion(event) {
     }, 1000);
 }
 
+// 🎬 რეკლამის ყურების ლოგიკა (გახსნა ახალ ჩანართში + ტაიმერი)
 function watchAd() {
     document.getElementById('adModal').style.display = 'flex';
     document.getElementById('claimEnergyBtn').style.display = 'none';
+    document.getElementById('adProgressText').innerText = "";
     loadNextUniqueAd();
 }
 
@@ -334,25 +333,12 @@ function loadNextUniqueAd() {
     .then(data => {
         if(data.success) {
             document.getElementById('adTitle').innerText = "📢 " + data.title;
-            let embedUrl = data.video_url;
-            
-            // ავტომატურად გადაჰყავს YouTube ლინკი embed ფორმატში
-            if (embedUrl.includes("watch?v=")) {
-                embedUrl = embedUrl.replace("watch?v=", "embed/");
-            } else if (embedUrl.includes("youtu.be/")) {
-                embedUrl = embedUrl.replace("youtu.be/", "www.youtube.com/embed/");
-            }
-            
-            document.getElementById('adIframe').src = embedUrl;
-            document.getElementById('adProgressText').innerText = `⏳ უყურე ვიდეოს (${adsWatched + 1}/2)... ბოლომდე`;
-            
-            // 5 წამის შემდეგ გამოჩნდება ღილაკი
-            setTimeout(() => {
-                document.getElementById('claimEnergyBtn').style.display = 'block';
-                document.getElementById('adProgressText').innerText = `✅ მზადაა! შეგიძლია დააჭირო.`;
-            }, 5000);
+            currentAdUrl = data.video_url;
+            let linkBtn = document.getElementById('adLinkBtn');
+            linkBtn.href = currentAdUrl;
+            document.getElementById('adProgressText').innerText = "მიაწექი ზედა ღილაკს, რომ გახსნათ რეკლამა!";
         } else {
-            document.getElementById('adProgressText').innerText = "აქტიური სარეკლამო ვიდეოები დროებით არ არის.";
+            document.getElementById('adProgressText').innerText = "აქტიური რეკლამები დროებით არ არის. ენერგია აღდგა!";
             setTimeout(() => {
                 clickLimit = 100;
                 document.getElementById('clicksLeft').innerText = clickLimit;
@@ -362,10 +348,30 @@ function loadNextUniqueAd() {
     });
 }
 
+// ტაიმერი ლინკზე დაჭერის მერე (5 წამი)
+function startAdTimer() {
+    let timeLeft = 5;
+    let progress = document.getElementById('adProgressText');
+    let claimBtn = document.getElementById('claimEnergyBtn');
+    
+    progress.innerText = `⏳ მიმდინარეობს ყურება... (${timeLeft}წმ)`;
+    
+    let timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+            progress.innerText = `⏳ მიმდინარეობს ყურება... (${timeLeft}წმ)`;
+        } else {
+            clearInterval(timer);
+            progress.innerText = `✅ რეკლამა ნანახია! შეგიძლია დააჭირო ღილაკს.`;
+            claimBtn.style.display = 'block';
+        }
+    }, 1000);
+}
+
 function confirmAdWatched() {
     adsWatched++;
     document.getElementById('claimEnergyBtn').style.display = 'none';
-    document.getElementById('adIframe').src = "";
+    document.getElementById('adProgressText').innerText = "";
     
     if (adsWatched >= 2) {
         clickLimit = 100;
@@ -374,7 +380,7 @@ function confirmAdWatched() {
         document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (100 კლიკი)!";
         document.getElementById('adModal').style.display = 'none';
     } else {
-        document.getElementById('adProgressText').innerText = `✅ 1 რეკლამა დასრულდა! იტვირთება მეორე...`;
+        document.getElementById('adProgressText').innerText = `✅ 1 რეკლამა დასრულდა! გახსენი მეორე...`;
         loadNextUniqueAd();
     }
 }
