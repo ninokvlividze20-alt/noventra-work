@@ -472,36 +472,26 @@ def admin_manage_ads():
     if request.method == 'POST':
         title = request.form.get('title')
         video_url = request.form.get('video_url')
-        if title and video_url:
-            new_ad = Advertisement(title=title, video_url=video_url)
-            db.session.add(new_ad)
-            db.session.commit()
-            flash("რეკლამა წარმატებით აიტვირთა!", "success")
-        return redirect(url_for('admin_manage_ads'))
-    
-    ads = Advertisement.query.all()
-    return render_template('admin_ads.html', ads=ads)
-
-@app.route('/admin/ads', methods=['GET', 'POST'])
-@login_required
-def admin_manage_ads():
-    if not current_user.is_admin:
-        abort(403)
-    if request.method == 'POST':
-        title = request.form.get('title')
         video_file = request.files.get('video_file')
-        if title and video_file:
+        
+        final_url = ""
+        # თუ ფაილი ატვირთა ადმინმა
+        if video_file and video_file.filename != '':
             filename = f"ad_{datetime.datetime.now().timestamp()}.mp4"
             ads_folder = os.path.join(app.root_path, 'static', 'ads_videos')
             os.makedirs(ads_folder, exist_ok=True)
             filepath = os.path.join(ads_folder, filename)
             video_file.save(filepath)
-            
-            # ვინახავთ ფაილის გზას ბაზაში
-            new_ad = Advertisement(title=title, video_url=url_for('static', filename=f'ads_videos/{filename}'))
+            final_url = url_for('static', filename=f'ads_videos/{filename}')
+        # თუ ლინკი ჩაწერა
+        elif video_url:
+            final_url = video_url
+
+        if title and final_url:
+            new_ad = Advertisement(title=title, video_url=final_url)
             db.session.add(new_ad)
             db.session.commit()
-            flash("ვიდეო-რეკლამა წარმატებით აიტვირთა!", "success")
+            flash("რეკლამა წარმატებით დაემატა!", "success")
         return redirect(url_for('admin_manage_ads'))
     
     ads = Advertisement.query.all()
