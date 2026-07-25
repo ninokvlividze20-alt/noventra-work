@@ -2,6 +2,12 @@
 
 {% block content %}
 <style>
+    /* 🚀 მობილურზე სწრაფი დაკლიკებისას ზუმის აკრძალვა (კომპიუტერზე მუშაობს ჩვეულებრივად) */
+    button, .btn {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
     .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
     
     .card { 
@@ -93,8 +99,17 @@
     <!-- 🌟 მთავარი არენა: რეგიონული შეჯიბრი (ფიქსირებული მომხმარებლის რეგიონი) -->
     <div class="card" style="border-color: #ffcc00;">
         <h3 style="color: #ffcc00;">🏆 რეგიონების ბრძოლა (Live Arena)</h3>
-        <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 15px;">შენი რეგიონი: <strong style="color: #00ffcc; text-transform: uppercase;">{{ current_user.region }}</strong></p>
+        <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 10px;">შენი რეგიონი: <strong style="color: #00ffcc; text-transform: uppercase;">{{ current_user.region }}</strong></p>
         
+        <!-- 📢 შენი რეგიონის სპონსორის/კომპანიის რეკლამა (მუდმივად ჩანს ღილაკის ზემოთ) -->
+        <div style="background: #161622; border: 1px solid #33334d; border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: center;">
+            <span style="font-size: 10px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 5px;">📍 შენი რეგიონის გენერალური სპონსორი</span>
+            <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #222233;">
+            <p style="font-size: 11px; color: #a1a1aa; margin: 0; line-height: 1.4;">
+                ⚠️ <strong>ყურადღება:</strong> ენერგიის ამოწურვისას 2 სარეკლამო ვიდეოს ბოლომდე ყურება არის შენი და შენი რეგიონის გამომუშავება!
+            </p>
+        </div>
+
         <!-- ვინახავთ რეგიონის აიდის ფარულად, რომ ჯავასკრიპტმა წაიკითხოს -->
         <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
 
