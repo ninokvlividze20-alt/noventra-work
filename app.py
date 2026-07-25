@@ -497,6 +497,17 @@ def admin_manage_ads():
     ads = Advertisement.query.all()
     return render_template('admin_ads.html', ads=ads)
 
+@app.route('/admin/ads/delete/<int:ad_id>', methods=['POST'])
+@login_required
+def admin_delete_ad(ad_id):
+    if not current_user.is_admin:
+        abort(403)
+    ad = Advertisement.query.get_or_404(ad_id)
+    db.session.delete(ad)
+    db.session.commit()
+    flash("რეკლამა წარმატებით წაიშალა!", "success")
+    return redirect(url_for('admin_manage_ads'))
+
 @app.route('/logout')
 def logout():
     logout_user()
