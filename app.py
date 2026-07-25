@@ -262,7 +262,37 @@ def request_withdrawal():
         flash("მოთხოვნა გაგზავნილია ადმინისტრატორთან!", "success")
     return redirect(url_for('dashboard'))
 
-# 🎯 დაამატე მხოლოდ ეს ნაწილი ადმინის როუტების თავში
+# 🎯 დავალების დეტალური ნახვა და შესრულება მომხმარებლისთვის
+@app.route('/task/<int:task_id>', methods=['GET', 'POST'])
+@login_required
+def task_detail(task_id):
+    task = Task.query.get_or_404(task_id)
+    if request.method == 'POST':
+        if task.is_completed:
+            flash("ეს დავალება უკვე შესრულებულია!", "warning")
+            return redirect(url_for('dashboard'))
+        
+        # მომხმარებლის მიერ გამოგზავნილი პასუხი
+        user_answer = request.form.get('user_answer')
+        if not user_answer:
+            flash("გთხოვთ, შეიყვანოთ პასუხი!", "danger")
+            return redirect(url_for('task_detail', task_id=task.id))
+
+        # ვნიშნავთ შესრულებულად და ვუწერთ ბალანსს
+        task.is_completed = True
+        task.user_id = current_user.id
+        current_user.balance += task.reward
+        
+        new_trans = Transaction(user_id=current_user.id, task_title=task.title, amount=task.reward)
+        db.session.add(new_trans)
+        db.session.commit()
+        
+        flash(f"დავალება წარმატებით შესრულდა! დაირიცხა {task.reward} ₾", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('task_detail.html', task=task)
+
+# 🎯 ადმინის მიერ ახალი დავალების შექმნა
 @app.route('/add_task', methods=['GET', 'POST'])
 @login_required
 def add_task():
@@ -273,7 +303,7 @@ def add_task():
         description = request.form.get('description')
         reward = float(request.form.get('reward', 5.0))
         if title and description:
-            new_task = Task(title=title, description=description, reward=reward)
+            new_task = Task(title=title, description=description, reward=reward, is_completed=False)
             db.session.add(new_task)
             db.session.commit()
             flash("ახალი დავალება წარმატებით დაემატა!", "success")
@@ -338,6 +368,10 @@ def admin_withdrawal_action(req_id, action):
     if not current_user.is_admin:
         abort(403)
     req = WithdrawalRequest.query.get_or_404(req_id)
+    if req.status != 'pending':
+        flash("ეს მოთხოვნა უკვე დამუშავებულია!", "warning")
+        return redirect(url_for('admin_dashboard'))
+
     if action == 'approve':
         req.status = 'approved'
         flash("მოთხოვნა დამტკიცებულია!", "success")
@@ -345,7 +379,7 @@ def admin_withdrawal_action(req_id, action):
         req.status = 'rejected'
         user = User.query.get(req.user_id)
         if user:
-            user.balance += req.amount
+            user.balance += req.amount  # ზუსტად იმდენივე უბრუნდება, რამდენიც ჰქონდა მოთხოვნილი
         flash("მოთხოვნა უარყოფილია, თანხა დაბრუნდა ბალანსზე.", "warning")
     db.session.commit()
     return redirect(url_for('admin_dashboard'))

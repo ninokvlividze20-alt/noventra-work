@@ -224,7 +224,7 @@
                     </div>
                     <p style="font-size: 12px; color: #aaa; margin: 6px 0;">ჯილდო: <span style="color: #00ffcc;">{{ task.reward }} GEL</span></p>
                     {% if not task.is_completed %}
-                        <a href="{{ url_for('complete_task', task_id=task.id) }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; display: inline-block; margin-top: 5px;">დავალების შესრულება</a>
+                        <a href="{{ url_for('task_detail', task_id=task.id) }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; display: inline-block; margin-top: 5px;">დავალების შესრულება</a>
                     {% endif %}
                 </div>
             {% endfor %}
