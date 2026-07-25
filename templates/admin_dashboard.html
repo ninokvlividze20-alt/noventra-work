@@ -151,50 +151,106 @@
         </div>
     </div>
 
-    <!-- 👥 მომხმარებლების სრული კონტროლი რეგიონების მიხედვით -->
+    <!-- 👥 მომხმარებლების მართვა რეგიონების მიხედვით, აქტიურობით და ძებნით -->
     <div class="admin-section" style="margin-top: 25px;">
-        <h3>👥 მომხმარებელთა მართვა (რეგიონების მიხედვით)</h3>
-        <div style="overflow-x: auto;">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>იუზერი</th>
-                        <th>რეგიონი</th>
-                        <th>ელ-ფოსტა</th>
-                        <th>ბალანსი (₾)</th>
-                        <th>რეპუტაცია</th>
-                        <th>ადმინი</th>
-                        <th>მოქმედება</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in users %}
-                    <tr>
-                        <td><strong>{{ u.username }}</strong></td>
-                        <td><span style="color: #ffcc00; text-transform: uppercase; font-size: 11px;">{{ u.region }}</span></td>
-                        <td style="color: #888; font-size: 12px;">{{ u.email }}</td>
-                        
-                        <!-- თითოეული მომხმარებლის განახლებისა და წაშლის ფორმები უსაფრთხოდ -->
-                        <td colspan="4">
-                            <form action="{{ url_for('admin_update_user', user_id=u.id) }}" method="POST" style="display: flex; gap: 10px; align-items: center; width: 100%;">
-                                <input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 80px;" title="ბალანსი">
-                                <input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 70px;" title="რეპუტაცია">
-                                <label style="display: flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer;">
-                                    <input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %} style="transform: scale(1.2);"> ადმინი
-                                </label>
-                                <button type="submit" class="btn-sm btn-success" style="padding: 5px 10px;">შენახვა</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ მომხმარებლის წაშლა?');">
-                                <button type="submit" class="btn-sm btn-danger" style="padding: 5px 8px;">წაშლა</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; border: none;">👥 მომხმარებლები რეგიონების მიხედვით (აქტიურები პირველები)</h3>
+            
+            <!-- 🔍 ცოცხალი საძიებო ველი -->
+            <div style="width: 100%; max-width: 300px;">
+                <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="🔍 მოძებნე იუზერი სახელით..." class="input-field">
+            </div>
         </div>
+        
+        {% for reg_id, data in users_by_region.items() %}
+            <div class="region-user-block" style="margin-bottom: 25px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
+                <h4 style="color: #ffcc00; margin-top: 0; border-bottom: 1px solid #222233; padding-bottom: 8px; font-size: 15px;">
+                    📍 {{ data.name }} (იუზერები: {{ data.users|length }})
+                </h4>
+
+                {% if data.users %}
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" style="margin-top: 5px;">
+                        <thead>
+                            <tr>
+                                <th>იუზერი</th>
+                                <th>ელ-ფოსტა</th>
+                                <th>დარჩ. კლიკები</th>
+                                <th>შესრულ. დავალებები</th>
+                                <th>ნანახი ვიდეოები</th>
+                                <th>ბალანსი (₾)</th>
+                                <th>რეპუტაცია</th>
+                                <th>ადმინი</th>
+                                <th>მოქმედება</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in data.users %}
+                            <tr>
+                                <td><strong>{{ u.username }}</strong></td>
+                                <td style="color: #888; font-size: 12px;">{{ u.email }}</td>
+                                <td style="color: #00ffcc; font-weight: bold;">⚡ {{ u.clicks_left }}</td>
+                                <td style="color: #00ffcc;">🎯 {{ user_stats[u.id].completed_tasks }}</td>
+                                <td style="color: #00ffcc;">🎬 {{ user_stats[u.id].watched_ads }}</td>
+                                
+                                <td colspan="4">
+                                    <form action="{{ url_for('admin_update_user', user_id=u.id) }}" method="POST" style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                                        <input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 70px;" title="ბალანსი">
+                                        <input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 60px;" title="რეპუტაცია">
+                                        <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; color: #fff;">
+                                            <input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %} style="transform: scale(1.1);"> ადმინი
+                                        </label>
+                                        <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ მომხმარებლის წაშლა?');">
+                                        <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p style="color: #777; font-size: 12px; margin: 5px 0 0 0;">ამ რეგიონში მომხმარებლები არ არიან.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
 </div>
+
+<!-- 🔍 ცოცხალი ძებნის და ფილტრაციის სკრიპტი -->
+<script>
+function filterUsers() {
+    let input = document.getElementById('userSearchInput');
+    let filter = input.value.toLowerCase();
+    let regionBlocks = document.querySelectorAll('.region-user-block');
+    
+    regionBlocks.forEach(block => {
+        let rows = block.querySelectorAll('tbody tr');
+        let hasVisibleRow = false;
+        
+        rows.forEach(row => {
+            let usernameTd = row.querySelector('td strong');
+            if (usernameTd) {
+                let username = usernameTd.textContent || usernameTd.innerText;
+                if (username.toLowerCase().indexOf(filter) > -1) {
+                    row.style.display = "";
+                    hasVisibleRow = true;
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
+        
+        if (filter === "" || hasVisibleRow) {
+            block.style.display = "";
+        } else {
+            block.style.display = "none";
+        }
+    });
+}
+</script>
 {% endblock %}

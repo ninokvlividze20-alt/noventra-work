@@ -345,10 +345,36 @@ def add_task():
 def admin_dashboard():
     if not current_user.is_admin:
         abort(403)
+    
+    # ამოვქაჩოთ რეგიონები და მომხმარებლები, დავალებების სია და მოთხოვნები
     users = User.query.all()
     tasks = Task.query.all()
     withdrawals = WithdrawalRequest.query.filter_by(status='pending').all()
     regions = RegionScore.query.all()
+    
+    # თითოეული მომხმარებლისთვის დავთვალოთ შესრულებული დავალებები და ნახული რეკლამები
+    user_stats = {}
+    for u in users:
+        completed_tasks_count = Task.query.filter_by(user_id=u.id, is_completed=True).count()
+        watched_ads_count = UserAdView.query.filter_by(user_id=u.id).count()
+        
+        user_stats[u.id] = {
+            'completed_tasks': completed_tasks_count,
+            'watched_ads': watched_ads_count,
+            # აქტიურობის ქულა: მაგალითად (100 - clicks_left) + შესრულებული დავალებები * 5 + ნახული რეკლამები * 2
+            'activity_score': (100 - u.clicks_left) + (completed_tasks_count * 5) + (watched_ads_count * 2)
+        }
+
+    # მომხმარებლები დავალაგოთ აქტიურობის მიხედვით (პირველები ყველაზე აქტიურები)
+    users_sorted = sorted(users, key=lambda x: user_stats[x.id]['activity_score'], reverse=True)
+
+    # რეგიონების მიხედვით დაჯგუფება
+    users_by_region = {}
+    for reg in regions:
+        users_by_region[reg.region_id] = {
+            'name': reg.region_name,
+            'users': [u for u in users_sorted if u.region == reg.region_id]
+        }
     
     ads_folder = os.path.join(app.root_path, 'static', 'ads')
     os.makedirs(ads_folder, exist_ok=True)
@@ -362,7 +388,14 @@ def admin_dashboard():
         else:
             region_sponsors[reg.region_id] = None
 
-    return render_template('admin_dashboard.html', users=users, tasks=tasks, withdrawals=withdrawals, regions=regions, region_sponsors=region_sponsors)
+    return render_template('admin_dashboard.html', 
+                           users=users_sorted, 
+                           users_by_region=users_by_region,
+                           user_stats=user_stats,
+                           tasks=tasks, 
+                           withdrawals=withdrawals, 
+                           regions=regions, 
+                           region_sponsors=region_sponsors)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
