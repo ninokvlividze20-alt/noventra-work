@@ -38,6 +38,7 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     phone = db.Column(db.String(20), default="")
     bank_account = db.Column(db.String(50), default="")
+    clicks_left = db.Column(db.Integer, default=100)
     region = db.Column(db.String(50), default="tbilisi")
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
