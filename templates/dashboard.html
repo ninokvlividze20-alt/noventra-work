@@ -263,8 +263,9 @@
 </div>
 
 <script>
-let clickLimit = 100; // 100 უფასო კლიკი
-let adsWatched = 0;   // სანახავი რეკლამების მრიცხველი (საჭიროა 2 რეკლამა)
+let clickLimit = 100; 
+let adsWatched = 0;   
+let pendingPoints = 0; // ქულები, რომლებიც დროებით გროვდება სანამ სერვერზე გაიგზავნება
 
 function boostRegion(event) {
     let regionId = document.getElementById('userRegionSelect').value;
@@ -274,7 +275,12 @@ function boostRegion(event) {
         return;
     }
 
-    // 💥 ვიზუალური ეფექტი: აფრინდება +1 კლიკის ადგილას
+    // 1️⃣ მომენტალური ვიზუალური რეაგირება (0 წამიანი დაყოვნება)
+    clickLimit--;
+    pendingPoints++;
+    document.getElementById('clicksLeft').innerText = clickLimit;
+
+    // 💥 ამოფრენილი ტექსტის ეფექტი
     let btn = document.getElementById('boostBtn');
     let fx = document.createElement('div');
     fx.className = 'click-fx';
@@ -286,23 +292,34 @@ function boostRegion(event) {
     btn.appendChild(fx);
     setTimeout(() => fx.remove(), 600);
 
-    fetch('/api/score', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ region_id: regionId, points: 1 })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            clickLimit--;
-            document.getElementById('clicksLeft').innerText = clickLimit;
-            document.getElementById('clickResponse').innerText = "🔥 +1 ქულა შენს რეგიონს! (ჯამური: " + data.new_score + ")";
+    document.getElementById('clickResponse').innerText = "🔥 +1 ქულა რეგიონს! (დარჩენილია: " + clickLimit + ")";
+
+    // 2️⃣ ფონური გაგზავნა სერვერზე (რომ ბაზა არ ჩაიტვირთოს და აკლიკოს სწრაფად)
+    // სერვერთან ზარი ხდება ფონში, მომხმარებელი ამას ვერ ამჩნევს
+    clearTimeout(window.syncTimeout);
+    window.syncTimeout = setTimeout(() => {
+        let pointsToSend = pendingPoints;
+        pendingPoints = 0;
+
+        if (pointsToSend > 0) {
+            fetch('/api/score', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ region_id: regionId, points: pointsToSend })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    // სერვერის ზუსტი ჯამური ქულის ჩვენება
+                    document.getElementById('clickResponse').innerText = "🔥 ქულა შენს რეგიონს მიემატა! (სულ: " + data.new_score + ")";
+                }
+            })
+            .catch(err => console.error(err));
         }
-    })
-    .catch(err => console.error(err));
+    }, 1000); // აგზავნის ფონში დაკლიკების დასრულებიდან 1 წამში
 }
 
-// რეკლამის ყურების ლოგიკა მონაცვლეობით (მოთხოვნილია 2 რეკლამა)
+// რეკლამის ყურების ლოგიკა (2 რეკლამა)
 function watchAd() {
     let btn = document.getElementById('watchAdBtn');
     btn.disabled = true;
@@ -316,11 +333,11 @@ function watchAd() {
             clickLimit = 100;
             adsWatched = 0;
             document.getElementById('clicksLeft').innerText = clickLimit;
-            document.getElementById('clickResponse').innerText = "✅ ენერგია აღდგენილია (100 კლიკი)!";
-            document.getElementById('adModal').style.display = 'none'; // ვხურავთ ფანჯარას
+            document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (100 კლიკი)!";
+            document.getElementById('adModal').style.display = 'none'; 
             document.getElementById('adProgressText').innerText = "";
         } else {
-            document.getElementById('adProgressText').innerText = `✅ 1 რეკლამა წარმატებით ნახე! დარჩა კიდევ 1.`;
+            document.getElementById('adProgressText').innerText = `✅ 1 რეკლამა ნახულია! დარჩა კიდევ 1.`;
         }
     }, 2500);
 }
