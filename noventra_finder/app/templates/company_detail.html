@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ka" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ company_name }} | Noventra Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0A0A0A] text-gray-100 font-sans pb-10">
+
+    <header class="p-4 border-b border-gray-800">
+        <a href="/" class="text-blue-500 font-medium">← უკან</a>
+    </header>
+
+    <main class="p-6 max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold text-white mb-6">{{ company_name }}</h1>
+
+        <div class="space-y-2">
+            {% for product in products %}
+            <div class="bg-gray-900 p-4 rounded-lg border border-gray-800 flex justify-between items-center hover:border-gray-600 transition-all">
+                <span class="text-gray-200">{{ product.name }}</span>
+                <span class="text-green-400 font-bold">{{ product.price }} ₾</span>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center mt-10">ამ მაღაზიაში ჯერ არ არის დამატებული პროდუქტები.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+</body>
+</html>

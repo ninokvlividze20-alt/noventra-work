@@ -1,0 +1,160 @@
+<div class="w-full max-w-5xl mx-auto p-8 bg-[#0A0A0A] min-h-screen text-white relative">
+    
+    <!-- გამოსვლის ღილაკი (X) - მარჯვენა ზედა კუთხეში -->
+    <div class="absolute top-8 right-8 z-50">
+        <button hx-get="/" 
+                hx-target="#content" 
+                hx-select="#content" 
+                hx-swap="innerHTML swap:0ms" 
+                class="text-gray-500 hover:text-red-500 transition-colors duration-300 text-3xl font-bold p-2">
+            ✕
+        </button>
+    </div>
+
+    <!-- სათაური -->
+    <div class="mb-10 border-l-2 border-emerald-500 pl-4">
+        <h1 class="text-3xl font-bold">ეკო-პროდუქტები</h1>
+        <p class="text-gray-400 mt-2">აირჩიე კატეგორია და აღმოაჩინე ნატურალური პროდუქცია</p>
+    </div>
+
+    <!-- კატეგორიების გაფართოებული ბადე (ორიგინალური 12-ივე ელემენტი შენარჩუნებულია და გადაკეთებულია ფილტრებად) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+
+        <!-- სასმელები -->
+        <div hx-get="/category/natural?sub=ღვინის მარანი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ღვინის მარანი' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🍷</div>
+            <h3 class="font-bold text-sm">სასმელები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ღვინო, არაყი, ძმარი</p>
+        </div>
+
+        <!-- სახლის კულინარია -->
+        <div hx-get="/category/natural?sub=სახლის საკონდიტროები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სახლის საკონდიტროები' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🥧</div>
+            <h3 class="font-bold text-sm">სახლის კულინარია</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ხაჭაპური, ნამცხვარი</p>
+        </div>
+
+        <!-- მებაღეობა -->
+        <div hx-get="/category/natural?sub=სამკურნალო მცენარეები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სამკურნალო მცენარეები' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🌱</div>
+            <h3 class="font-bold text-sm">მებაღეობა</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ნერგები, თესლები</p>
+        </div>
+
+        <!-- სანელებლები -->
+        <div hx-get="/category/natural?sub=სპეციალობები და სანელებლები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სპეციალობები და სანელებლები' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🧂</div>
+            <h3 class="font-bold text-sm">სანელებლები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">სუნელები, მარცვლეული</p>
+        </div>
+
+        <!-- ხილი და ბოსტნეული -->
+        <div hx-get="/category/natural?sub=ორგანული ბოსტნეული" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ორგანული ბოსტნეული' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🍎</div>
+            <h3 class="font-bold text-sm">ხილ-ბოსტნეული</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ახალი პროდუქტი</p>
+        </div>
+
+        <!-- თაფლი და ჩირი -->
+        <div hx-get="/category/natural?sub=თაფლი და ჩურჩხელა" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'თაფლი და ჩურჩხელა' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🍯</div>
+            <h3 class="font-bold text-sm">თაფლი და ჩირი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ტკბილეული</p>
+        </div>
+
+        <!-- რძის ნაწარმი -->
+        <div hx-get="/category/natural?sub=ნატურალური რძის ნაწარმი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ნატურალური რძის ნაწარმი' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🧀</div>
+            <h3 class="font-bold text-sm">რძის ნაწარმი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ყველი, კარაქი</p>
+        </div>
+
+        <!-- ჩაი და მწვანილი -->
+        <div hx-get="/category/natural?sub=ჩირი და ჩაი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ჩირი და ჩაი' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🌿</div>
+            <h3 class="font-bold text-sm">ჩაი და მწვანილი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">სამკურნალო</p>
+        </div>
+
+        <!-- ხორცი და ნადირი -->
+        <div hx-get="/category/natural?sub=ფერმერული ხორცი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ფერმერული ხორცი' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🥩</div>
+            <h3 class="font-bold text-sm">ხორცი და პროდუქტი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ფერმერული</p>
+        </div>
+
+        <!-- მარცვლეული და პარკოსნები -->
+        <div hx-get="/category/natural?sub=მარცვლეული" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'მარცვლეული' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🌾</div>
+            <h3 class="font-bold text-sm">მარცვლეული</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ხორბალი, სიმინდი</p>
+        </div>
+
+        <!-- კოსმეტიკა და ჰიგიენა -->
+        <div hx-get="/category/natural?sub=ეკო-კოსმეტიკა" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ეკო-კოსმეტიკა' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🧴</div>
+            <h3 class="font-bold text-sm">ეკო-კოსმეტიკა</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">მოვლა, თავის ტიპი</p>
+        </div>
+
+        <!-- ხელნაკეთი ნივთები -->
+        <div hx-get="/category/natural?sub=ხელნაკეთი ნივთები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ხელნაკეთი ნივთები' %}border-emerald-500 bg-emerald-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-emerald-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🧶</div>
+            <h3 class="font-bold text-sm">ხელნაკეთი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ნივთები და აქსესუარები</p>
+        </div>
+
+    </div>
+
+    <!-- ბაზიდან წამოღებული რეალური ბიზნესების სექცია -->
+    <div class="space-y-6 pt-6 border-t border-gray-800">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-bold text-white uppercase tracking-wider">
+                {% if current_sub %}არჩეულია: {{ current_sub }}{% else %}რეგისტრირებული ბიზნესები ეკო-პროდუქტებში{% endif %}
+            </h2>
+            {% if current_sub %}
+            <a href="/category/natural" hx-get="/category/natural" hx-target="#content" hx-swap="innerHTML" class="text-xs text-emerald-400 hover:underline">ყველას ჩვენება ↺</a>
+            {% endif %}
+        </div>
+        
+        {% if businesses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for biz in businesses %}
+                <a href="/business-profile/{{ biz.slot_id }}" class="bg-gray-900/50 border border-gray-800 rounded-3xl p-5 hover:border-emerald-500 transition-all flex flex-col justify-between group">
+                    <div>
+                        {% if biz.photo_path %}
+                            <img src="{{ url_for('static', filename=biz.photo_path) }}" class="w-full h-40 object-cover rounded-2xl mb-4 border border-gray-800 group-hover:scale-[1.02] transition">
+                        {% else %}
+                            <div class="w-full h-40 bg-gray-800 rounded-2xl mb-4 flex items-center justify-center text-gray-600 text-xs">ფოტო არ არის</div>
+                        {% endif %}
+                        <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest bg-emerald-600/10 px-2.5 py-1 rounded-lg inline-block mb-2">{{ biz.subcategory or 'ეკო-პროდუქტი' }}</span>
+                        <h3 class="text-lg font-bold text-white group-hover:text-emerald-400 transition">{{ biz.business_name }}</h3>
+                        <p class="text-xs text-gray-400 mt-2 line-clamp-2">{{ biz.description }}</p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-800/80 flex justify-between items-center text-xs text-gray-500">
+                        <span>📍 {{ biz.location }}</span>
+                        <span class="text-emerald-500 font-bold">ნახვა →</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-900/20 border border-gray-800/60 rounded-3xl p-10 text-center text-gray-500">
+                <p class="text-sm">ამ კატეგორიაში ჯერ ბიზნესები არ არის რეგისტრირებული.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>

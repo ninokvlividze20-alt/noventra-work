@@ -1,0 +1,36 @@
+<div class="bg-gray-900 border border-gray-700 rounded-3xl p-4 shadow-2xl backdrop-blur-md max-h-96 overflow-y-auto space-y-4 relative">
+    
+    <!-- ზედა პანელი: სათაური და დახურვის ღილაკი -->
+    <div class="flex justify-between items-center border-b border-gray-800 pb-3 sticky top-0 bg-gray-900/95 z-10">
+        <span class="text-xs font-bold text-emerald-400">🔍 ძებნის შედეგები {% if query %}("{{ query }}"){% endif %}</span>
+        
+        <!-- დახურვის ღილაკი, რომელიც სუფთად ხურავს ამ ფანჯარას -->
+        <button onclick="document.getElementById('search-dropdown-results').innerHTML = ''" class="w-7 h-7 flex items-center justify-center bg-gray-800 hover:bg-red-600/80 text-gray-300 hover:text-white rounded-full transition text-xs font-bold shadow">
+            ✕
+        </button>
+    </div>
+
+    <!-- ნაპოვნი ბიზნესების სუფთა ჩამონათვალი -->
+    <div class="space-y-3">
+        {% if results %}
+            {% for biz in results %}
+            <a href="/business-profile/{{ biz.slot_id }}" class="flex flex-col gap-1 p-3 bg-gray-800/40 hover:bg-gray-800 rounded-2xl border border-gray-700/40 hover:border-emerald-500/50 transition block">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold text-white">{{ biz.business_name }}</span>
+                    <span class="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-lg font-bold">{{ biz.subcategory or biz.category_type }}</span>
+                </div>
+                <p class="text-xs text-gray-400">📍 {{ biz.location }}</p>
+                {% if biz.description %}
+                    <p class="text-[11px] text-gray-500 line-clamp-1">{{ biz.description }}</p>
+                {% endif %}
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="py-6 text-center">
+                <p class="text-xs text-gray-400">მსგავსი სერვისი ან ბიზნესი ვერ მოიძებნა.</p>
+                <p class="text-[10px] text-gray-500 mt-1">სცადეთ სხვა საკვანძო სიტყვა (მაგ: სახელი ან უბანი).</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>

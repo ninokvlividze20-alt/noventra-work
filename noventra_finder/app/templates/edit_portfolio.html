@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ka" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>პორტფოლიოს რედაქტირება | Noventra Finder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="bg-[#0A0A0A] text-gray-100 font-sans min-h-screen pb-12">
+
+<div class="w-full max-w-4xl mx-auto p-4 sm:p-8 bg-[#0A0A0A] text-white min-h-screen relative space-y-6">
+    
+    <!-- დახურვის / გასვლის ღილაკი -->
+    <div class="absolute top-6 right-6 z-50">
+        <a href="/business-profile/{{ portfolio.slot_id }}" class="w-10 h-10 rounded-full bg-gray-900/90 border border-gray-800 hover:border-red-500/50 hover:bg-red-500/10 text-gray-400 hover:text-red-500 flex items-center justify-center text-lg font-bold transition-all shadow-xl backdrop-blur-md">
+            ✕
+        </a>
+    </div>
+
+    <!-- ძირითადი რედაქტირების ბლოკი -->
+    <div class="bg-gradient-to-b from-gray-900/60 to-black/60 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-gray-800 shadow-2xl space-y-6">
+        
+        <div>
+            <span class="px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold uppercase tracking-wider mb-3 inline-block">
+                მართვის პანელი
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">პორტფოლიოს რედაქტირება</h1>
+        </div>
+
+        <form action="/edit-portfolio/{{ portfolio.slot_id }}" method="POST" class="space-y-6">
+            
+            <!-- ბიზნესის სახელი -->
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">ბიზნესის სახელი *</label>
+                <input type="text" name="business_name" value="{{ portfolio.business_name }}" required
+                       class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition">
+            </div>
+             
+            <!-- აღწერა -->
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">აღწერა *</label>
+                <textarea name="description" rows="5" required
+                          class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition leading-relaxed">{{ portfolio.description }}</textarea>
+            </div>
+             
+            <!-- კონტაქტები -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">ტელეფონი *</label>
+                    <input type="text" name="phone" value="{{ portfolio.phone }}" required
+                           class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">ელ-ფოსტა</label>
+                    <input type="email" name="email" value="{{ portfolio.email or '' }}"
+                           class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition">
+                </div>
+            </div>
+
+            <!-- სოციალური ქსელები -->
+            <div class="space-y-4 pt-2">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">სოციალური ქსელები</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="url" name="social_fb" placeholder="Facebook ლინკი" value="{{ portfolio.social_fb or '' }}" class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition">
+                    <input type="url" name="social_ig" placeholder="Instagram ლინკი" value="{{ portfolio.social_ig or '' }}" class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition">
+                    <input type="url" name="social_tt" placeholder="TikTok ლინკი" value="{{ portfolio.social_tt or '' }}" class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition">
+                    <input type="url" name="social_yt" placeholder="YouTube ლინკი" value="{{ portfolio.social_yt or '' }}" class="w-full bg-black/40 p-4 rounded-2xl border border-gray-800 focus:border-emerald-500 text-white outline-none transition">
+                </div>
+            </div>
+
+            <!-- ინტერაქტიული რუკა ლოკაციის შესაცვლელად -->
+            <div class="pt-2">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">შეცვალეთ ბიზნესის ადგილი რუკაზე (დააკლიკეთ ან გადათრიეთ)</label>
+                <div id="edit-map" class="w-full h-72 rounded-2xl border border-gray-800 shadow-inner"></div>
+                <input type="hidden" id="latitude" name="latitude" value="{{ portfolio.latitude or '' }}">
+                <input type="hidden" id="longitude" name="longitude" value="{{ portfolio.longitude or '' }}">
+            </div>
+
+            <!-- ღილაკები -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <button type="submit" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-black font-bold rounded-2xl transition shadow-lg text-center">ცვლილებების შენახვა</button>
+                <a href="/business-profile/{{ portfolio.slot_id }}" class="flex-1 text-center py-4 bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300 font-bold rounded-2xl transition">გაუქმება</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    var initLat = {{ portfolio.latitude if portfolio and portfolio.latitude else 41.7151 }};
+    var initLng = {{ portfolio.longitude if portfolio and portfolio.longitude else 44.8271 }};
+
+    var editMap = L.map('edit-map').setView([initLat, initLng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMap);
+
+    var editMarker = L.marker([initLat, initLng], {draggable: true}).addTo(editMap);
+
+    editMap.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+        editMarker.setLatLng([lat, lng]);
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    });
+
+    editMarker.on('dragend', function(e) {
+        var lat = editMarker.getLatLng().lat;
+        var lng = editMarker.getLatLng().lng;
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!-- app/templates/content_part.html -->
+
+<!-- ჰამბურგერი მენიუ და ნავიგაცია -->
+<div class="flex items-center justify-between p-6">
+    <button hx-get="/register-business" hx-target="#content" hx-swap="innerHTML" class="text-white font-bold">რეგისტრაცია</button>
+</div>
+
+<!-- მთავარი სექცია -->
+<div class="p-6">
+    <h1 class="text-2xl font-bold mb-6 text-white">აღმოაჩინე ლოკალური სერვისები</h1>
+
+    <!-- კატეგორიები -->
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <!-- ეკო-პროდუქტები (გადადის natural.html-ზე) -->
+        <button hx-get="/category/natural" hx-target="#content" hx-swap="innerHTML" class="p-4 bg-gray-900 rounded-xl border border-gray-800 hover:border-emerald-500 transition-all">
+            <span class="text-emerald-400 font-bold">ეკო-პროდუქტები</span>
+        </button>
+
+        <!-- სერვის-ჰაბი (გადადის services.html-ზე) -->
+        <button hx-get="/category/services" hx-target="#content" hx-swap="innerHTML" class="p-4 bg-gray-900 rounded-xl border border-gray-800 hover:border-blue-500 transition-all">
+            <span class="text-blue-400 font-bold">სერვის-ჰაბი</span>
+        </button>
+
+        <!-- ცოდნის ბაზა (გადადის education.html-ზე) -->
+        <button hx-get="/category/education" hx-target="#content" hx-swap="innerHTML" class="p-4 bg-gray-900 rounded-xl border border-gray-800 hover:border-yellow-500 transition-all">
+            <span class="text-yellow-400 font-bold">ცოდნის ბაზა</span>
+        </button>
+
+        <!-- ბიზნეს-კატალოგი (გადადის startups.html-ზე) -->
+        <button hx-get="/category/startups" hx-target="#content" hx-swap="innerHTML" class="p-4 bg-gray-900 rounded-xl border border-gray-800 hover:border-purple-500 transition-all">
+            <span class="text-purple-400 font-bold">ბიზნეს-კატალოგი</span>
+        </button>
+    </div>
+
+    <!-- პორტფოლიოების სია -->
+    <div class="space-y-4">
+        <h2 class="text-lg font-bold text-gray-400">აქტიური ბიზნესები</h2>
+        {% for p in portfolios %}
+            <div class="p-4 bg-gray-900 rounded-lg border border-gray-800 flex justify-between items-center">
+                <span class="text-white">{{ p.business_name }}</span>
+                <button hx-get="/portfolio/{{ p.slot_id }}" hx-target="#content" hx-swap="innerHTML" class="text-blue-400 text-sm font-bold">იხილე</button>
+            </div>
+        {% endfor %}
+    </div>
+</div>

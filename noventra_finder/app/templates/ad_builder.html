@@ -1,0 +1,52 @@
+<div class="w-full max-w-2xl mx-auto p-6 bg-[#0A0A0A]/80 backdrop-blur-xl border border-gray-800 rounded-3xl shadow-2xl">
+    
+    <!-- გათიშვის ღილაკი -->
+    <div class="flex justify-end mb-6">
+        <button hx-get="/" 
+        hx-target="#content" 
+        hx-select="#content" 
+        hx-swap="innerHTML swap:0ms" 
+        class="text-gray-500 hover:text-red-500 transition-colors duration-300 text-3xl font-bold">
+    ✕
+</button>
+    </div>
+    
+    <div class="mt-4 p-4 bg-blue-900/10 border border-blue-800/50 rounded-2xl">
+        <p class="text-gray-300 text-sm leading-relaxed">
+            <span class="text-blue-400 font-bold">გახადე შენი ბიზნესი ხილვადი!</span> 
+            თქვენი რეკლამა განთავსდება Noventra-ს ციფრულ ვიტრინაზე, სადაც ათასობით მომხმარებელი ეძებს სერვისებს. 
+            სწორად შევსებული ინფორმაცია ზრდის ნდობას და აადვილებს კლიენტებთან დაკავშირებას. 
+            ატვირთეთ ხარისხიანი ფოტო და დაამატეთ ყველა საკონტაქტო დეტალი, რათა იყოთ მაქსიმალურად ხელმისაწვდომი.
+        </p>
+    </div>
+
+    <form action="/save-portfolio/{{ slot_id }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 gap-6">
+       
+        <!-- სავალდებულო ფოტო -->
+        <div>
+            <label class="block text-gray-400 text-xs mb-2">ფოტო (სავალდებულო):</label>
+            <input type="file" name="photo" accept="image/*" required class="w-full p-4 bg-gray-900 border border-gray-700 rounded-2xl text-white">
+        </div>
+
+        <!-- სავალდებულო ველები -->
+        <div class="space-y-4">
+            <input type="text" name="business_name" placeholder="ბიზნესის სახელი (სავალდებულო)..." required class="w-full p-4 bg-gray-900 border border-gray-700 rounded-2xl text-white outline-none">
+            <input type="tel" name="phone" placeholder="საკონტაქტო ნომერი (სავალდებულო)..." required class="w-full p-4 bg-gray-900 border border-gray-700 rounded-2xl text-white outline-none">
+            <textarea name="description" placeholder="საქმიანობის აღწერა (სავალდებულო)..." required class="w-full p-4 bg-gray-900 border border-gray-700 rounded-2xl text-white outline-none h-24"></textarea>
+        </div>
+
+        <!-- ნებაყოფლობითი ველები -->
+        <div class="grid grid-cols-1 gap-4 pt-4 border-t border-gray-800">
+            <label class="block text-gray-400 text-xs mb-0">დამატებითი საკონტაქტო ინფორმაცია (ნებაყოფლობითი):</label>
+            <input type="email" name="email" placeholder="იმეილი..." class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm">
+            <input type="url" name="social_fb" placeholder="Facebook ლინკი..." class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm">
+            <input type="url" name="social_ig" placeholder="Instagram ლინკი..." class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm">
+            <input type="url" name="social_tt" placeholder="TikTok ლინკი..." class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm">
+            <input type="url" name="social_yt" placeholder="YouTube ლინკი..." class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm">
+        </div>
+
+        <button type="submit" class="w-full mt-4 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition">
+            პორტფოლიოს შენახვა
+        </button>
+    </form>
+</div>

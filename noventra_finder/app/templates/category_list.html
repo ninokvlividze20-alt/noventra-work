@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ka" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0A0A0A] text-gray-100 p-4">
+
+    <a href="/" class="text-blue-500 mb-6 block">← უკან</a>
+
+    <h1 class="text-2xl font-bold mb-6 capitalize">{{ category }}</h1>
+
+    <div class="space-y-3">
+    {% for company in companies %}
+    <a href="/company/{{ company.name }}" class="block p-4 bg-gray-900 rounded-xl border border-gray-800 flex items-center gap-4 hover:border-blue-500 transition-all cursor-pointer">
+        <img src="{{ url_for('static', filename='images/logos/' + company.logo) }}" 
+             alt="{{ company.name }}" 
+             class="w-10 h-10 object-contain bg-white rounded-lg p-1"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        
+        <div class="w-10 h-10 hidden items-center justify-center bg-blue-900 rounded-lg text-white font-bold text-lg">
+            {{ company.name[0] }}
+        </div>
+        
+        <span class="font-bold flex-1">{{ company.name }}</span>
+        <span class="text-blue-400">→</span>
+    </a>
+{% endfor %}
+    
+    {% if not companies %}
+        <p class="text-center text-gray-500 mt-10">ამ კატეგორიაში მონაცემები ჯერ არ არის.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

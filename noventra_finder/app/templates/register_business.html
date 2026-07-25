@@ -1,0 +1,226 @@
+<div class="w-full max-w-2xl mx-auto p-8 bg-[#0A0A0A] text-white min-h-screen">
+    <h1 class="text-2xl font-bold mb-6">ბიზნესის რეგისტრაცია</h1>
+    
+    <form action="/save-portfolio/{{ slot_id }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+<!-- კატეგორია და საქმიანობის სფერო -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">მთავარი კატეგორია *</label>
+                <select name="category_type" id="category-select" required onchange="updateSubcategories()"
+                        class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl focus:border-blue-500 outline-none">
+                    <option value="" disabled selected>აირჩიეთ კატეგორია</option>
+                    <option value="natural">ეკო-პროდუქტები</option>
+                    <option value="services">სერვის-ჰაბი</option>
+                    <option value="education">ცოდნის ბაზა</option>
+                    <option value="startups">ბიზნეს-კატალოგი</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">საქმიანობის სფერო (ქვეკატეგორია) *</label>
+                <select name="subcategory" id="subcategory-select" required
+                        class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl focus:border-blue-500 outline-none">
+                    <option value="" disabled selected>ჯერ აირჩიეთ კატეგორია</option>
+                </select>
+            </div>
+        </div>
+
+        <script>
+            // ყველა კატეგორიის სრული და დეტალური ჩამონათვალი
+            const categoriesData = {
+                'natural': [
+                    'ნატურალური რძის ნაწარმი', 
+                    'ხელნაკეთი ნივთები', 
+                    'თაფლი და ჩურჩხელა', 
+                    'ეკო-კოსმეტიკა', 
+                    'ფერმერული ხორცი', 
+                    'ჩირი და ჩაი', 
+                    'ღვინის მარანი', 
+                    'სამკურნალო მცენარეები', 
+                    'ხელნაკეთი აქსესუარები', 
+                    'ორგანული ბოსტნეული'
+                ],
+                'services': [
+                    'სანტექნიკა და ელექტრიკოსი', 
+                    'ავეჯის შემკეთებელი', 
+                    'სალონები და მასაჟი', 
+                    'ავტო-სერვისი', 
+                    'კონდიციონერების მონტაჟი', 
+                    'სახლის დალაგება', 
+                    'კომპიუტერული სერვისი', 
+                    'ფოტო/ვიდეო გადაღება', 
+                    'მშენებლობა და რემონტი', 
+                    'კურიერი და ტრანსპორტირება'
+                ],
+                'education': [
+                    'კერძო რეპეტიტორები', 
+                    'კომპიუტერული პროგრამები', 
+                    'უცხო ენები', 
+                    'კრეატიული სტუდია', 
+                    'მუსიკის სკოლა', 
+                    'სპორტული სექცია', 
+                    'მზარეულთა კურსები', 
+                    'ბიზნეს ტრენინგები', 
+                    'სკოლამდელი განვითარება', 
+                    'დიზაინის სკოლა'
+                ],
+                'startups': [
+                    'სახლის საკონდიტროები', 
+                    'IT სერვისები', 
+                    'კრეატიული ბიზნესები', 
+                    'ონლაინ სტარტაპები', 
+                    'მარკეტინგული სააგენტო', 
+                    'დეკორი და დიზაინი', 
+                    'ტანსაცმლის ბრენდი', 
+                    'ტურისტული კომპანია', 
+                    'იურიდიული კონსულტაცია', 
+                    'ინოვაციური პროექტები'
+                ]
+            };
+
+            function updateSubcategories() {
+                const catSelect = document.getElementById('category-select');
+                const subSelect = document.getElementById('subcategory-select');
+                const selectedCategory = catSelect.value;
+
+                subSelect.innerHTML = '<option value="" disabled selected>აირჩიეთ ქვეკატეგორია</option>';
+
+                if (categoriesData[selectedCategory]) {
+                    categoriesData[selectedCategory].forEach(sub => {
+                        const opt = document.createElement('option');
+                        opt.value = sub;
+                        opt.textContent = sub;
+                        subSelect.appendChild(opt);
+                    });
+                }
+            }
+        </script>
+        
+        <!-- ბიზნესის სახელი -->
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">ბიზნესის დასახელება *</label>
+            <input type="text" name="business_name" required 
+                   placeholder="მაგ: 'ღვინის მარანი' ან 'ხელნაკეთი ნივთები'"
+                   class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl focus:border-blue-500 outline-none">
+            <p class="text-[10px] text-gray-500 mt-1">დაარქვით სახელი ისე, როგორც გსურთ მომხმარებელმა დაგამახსოვროთ.</p>
+        </div>
+
+        <!-- რეგიონი და ქალაქი -->
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">მდებარეობა (ქალაქი/მუნიციპალიტეტი) *</label>
+            <select name="location_district" required class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl focus:border-blue-500 outline-none">
+                <option value="" disabled selected>აირჩიე ქალაქი/მუნიციპალიტეტი</option>
+                <optgroup label="თბილისი">
+                    <option value="თბილისი">თბილისი</option>
+                </optgroup>
+                <optgroup label="აჭარა">
+                    <option value="ბათუმი">ბათუმი</option>
+                    <option value="ქობულეთი">ქობულეთი</option>
+                    <option value="ხელვაჩაური">ხელვაჩაური</option>
+                </optgroup>
+                <optgroup label="იმერეთი">
+                    <option value="ქუთაისი">ქუთაისი</option>
+                    <option value="წყალტუბო">წყალტუბო</option>
+                    <option value="ჭიათურა">ჭიათურა</option>
+                </optgroup>
+                <optgroup label="კახეთი">
+                    <option value="თელავი">თელავი</option>
+                    <option value="სიღნაღი">სიღნაღი</option>
+                    <option value="ყვარელი">ყვარელი</option>
+                </optgroup>
+                <optgroup label="სხვა რეგიონები">
+                    <option value="რუსთავი">რუსთავი</option>
+                    <option value="გორის მუნიციპალიტეტი">გორი</option>
+                    <option value="ზუგდიდი">ზუგდიდი</option>
+                    <option value="ახალციხე">ახალციხე</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <!-- ზუსტი მისამართი -->
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">ზუსტი მისამართი *</label>
+            <input type="text" name="address" required 
+                   placeholder="მაგ: თავისუფლების მოედანი 1"
+                   class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl focus:border-blue-500 outline-none">
+        </div>
+
+        <!-- ფოტო -->
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">მთავარი ფოტო (ჰორიზონტალური) *</label>
+            <input type="file" name="photo" accept="image/*" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+        </div>
+
+<!-- ინტერაქტიული რუკა კოორდინატების ასარჩევად -->
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">მიუთითეთ ზუსტი ადგილი რუკაზე (დააკლიკეთ რუკას) *</label>
+            <div id="picker-map" class="w-full h-64 rounded-xl border border-gray-700"></div>
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+        </div>
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            var pickerMap = L.map('picker-map').setView([41.7151, 44.8271], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickerMap);
+
+            var pickerMarker = null;
+
+            pickerMap.on('click', function(e) {
+                var lat = e.latlng.lat;
+                var lng = e.latlng.lng;
+                
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+
+                if (pickerMarker) {
+                    pickerMarker.setLatLng([lat, lng]);
+                } else {
+                    pickerMarker = L.marker([lat, lng]).addTo(pickerMap);
+                }
+            });
+        </script>
+
+        <!-- აღწერა -->
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">დეტალური აღწერა *</label>
+            <textarea name="description" required rows="4" 
+                      placeholder="მოგვიყევით თქვენი საქმიანობის შესახებ, რა მიღწევები გაქვთ, რა მომსახურებას სთავაზობთ მომხმარებელს..."
+                      class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl focus:border-blue-500 outline-none"></textarea>
+        </div>
+
+        <!-- ახალი ველები: მეილი და სოციალური ქსელები -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">ელ-ფოსტა</label>
+                <input type="email" name="email" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">Facebook ლინკი</label>
+                <input type="url" name="social_fb" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">Instagram ლინკი</label>
+                <input type="url" name="social_ig" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">TikTok ლინკი</label>
+                <input type="url" name="social_tt" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">YouTube ლინკი</label>
+                <input type="url" name="social_yt" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl outline-none">
+            </div>
+            <!-- ტელეფონი -->
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">საკონტაქტო ნომერი *</label>
+                <input type="tel" name="phone" required class="w-full p-3 bg-gray-900 border border-gray-700 rounded-xl focus:border-blue-500 outline-none">
+            </div>
+        </div>
+
+        <button type="submit" class="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-700 transition-all">
+            რეგისტრაცია
+        </button>
+    </form>
+</div>

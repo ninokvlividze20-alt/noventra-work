@@ -1,0 +1,141 @@
+<div class="w-full max-w-5xl mx-auto p-8 bg-[#0A0A0A] min-h-screen text-white relative">
+    
+    <!-- გამოსვლის ღილაკი (X) - მარჯვენა ზედა კუთხეში -->
+    <div class="absolute top-8 right-8 z-50">
+        <button hx-get="/" 
+                hx-target="#content" 
+                hx-select="#content" 
+                hx-swap="innerHTML swap:0ms" 
+                class="text-gray-500 hover:text-red-500 transition-colors duration-300 text-3xl font-bold p-2">
+            ✕
+        </button>
+    </div>
+
+    <!-- სათაური -->
+    <div class="mb-10 border-l-2 border-yellow-500 pl-4">
+        <h1 class="text-3xl font-bold">ცოდნის ბაზა</h1>
+        <p class="text-gray-400 mt-2">განავითარე უნარები საუკეთესო სპეციალისტებთან</p>
+    </div>
+
+    <!-- ბადე (ორიგინალური 10-ივე ელემენტი შენარჩუნებულია და გადაკეთებულია ფილტრებად) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+        
+        <!-- 1 -->
+        <div hx-get="/category/education?sub=კერძო რეპეტიტორები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'კერძო რეპეტიტორები' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📚</div>
+            <h3 class="font-bold text-sm">რეპეტიტორები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">საგნები</p>
+        </div>
+
+        <!-- 2 -->
+        <div hx-get="/category/education?sub=კომპიუტერული პროგრამები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'კომპიუტერული პროგრამები' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">💻</div>
+            <h3 class="font-bold text-sm">IT კურსები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">პროგრამირება</p>
+        </div>
+
+        <!-- 3 -->
+        <div hx-get="/category/education?sub=უცხო ენები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'უცხო ენები' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🌍</div>
+            <h3 class="font-bold text-sm">უცხო ენები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ინგლისური, გერმანული</p>
+        </div>
+
+        <!-- 4 -->
+        <div hx-get="/category/education?sub=კრეატიული სტუდია" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'კრეატიული სტუდია' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🎨</div>
+            <h3 class="font-bold text-sm">ხელოვნება</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ხატვა, მუსიკა</p>
+        </div>
+
+        <!-- 5 -->
+        <div hx-get="/category/education?sub=ბიზნეს ტრენინგები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ბიზნეს ტრენინგები' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📊</div>
+            <h3 class="font-bold text-sm">ბიზნეს კურსები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">მარკეტინგი, ფინანსები</p>
+        </div>
+
+        <!-- 6 -->
+        <div hx-get="/category/education?sub=სპორტული სექცია" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სპორტული სექცია' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🧘</div>
+            <h3 class="font-bold text-sm">სპორტი და იოგა</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ჯანსაღი ცხოვრება</p>
+        </div>
+
+        <!-- 7 -->
+        <div hx-get="/category/education?sub=მზარეულთა კურსები" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'მზარეულთა კურსები' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🍳</div>
+            <h3 class="font-bold text-sm">კულინარია</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">მასტერკლასები</p>
+        </div>
+
+        <!-- 8 -->
+        <div hx-get="/category/education?sub=დიზაინის სკოლა" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'დიზაინის სკოლა' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📸</div>
+            <h3 class="font-bold text-sm">ფოტოგრაფია</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">გადაღება, მონტაჟი</p>
+        </div>
+
+        <!-- 9 -->
+        <div hx-get="/category/education?sub=მუსიკის სკოლა" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'მუსიკის სკოლა' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🎭</div>
+            <h3 class="font-bold text-sm">თეატრი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">მსახიობობა</p>
+        </div>
+
+        <!-- 10 -->
+        <div hx-get="/category/education?sub=სკოლამდელი განვითარება" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სკოლამდელი განვითარება' %}border-yellow-500 bg-yellow-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-yellow-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🚀</div>
+            <h3 class="font-bold text-sm">პერსონალური ზრდა</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ტრენინგები</p>
+        </div>
+    </div>
+
+    <!-- ულამაზესი ცენტრალური მინიმალისტური ფანჯარა (Modal) ქვეკატეგორიის დაჭერისას -->
+    {% if current_sub %}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+        <div class="bg-[#121212] border border-yellow-500/50 w-full max-w-md rounded-3xl p-6 shadow-2xl relative">
+            
+            <!-- დახურვის ღილაკი (✕) -->
+            <a href="/category/education" hx-get="/category/education" hx-target="#content" hx-swap="innerHTML" 
+               class="absolute top-5 right-5 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-red-600/20 w-8 h-8 rounded-full flex items-center justify-center transition">
+                ✕
+            </a>
+
+            <!-- სათაური -->
+            <div class="mb-5">
+                <span class="text-[10px] uppercase tracking-widest text-yellow-500 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-lg">კატეგორია</span>
+                <h3 class="text-xl font-bold text-white mt-2">{{ current_sub }}</h3>
+            </div>
+
+            <!-- ბიზნესების მინიმალისტური სია -->
+            {% if businesses %}
+                <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {% for biz in businesses %}
+                    <a href="/business-profile/{{ biz.slot_id }}" class="flex items-center justify-between p-3.5 rounded-2xl bg-black/60 hover:bg-yellow-500/10 border border-gray-800 hover:border-yellow-500 transition group">
+                        <span class="text-sm font-medium text-gray-200 group-hover:text-yellow-400 transition">✦ {{ biz.business_name }}</span>
+                        <span class="text-xs text-yellow-500 font-bold">ნახვა →</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="py-8 text-center text-gray-500 text-sm">
+                    ამ ქვეკატეგორიაში ჯერ ბიზნესები არ არის რეგისტრირებული.
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endif %}
+
+</div>

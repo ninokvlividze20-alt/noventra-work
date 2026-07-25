@@ -1,0 +1,1 @@
+INSERT INTO companies (id, name, category_type) VALUES (1, 'Carrefour', 'shops') ON CONFLICT (id) DO NOTHING; INSERT INTO products (company_id, name, price, image_url) VALUES (1, 'რძე ნიკორა 1ლ', 4.50, 'https://via.placeholder.com/150');

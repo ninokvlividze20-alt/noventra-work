@@ -3,36 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noventra</title>
+    <title>Noventra | Cyber Arena</title>
     <style>
-        body { background-color: #050505; color: #ffffff; font-family: sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 400px; }
-        /* მენიუს სტილი */
-        nav { margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; font-size: 14px; }
-        nav a { color: #00ffcc; text-decoration: none; }
+        body { 
+            background-color: #07070c; 
+            color: #ffffff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+        .container { 
+            width: 100%; 
+            max-width: 480px; 
+        }
+        /* პროფესიონალური გეიმინგ ნავიგაცია */
+        nav { 
+            background: #111118;
+            margin-bottom: 25px; 
+            padding: 12px 15px; 
+            border-bottom: 2px solid #00ffcc; 
+            border-radius: 12px;
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 13px; 
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.15);
+        }
+        nav a { 
+            color: #00ffcc; 
+            text-decoration: none; 
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        nav a:hover {
+            color: #fff;
+            text-shadow: 0 0 8px #00ffcc;
+        }
         
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
-        button { background-color: #00ffcc; color: #000; font-weight: bold; cursor: pointer; border: none; }
+        input, select, textarea, button { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            border: 1px solid #222233; 
+            background: #0f0f17; 
+            color: #fff; 
+            box-sizing: border-box; 
+            font-size: 14px;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #00ffcc;
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+        button { 
+            background: linear-gradient(135deg, #00ffcc, #00b386); 
+            color: #000; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border: none; 
+            transition: 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+        }
         
-        /* ფლეშ შეტყობინებების სტილი (წითელი/მწვანე) */
-        .flash { padding: 10px; border-radius: 5px; margin-bottom: 10px; text-align: center; }
+        .flash { 
+            background: #151520;
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            text-align: center; 
+            border-left: 4px solid #00ffcc;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         {% if current_user.is_authenticated %}
         <nav>
-            <a href="{{ url_for('dashboard') }}">დაშბორდი</a>
-            <a href="{{ url_for('board') }}">დაფა</a>
-            <a href="{{ url_for('profile') }}">პროფილი</a>
-            <a href="{{ url_for('about') }}" style="color: #fff; margin-left: 15px;">About</a>
+            <a href="{{ url_for('dashboard') }}">⚡ არენა</a>
+            <a href="{{ url_for('board') }}">💬 დაფა</a>
+            <a href="{{ url_for('profile') }}">👤 პროფილი</a>
+            <a href="{{ url_for('about') }}" style="color: #aaa;">About</a>
         </nav>
         {% endif %}
 
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             {% for message in messages %}
-              <div class="flash" style="border: 1px solid #00ffcc;">{{ message }}</div>
+              <div class="flash">{{ message }}</div>
             {% endfor %}
           {% endif %}
         {% endwith %}

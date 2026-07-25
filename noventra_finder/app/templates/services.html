@@ -1,0 +1,144 @@
+<div class="w-full max-w-5xl mx-auto p-8 bg-[#0A0A0A] min-h-screen text-white relative">
+    
+    <!-- გამოსვლის ღილაკი (X) - მარჯვენა ზედა კუთხეში -->
+    <div class="absolute top-8 right-8 z-50">
+        <button hx-get="/" 
+                hx-target="#content" 
+                hx-select="#content" 
+                hx-swap="innerHTML swap:0ms" 
+                class="text-gray-500 hover:text-red-500 transition-colors duration-300 text-3xl font-bold p-2">
+            ✕
+        </button>
+    </div>
+
+    <!-- სათაური -->
+    <div class="mb-10 border-l-2 border-blue-500 pl-4">
+        <h1 class="text-3xl font-bold">სერვის-ჰაბი</h1>
+        <p class="text-gray-400 mt-2">აირჩიე სასურველი მომსახურება და დაუკავშირდი სპეციალისტს</p>
+    </div>
+
+    <!-- სერვისების ბადე (ორიგინალური 10-ივე ელემენტი შენარჩუნებულია და გადაკეთებულია ფილტრებად) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+
+        <!-- 1. რემონტი -->
+        <div hx-get="/category/services?sub=სანტექნიკა და ელექტრიკოსი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სანტექნიკა და ელექტრიკოსი' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🛠️</div>
+            <h3 class="font-bold text-sm">სარემონტო სამუშაოები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">მშენებლობა, ხელოსნები</p>
+        </div>
+
+        <!-- 2. ტექნიკა -->
+        <div hx-get="/category/services?sub=კომპიუტერული სერვისი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'კომპიუტერული სერვისი' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">💻</div>
+            <h3 class="font-bold text-sm">IT სერვისები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">პროგრამირება, შეკეთება</p>
+        </div>
+
+        <!-- 3. დასუფთავება -->
+        <div hx-get="/category/services?sub=სახლის დალაგება" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სახლის დალაგება' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🧹</div>
+            <h3 class="font-bold text-sm">დასუფთავება</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ჰიმწმენდა, დალაგება</p>
+        </div>
+
+        <!-- 4. განათლება -->
+        <div hx-get="/category/education" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border border-gray-800 rounded-3xl bg-gray-900/30 hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🎓</div>
+            <h3 class="font-bold text-sm">განათლება და კურსები</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">რეპეტიტორობა, ტრენინგები</p>
+        </div>
+
+        <!-- 5. სილამაზე -->
+        <div hx-get="/category/services?sub=სალონები და მასაჟი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სალონები და მასაჟი' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">💄</div>
+            <h3 class="font-bold text-sm">სილამაზის სალონი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ვიზაჟი, ვარცხნილობა</p>
+        </div>
+
+        <!-- 6. იურიდიული -->
+        <div hx-get="/category/services?sub=იურიდიული კონსულტაცია" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'იურიდიული კონსულტაცია' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">⚖️</div>
+            <h3 class="font-bold text-sm">იურიდიული დახმარება</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">კონსულტაცია, საბუთები</p>
+        </div>
+
+        <!-- 7. გადაზიდვა -->
+        <div hx-get="/category/services?sub=კურიერი და ტრანსპორტირება" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'კურიერი და ტრანსპორტირება' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🚚</div>
+            <h3 class="font-bold text-sm">გადაზიდვა/ტაქსი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ლოჯისტიკა, მგზავრობა</p>
+        </div>
+
+        <!-- 8. კვება -->
+        <div hx-get="/category/services?sub=კვება და ქეითერინგი" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'კვება და ქეითერინგი' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🍱</div>
+            <h3 class="font-bold text-sm">კვება და ქეითერინგი</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">დელივერი, შეკვეთით</p>
+        </div>
+
+        <!-- 9. სამედიცინო -->
+        <div hx-get="/category/services?sub=სამედიცინო მომსახურება" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'სამედიცინო მომსახურება' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🩺</div>
+            <h3 class="font-bold text-sm">სამედიცინო მომსახურება</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">ექიმები, ანალიზები</p>
+        </div>
+
+        <!-- 10. ღონისძიებები -->
+        <div hx-get="/category/services?sub=ფოტო/ვიდეო გადაღება" hx-target="#content" hx-swap="innerHTML"
+             class="p-6 border {% if current_sub == 'ფოტო/ვიდეო გადაღება' %}border-blue-500 bg-blue-900/10{% else %}border-gray-800 bg-gray-900/30{% endif %} rounded-3xl hover:border-blue-500 transition-all cursor-pointer group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🎉</div>
+            <h3 class="font-bold text-sm">ღონისძიებების ორგანიზება</h3>
+            <p class="text-[9px] text-gray-500 uppercase mt-1">დღესასწაულები, ფოტო</p>
+        </div>
+
+    </div>
+
+    <!-- ბაზიდან წამოღებული რეალური ბიზნესების სექცია -->
+    <div class="space-y-6 pt-6 border-t border-gray-800">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-bold text-white uppercase tracking-wider">
+                {% if current_sub %}არჩეულია: {{ current_sub }}{% else %}რეგისტრირებული ბიზნესები სერვის-ჰაბში{% endif %}
+            </h2>
+            {% if current_sub %}
+            <a href="/category/services" hx-get="/category/services" hx-target="#content" hx-swap="innerHTML" class="text-xs text-blue-400 hover:underline">ყველას ჩვენება ↺</a>
+            {% endif %}
+        </div>
+        
+        {% if businesses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for biz in businesses %}
+                <a href="/business-profile/{{ biz.slot_id }}" class="bg-gray-900/50 border border-gray-800 rounded-3xl p-5 hover:border-blue-500 transition-all flex flex-col justify-between group">
+                    <div>
+                        {% if biz.photo_path %}
+                            <img src="{{ url_for('static', filename=biz.photo_path) }}" class="w-full h-40 object-cover rounded-2xl mb-4 border border-gray-800 group-hover:scale-[1.02] transition">
+                        {% else %}
+                            <div class="w-full h-40 bg-gray-800 rounded-2xl mb-4 flex items-center justify-center text-gray-600 text-xs">ფოტო არ არის</div>
+                        {% endif %}
+                        <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest bg-blue-600/10 px-2.5 py-1 rounded-lg inline-block mb-2">{{ biz.subcategory or 'სერვისი' }}</span>
+                        <h3 class="text-lg font-bold text-white group-hover:text-blue-400 transition">{{ biz.business_name }}</h3>
+                        <p class="text-xs text-gray-400 mt-2 line-clamp-2">{{ biz.description }}</p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-800/80 flex justify-between items-center text-xs text-gray-500">
+                        <span>📍 {{ biz.location }}</span>
+                        <span class="text-blue-500 font-bold">ნახვა →</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-900/20 border border-gray-800/60 rounded-3xl p-10 text-center text-gray-500">
+                <p class="text-sm">ამ კატეგორიაში ჯერ ბიზნესები არ არის რეგისტრირებული.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>

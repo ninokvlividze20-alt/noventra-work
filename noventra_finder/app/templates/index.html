@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ka" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Noventra Finder | შენი ლოკალური ჰაბი</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .animate-marquee { display: flex; width: max-content; animation: marquee 300s linear infinite; }
+</style>
+</head>
+
+<body class="bg-[#0A0A0A] text-gray-100 font-sans pb-10">
+
+    <header class="p-4 border-b border-gray-800 bg-[#0A0A0A] sticky top-0 z-50">
+        <div class="flex items-center justify-between max-w-5xl mx-auto px-4">
+            <!-- ლოგო -->
+            <h1 class="text-lg sm:text-2xl font-bold cursor-default flex items-center">
+                <span class="text-white">NOVENTRA</span>
+                <span class="text-blue-500 relative ml-1.5">
+                    finder
+                    <span class="absolute -bottom-0.5 left-0 w-full h-0.5 bg-blue-500"></span>
+                </span>
+            </h1>
+            
+            <!-- დესკტოპის ნავიგაცია (იფარება მობილურზე) -->
+            <nav class="hidden md:flex gap-6 text-xs font-bold uppercase tracking-widest items-center">
+                <a href="/" class="text-gray-400 hover:text-white transition-colors">მთავარი</a>
+                <a href="#" hx-get="/about" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" class="text-gray-400 hover:text-white transition-colors">About</a>
+                <a href="#" hx-get="/register-business" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" class="text-gray-400 hover:text-white transition-colors">ბიზნესი</a>
+                <a href="#" hx-get="/ad-builder" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" class="text-gray-400 hover:text-white transition-colors">რეკლამა</a>
+                <a href="#" hx-get="/contact" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" class="text-gray-400 hover:text-white transition-colors">კონტაქტი</a>
+
+                {% if session.get('user_id') %}
+                    <span class="text-gray-700">|</span>
+                    <a href="/my-profile" class="text-blue-400 hover:text-blue-300 font-bold transition flex items-center gap-1">
+                        👤 {{ session.get('username') }}
+                    </a>
+                    <a href="/logout" class="text-red-500 hover:text-red-400 text-xs transition ml-2">გასვლა</a>
+                {% else %}
+                    <a href="/register" class="px-4 py-2 bg-blue-600 rounded-xl text-white text-xs font-bold hover:bg-blue-500 transition">
+                        შესვლა / რეგისტრაცია
+                    </a>
+                {% endif %}
+            </nav>
+
+            <!-- მობილურის ჰამბურგერ ღილაკი (ჩანს მხოლოდ მობილურზე) -->
+            <button id="mobile-menu-button" onclick="toggleMobileMenu()" class="md:hidden text-gray-300 hover:text-white focus:outline-none p-2 bg-gray-900 border border-gray-800 rounded-xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- მობილურის ჩამოსაშლელი მენიუ (სრული ჰთმქს მხარდაჭერით და მყისიერი დახურვით) -->
+        <div id="mobile-menu" class="hidden md:hidden mt-4 pt-4 border-t border-gray-800 flex flex-col gap-3 px-4 pb-2 text-xs font-bold uppercase tracking-widest">
+            <a href="/" class="text-gray-300 hover:text-white py-1">მთავარი</a>
+            <a href="#" hx-get="/about" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white py-1">About</a>
+            <a href="#" hx-get="/register-business" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white py-1">ბიზნესი</a>
+            <a href="#" hx-get="/ad-builder" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white py-1">რეკლამა</a>
+            <a href="#" hx-get="/contact" hx-target="#content" hx-push-url="true" hx-swap="innerHTML swap:0ms" onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white py-1">კონტაქტი</a>
+
+            <div class="pt-2 border-t border-gray-800 flex flex-col gap-2">
+                {% if session.get('user_id') %}
+                    <a href="/my-profile" onclick="toggleMobileMenu()" class="text-blue-400 font-bold py-1 flex items-center gap-1">
+                        👤 {{ session.get('username') }}
+                    </a>
+                    <a href="/logout" class="text-red-500 py-1">გასვლა</a>
+                {% else %}
+                    <a href="/register" onclick="toggleMobileMenu()" class="w-full text-center py-2.5 bg-blue-600 rounded-xl text-white font-bold hover:bg-blue-500 transition">
+                        შესვლა / რეგისტრაცია
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- ბანერი (ფიქსირებული, ჰედერის ქვეშ) -->
+<div class="sticky top-[73px] z-40 bg-[#0A0A0A] border-b border-gray-800 overflow-hidden">
+    <div class="animate-marquee flex gap-4 w-max py-2">
+        {% for i in range(1, 51) %}
+            {% set ad = portfolios | selectattr("slot_id", "equalto", i) | first %}
+               
+            {% if ad and ad.is_paid %}
+                <!-- ნაყიდი რეკლამა -->
+                <div hx-get="/ad-builder/{{ i }}" 
+                      hx-target="#content" 
+                      hx-swap="innerHTML swap:0ms" 
+                      class="cursor-pointer flex-shrink-0 w-48 h-20 bg-blue-900/50 border border-blue-500 rounded-lg flex flex-col items-center justify-center p-2 text-center hover:border-yellow-500 transition-all">
+                    <span class="text-[10px] font-bold text-white truncate w-full">{{ ad.business_name }}</span>
+                    <span class="text-[9px] text-blue-300">დაკავებულია</span>
+                </div>
+            {% else %}
+                <!-- ცარიელი სლოტი: მკრთალი და დახვეწილი -->
+                <div hx-get="/ad-builder/{{ i }}" 
+                      hx-target="#content"
+                      hx-swap="innerHTML swap:0ms"
+                      class="cursor-pointer flex-shrink-0 w-48 h-20 bg-[#111] border border-gray-800/30 rounded-lg flex flex-col items-center justify-center p-2 text-center hover:border-gray-600 transition-all">
+                    <span class="text-[9px] font-bold text-gray-700 uppercase">სარეკლამო ადგილი</span>
+                    <span class="text-[10px] text-gray-800">75 ₾</span>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+       
+<main id="content" class="w-full px-5 py-8 space-y-8 transition-opacity duration-75">
+   
+<!-- საძიებო სისტემის სექცია ახსნა-განმარტებით და მაგალითით -->
+<div class="w-full max-w-2xl mx-auto my-6 px-4 relative">
+    <form action="/search" method="GET" hx-get="/search" hx-target="#search-dropdown-results" hx-swap="innerHTML" hx-push-url="true" class="flex flex-col gap-2">
+        <div class="flex gap-2">
+            <input type="text" name="q" placeholder="მოძებნე სერვისი, რეგიონი, ქალაქი ან ქუჩა..." 
+                   class="flex-1 bg-gray-900 border border-gray-800 rounded-2xl px-5 py-3.5 text-white focus:border-emerald-500 outline-none text-sm sm:text-base shadow-lg">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-black font-bold px-6 py-3.5 rounded-2xl transition shadow-lg text-sm sm:text-base">ძებნა</button>
+        </div>
+        
+        <!-- მომხმარებლისთვის განკუთვნილი კომენტარი და მაგალითი (შენარჩუნებულია) -->
+        <p class="text-xs text-gray-400 px-2 leading-relaxed">
+            💡 <span class="text-emerald-400 font-medium">მრჩეველი:</span> თუ გსურთ იპოვოთ მომსახურება თქვენთან ახლოს, საძიებო სისტემაში მიუთითეთ დეტალურად — <span class="text-gray-300 underline">რეგიონი, ქალაქი და ქუჩა</span>. 
+            <br>
+            <span class="text-gray-500 italic">მაგალითი:</span> <span class="text-emerald-300 font-mono">"ბათუმი რუსთაველის სანტექნიკი"</span> ან <span class="text-emerald-300 font-mono">"თბილისი საბურთალო რეპეტიტორი"</span>.
+        </p>
+    </form>
+
+    <!-- ამოხტომილი ლამაზი ფანჯარა ჩამონათვლით, რომელიც იხსნება საძიებოსთანვე -->
+    <div id="search-dropdown-results" class="absolute left-4 right-4 z-50 mt-2"></div>
+</div>
+
+    <div class="h-56 bg-gray-900 rounded-3xl border border-gray-800 overflow-hidden relative shadow-lg">
+        <div id="map" class="w-full h-full opacity-70"></div>
+        <div class="absolute bottom-4 left-4 bg-black/70 px-4 py-2 rounded-xl text-xs backdrop-blur-md">
+            📍 იპოვე აქტიური ბიზნესი შენს ირგვლივ
+        </div>
+    </div>
+
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- 1. ეკო-პროდუქტები (Emerald) -->
+        <div hx-get="/category/natural" 
+             hx-target="#content" 
+             hx-swap="innerHTML swap:0ms" 
+             class="bg-[#111] p-6 rounded-3xl border border-gray-800 hover:border-emerald-500 transition-all group cursor-pointer">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 flex items-center justify-center rounded-2xl bg-emerald-900/20 text-2xl group-hover:bg-emerald-500/20 transition-colors">🌿</div>
+                <div>
+                    <h2 class="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">ეკო-პროდუქტები</h2>
+                    <p class="text-gray-500 text-[10px] uppercase tracking-wider">იხილეთ კატეგორიები</p>
+                </div>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">ფერმერული ნაწარმი, ნატურალური ტკბილეული და ხელნაკეთი ნივთები პირდაპირ მწარმოებლისგან.</p>
+        </div>
+
+        <!-- 2. სერვის-ჰაბი (Blue) -->
+        <div hx-get="/category/services" 
+             hx-target="#content" 
+             hx-swap="innerHTML swap:0ms" 
+             class="bg-[#111] p-6 rounded-3xl border border-gray-800 hover:border-blue-500 transition-all group cursor-pointer">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 flex items-center justify-center rounded-2xl bg-blue-900/20 text-2xl group-hover:bg-blue-500/20 transition-colors">🔧</div>
+                <div>
+                    <h2 class="text-white font-bold text-lg group-hover:text-blue-400 transition-colors">სერვის-ჰაბი</h2>
+                    <p class="text-gray-500 text-[10px] uppercase tracking-wider">იხილეთ კატეგორიები</p>
+                </div>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">სანდო ხელოსნები, რემონტი და ყოველდღიური სერვისები — თქვენს უბანში.</p>
+        </div>
+
+        <!-- 3. ცოდნის ბაზა (Amber/Yellow) -->
+        <div hx-get="/category/education" 
+             hx-target="#content" 
+             hx-swap="innerHTML swap:0ms" 
+             class="bg-[#111] p-6 rounded-3xl border border-gray-800 hover:border-amber-500 transition-all group cursor-pointer">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 flex items-center justify-center rounded-2xl bg-amber-900/20 text-2xl group-hover:bg-amber-500/20 transition-colors">🎓</div>
+                <div>
+                    <h2 class="text-white font-bold text-lg group-hover:text-amber-400 transition-colors">ცოდნის ბაზა</h2>
+                    <p class="text-gray-500 text-[10px] uppercase tracking-wider">იხილეთ კატეგორიები</p>
+                </div>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">კერძო რეპეტიტორები, ენების შემსწავლელი კურსები და კრეატიული სტუდიები.</p>
+        </div>
+
+        <!-- 4. ბიზნეს-კატალოგი (Purple) -->
+        <div hx-get="/category/startups" 
+             hx-target="#content" 
+             hx-swap="innerHTML swap:0ms" 
+             class="bg-[#111] p-6 rounded-3xl border border-gray-800 hover:border-purple-500 transition-all group cursor-pointer">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 flex items-center justify-center rounded-2xl bg-purple-900/20 text-2xl group-hover:bg-purple-500/20 transition-colors">🚀</div>
+                <div>
+                    <h2 class="text-white font-bold text-lg group-hover:text-purple-400 transition-colors">ბიზნეს-კატალოგი</h2>
+                    <p class="text-gray-500 text-[10px] uppercase tracking-wider">იხილეთ კატეგორიები</p>
+                </div>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">აღმოაჩინე ახალი ონლაინ მაღაზიები, სტარტაპები და ინოვაციური ბიზნეს იდეები.</p>
+        </div>
+    </div>
+
+    <div class="bg-gray-900/40 p-6 rounded-3xl border border-gray-800">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-[10px] text-emerald-400 uppercase tracking-[0.2em] font-bold flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                Live Hub
+            </h3>
+        </div>
+        <div class="space-y-4">
+            {% for biz in live_businesses %}
+            <a href="/business-profile/{{ biz.slot_id }}" class="flex items-start gap-4 p-3 rounded-2xl hover:bg-gray-800/50 transition-colors block">
+                <div class="mt-1 w-2 h-2 rounded-full bg-blue-500"></div>
+                <div>
+                    <p class="text-sm text-gray-200">ახალი ბიზნესი: <span class="font-bold text-white">"{{ biz.business_name }}"</span></p>
+                    <p class="text-[10px] text-gray-500">📍 {{ biz.location }} • {{ biz.subcategory or biz.category_type }}</p>
+                </div>
+            </a>
+            {% else %}
+            <p class="text-xs text-gray-500 p-3">ჯერ აქტიური ბიზნესები არ არის.</p>
+            {% endfor %}
+        </div>
+        <div class="mt-6 pt-6 border-t border-gray-800 flex justify-between items-center">
+            <span class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">დღევანდელი ვიზიტორი</span>
+            <div class="flex items-center gap-2">
+                <span class="text-xl font-bold text-white">{{ daily_visits }}</span>
+                <span class="text-[10px] text-emerald-500">აქტიური</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // მობილური მენიუს გახსნა-დახურვა
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener("click", function(event) {
+        if (event.target.closest("#mobile-menu a")) {
+            const menu = document.getElementById('mobile-menu');
+            if (menu && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        }
+    });
+
+    function initMap() {
+        // რუკის კონტეინერის გასუფთავება (თუ უკვე არსებობს)
+        const mapContainer = document.getElementById('map');
+        if (mapContainer && mapContainer._leaflet_id) {
+            mapContainer._leaflet_id = null;
+        }
+         
+        // რუკის ინიციალიზაცია
+        var map = L.map('map').setView([41.7151, 44.8271], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // ბიზნესების კოორდინატების გამოტანა რუკაზე მარკერებად
+        var businesses = {{ portfolios | tojson }};
+        if (Array.isArray(businesses)) {
+            businesses.forEach(function(biz) {
+                if (biz.latitude && biz.longitude) {
+                    var marker = L.marker([biz.latitude, biz.longitude]).addTo(map);
+                    marker.bindPopup("<b>" + biz.business_name + "</b><br><a href='/business-profile/" + biz.slot_id + "' class='text-blue-400 underline'>პროფილის ნახვა</a>");
+                }
+            });
+        }
+    }
+
+    // გაშვება თავდაპირველად
+    initMap();
+
+    // მყისიერად ვამცირებთ გამჭვირვალობას დაკლიკებისას, რომ ციმციმი არ გამოჩნდეს
+    document.body.addEventListener('htmx:beforeRequest', function(evt) {
+        const content = document.getElementById('content');
+        if(content) {
+            content.style.opacity = '0';
+        }
+    });
+
+    // ახალი გვერდის ჩატვირთვისას ვაბრუნებთ ხილვადობას და ვტვირთავთ რუკას
+    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+        const content = document.getElementById('content');
+        if(content) {
+            content.style.opacity = '1';
+        }
+        if (document.getElementById('map')) {
+            initMap();
+        }
+    });
+</script>
+</body>
+</html>

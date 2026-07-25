@@ -1,0 +1,29 @@
+<div class="w-full max-w-2xl mx-auto p-6 bg-[#0A0A0A] border border-gray-800 rounded-3xl text-white">
+    <img src="{{ url_for('static', filename=portfolio.photo_path) }}" class="w-full h-64 object-cover rounded-2xl mb-6">
+    
+    <h1 class="text-3xl font-bold mb-2">{{ portfolio.business_name }}</h1>
+    <p class="text-gray-400 mb-6">{{ portfolio.description }}</p>
+    
+    <div class="space-y-3">
+        <p>📞 {{ portfolio.phone }}</p>
+        <p>📧 {{ portfolio.email }}</p>
+    </div>
+
+    <div class="flex gap-4 mt-8">
+        {% if portfolio.social_fb %}<a href="{{ portfolio.social_fb }}" class="text-blue-500 hover:text-blue-400 transition-colors">Facebook</a>{% endif %}
+        {% if portfolio.social_ig %}<a href="{{ portfolio.social_ig }}" class="text-pink-500 hover:text-pink-400 transition-colors">Instagram</a>{% endif %}
+    </div>
+    
+    <div class="flex gap-4 mt-6">
+        <!-- რედაქტირების ღილაკი -->
+        <a href="/edit-portfolio/{{ portfolio.slot_id }}" 
+           class="flex-1 text-center py-3 bg-blue-600 rounded-xl hover:bg-blue-700 transition-all font-medium">
+           რედაქტირება
+        </a>
+        
+        <!-- მთავარზე დაბრუნება -->
+        <a href="/" class="flex-1 text-center py-3 bg-gray-800 rounded-xl hover:bg-gray-700 transition-all">
+           მთავარზე
+        </a>
+    </div>
+</div>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ka" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Noventra Finder | ავტორიზაცია</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0A0A0A] text-gray-100 font-sans flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-md p-8 bg-[#111] border border-gray-800 rounded-3xl shadow-2xl">
+        
+        <!-- ლოგო ან სათაური -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold">
+                <span class="text-white">NOVENTRA</span>
+                <span class="text-blue-500">finder</span>
+            </h1>
+            <p id="form-subtitle" class="text-gray-400 text-xs uppercase tracking-widest mt-2">შედით თქვენს ანგარიშში</p>
+        </div>
+
+        <!-- შეტყობინებების ჩვენება (თუ რამე შეცდომაა) -->
+        {% if error %}
+            <div class="mb-4 p-3 bg-red-900/30 border border-red-500 text-red-400 text-xs rounded-xl text-center">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <!-- ლოგინის ფორმა (ნაგულისხმევად ჩანს) -->
+        <form id="login-form" action="/login" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1">ელ-ფოსტა ან სახელი</label>
+                <input type="text" name="email_or_username" required 
+                       class="w-full p-4 rounded-2xl bg-gray-900 border border-gray-700 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+            </div>
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1">პაროლი</label>
+                <input type="password" name="password" required 
+                       class="w-full p-4 rounded-2xl bg-gray-900 border border-gray-700 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+            </div>
+            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all uppercase tracking-wider text-xs">
+                შესვლა
+            </button>
+        </form>
+
+        <!-- რეგისტრაციის ფორმა (თავიდან დამალულია) -->
+        <form id="register-form" action="/register" method="POST" class="space-y-4 hidden">
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1">მომხმარებლის სახელი</label>
+                <input type="text" name="username" required 
+                       class="w-full p-4 rounded-2xl bg-gray-900 border border-gray-700 text-sm focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
+            </div>
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1">ელ-ფოსტა</label>
+                <input type="email" name="email" required 
+                       class="w-full p-4 rounded-2xl bg-gray-900 border border-gray-700 text-sm focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
+            </div>
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1">პაროლი</label>
+                <input type="password" name="password" required 
+                       class="w-full p-4 rounded-2xl bg-gray-900 border border-gray-700 text-sm focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
+            </div>
+            <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all uppercase tracking-wider text-xs">
+                რეგისტრაცია
+            </button>
+        </form>
+
+        <!-- ქვედა გადამრთველი (შენი იდეა) -->
+        <div class="mt-6 text-center border-t border-gray-800/60 pt-4">
+            <p id="switch-text" class="text-xs text-gray-400">
+                არ გაქვთ ანგარიში? 
+                <button type="button" onclick="toggleForm()" class="text-blue-400 font-bold hover:underline ml-1">გაიარეთ რეგისტრაცია</button>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleForm() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const subtitle = document.getElementById('form-subtitle');
+            const switchText = document.getElementById('switch-text');
+
+            if (loginForm.classList.contains('hidden')) {
+                // ვუბრუნდებით ლოგინს
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                subtitle.innerText = "შედით თქვენს ანგარიშში";
+                switchText.innerHTML = 'არ გაქვთ ანგარიში? <button type="button" onclick="toggleForm()" class="text-blue-400 font-bold hover:underline ml-1">გაიარეთ რეგისტრაცია</button>';
+            } else {
+                // გადავდივართ რეგისტრაციაზე
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                subtitle.innerText = "შექმენით ახალი ანგარიში";
+                switchText.innerHTML = 'უკვე გაქვთ ანგარიში? <button type="button" onclick="toggleForm()" class="text-blue-400 font-bold hover:underline ml-1">შედით სისტემაში</button>';
+            }
+        }
+    </script>
+</body>
+</html>
