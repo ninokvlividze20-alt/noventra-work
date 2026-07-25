@@ -262,36 +262,72 @@ def request_withdrawal():
         flash("მოთხოვნა გაგზავნილია ადმინისტრატორთან!", "success")
     return redirect(url_for('dashboard'))
 
-@app.route('/admin/users')
+@app.route('/admin')
 @login_required
-def admin_users():
+def admin_dashboard():
     if not current_user.is_admin:
         abort(403)
     users = User.query.all()
-    return render_template('admin_users.html', users=users)
+    tasks = Task.query.all()
+    withdrawals = WithdrawalRequest.query.filter_by(status='pending').all()
+    regions = RegionScore.query.all()
+    return render_template('admin_dashboard.html', users=users, tasks=tasks, withdrawals=withdrawals, regions=regions)
 
-@app.route('/admin/withdrawals')
+@app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
-def admin_withdrawals():
+def admin_update_user(user_id):
     if not current_user.is_admin:
         abort(403)
-    requests = WithdrawalRequest.query.filter_by(status='pending').all()
-    return render_template('admin_withdrawals.html', requests=requests)
+    user = User.query.get_or_404(user_id)
+    user.balance = float(request.form.get('balance', user.balance))
+    user.reputation = int(request.form.get('reputation', user.reputation))
+    user.is_admin = True if request.form.get('is_admin') == 'on' else False
+    db.session.commit()
+    flash(f"მომხმარებელი {user.username} წარმატებით განახლდა!", "success")
+    return redirect(url_for('admin_dashboard'))
 
-@app.route('/add_task', methods=['GET', 'POST'])
+@app.route('/admin/withdrawal/<int:req_id>/<action>')
 @login_required
-def add_task():
+def admin_withdrawal_action(req_id, action):
     if not current_user.is_admin:
         abort(403)
-    if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        reward = float(request.form.get('reward'))
-        new_task = Task(title=title, description=description, reward=reward)
-        db.session.add(new_task)
-        db.session.commit()
-        return redirect(url_for('dashboard'))
-    return render_template('add_task.html')
+    req = WithdrawalRequest.query.get_or_404(req_id)
+    if action == 'approve':
+        req.status = 'approved'
+        flash("მოთხოვნა დამტკიცებულია!", "success")
+    elif action == 'reject':
+        req.status = 'rejected'
+        user = User.query.get(req.user_id)
+        if user:
+            user.balance += req.amount
+        flash("მოთხოვნა უარყოფილია, თანხა დაბრუნდა ბალანსზე.", "warning")
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/task/<int:task_id>/delete')
+@login_required
+def admin_delete_task(task_id):
+    if not current_user.is_admin:
+        abort(403)
+    task = Task.query.get_or_404(task_id)
+    db.session.delete(task)
+    db.session.commit()
+    flash("დავალება წაშლილია!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/region/sponsor', methods=['POST'])
+@login_required
+def admin_update_sponsor():
+    if not current_user.is_admin:
+        abort(403)
+    region_id = request.form.get('region_id')
+    file = request.files.get('sponsor_image')
+    if file and region_id:
+        filename = f"{region_id}.jpg"
+        os.makedirs(os.path.join(app.root_path, 'static', 'ads'), exist_ok=True)
+        file.save(os.path.join(app.root_path, 'static', 'ads', filename))
+        flash("სპონსორის ფოტო წარმატებით აიტვირთა!", "success")
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/logout')
 def logout():

@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .admin-container { max-width: 1200px; margin: 0 auto; padding-bottom: 50px; }
+    .admin-section { background: #111118; border: 1px solid #222233; border-radius: 16px; padding: 22px; margin-bottom: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+    .admin-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #00ffcc, #ffcc00); }
+    .admin-section h3 { color: #00ffcc; margin-top: 0; font-size: 18px; border-bottom: 1px solid #222233; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #222233; color: #fff; }
+    .admin-table th { color: #ffcc00; text-transform: uppercase; font-size: 11px; }
+    .input-field { background: #161622; border: 1px solid #33334d; color: #fff; padding: 8px 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 13px; }
+    .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+    .btn-success { background: #00ffcc; color: #000; }
+    .btn-success:hover { background: #00cca3; }
+    .btn-danger { background: #ff4757; color: #fff; }
+    .btn-danger:hover { background: #ff2338; }
+    .btn-warning { background: linear-gradient(135deg, #ffcc00, #ff9900); color: #000; font-weight: bold; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+
+<div class="admin-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="color: #fff; font-size: 22px; margin: 0;">⚙️ პროფესიონალური ადმინ-პანელი</h1>
+        <a href="{{ url_for('dashboard') }}" class="btn-sm btn-warning" style="text-decoration: none;">← დაშბორდზე დაბრუნება</a>
+    </div>
+
+    <!-- 💰 ფინანსური მოთხოვნები -->
+    <div class="admin-section" style="border-color: #ff4757;">
+        <h3>🔔 თანხის გატანის მოთხოვნები ({{ withdrawals|length }})</h3>
+        {% if withdrawals %}
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>მომხმარებელი</th>
+                        <th>თანხა</th>
+                        <th>ტელეფონი / IBAN</th>
+                        <th>მოქმედება</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in withdrawals %}
+                    <tr>
+                        <td><strong>{{ req.user.username }}</strong></td>
+                        <td style="color: #00ffcc; font-weight: bold;">{{ req.amount }} ₾</td>
+                        <td>{{ req.phone }}<br><small style="color: #888;">{{ req.bank_account }}</small></td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ url_for('admin_withdrawal_action', req_id=req.id, action='approve') }}" class="btn-sm btn-success">✅ დამტკიცება</a>
+                                <a href="{{ url_for('admin_withdrawal_action', req_id=req.id, action='reject') }}" class="btn-sm btn-danger">❌ უარყოფა</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #888; font-size: 13px; margin: 10px 0 0 0;">მომლოდინე მოთხოვნები არ არის.</p>
+        {% endif %}
+    </div>
+
+    <div class="grid-2">
+        <!-- 📍 რეგიონების სპონსორების ფოტოების მართვა -->
+        <div class="admin-section">
+            <h3>🖼️ რეგიონის სპონსორის ბანერის შეცვლა</h3>
+            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                <div>
+                    <label style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 5px;">აირჩიე რეგიონი:</label>
+                    <select name="region_id" class="input-field">
+                        {% for reg in regions %}
+                        <option value="{{ reg.region_id }}">{{ reg.region_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 5px;">ატვირთე ფოტო (.jpg):</label>
+                    <input type="file" name="sponsor_image" accept="image/*" required class="input-field" style="padding: 6px;">
+                </div>
+                <button type="submit" class="btn-sm btn-success" style="padding: 10px; margin-top: 5px;">💾 სპონსორის ფოტოს განახლება</button>
+            </form>
+        </div>
+
+        <!-- 🎯 AI დავალებების მართვა -->
+        <div class="admin-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0; border: none;">🎯 AI დავალებები</h3>
+                <a href="/add_task" class="btn-sm btn-success" style="text-decoration: none;">➕ ახალი დავალება</a>
+            </div>
+            <div style="max-height: 240px; overflow-y: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>სათაური</th>
+                            <th>ჯილდო</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.title }}</td>
+                            <td style="color: #00ffcc; font-weight: bold;">{{ task.reward }} GEL</td>
+                            <td>
+                                <a href="{{ url_for('admin_delete_task', task_id=task.id) }}" class="btn-sm btn-danger" style="padding: 4px 10px;">წაშლა</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 👥 მომხმარებლების სრული კონტროლი -->
+    <div class="admin-section" style="margin-top: 25px;">
+        <h3>👥 მომხმარებელთა მართვა და ბალანსები</h3>
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>იუზერი</th>
+                        <th>ელ-ფოსტა</th>
+                        <th>ბალანსი (₾)</th>
+                        <th>რეპუტაცია</th>
+                        <th>ადმინი</th>
+                        <th>მოქმედება</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <form action="{{ url_for('admin_update_user', user_id=u.id) }}" method="POST">
+                            <td><strong>{{ u.username }}</strong></td>
+                            <td style="color: #888; font-size: 12px;">{{ u.email }}</td>
+                            <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 90px;"></td>
+                            <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 80px;"></td>
+                            <td style="text-align: center;"><input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %} style="transform: scale(1.2);"></td>
+                            <td><button type="submit" class="btn-sm btn-success" style="padding: 6px 12px;">შენახვა</button></td>
+                        </form>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
