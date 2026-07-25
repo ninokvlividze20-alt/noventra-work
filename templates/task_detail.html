@@ -2,7 +2,7 @@
 {% block content %}
 <div class="card" style="max-width: 700px; margin: 40px auto; padding: 30px; background: #111118; border: 1px solid #222233; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); color: #fff;">
     <h1 style="color: #00ffcc; margin-top: 0; font-size: 22px;">🎯 {{ task.title }}</h1>
-    
+
     <div style="background: #161622; border: 1px solid #33334d; padding: 15px; border-radius: 10px; margin: 20px 0;">
         <strong style="color: #ffcc00; display: block; margin-bottom: 8px;">დავალების ინსტრუქცია:</strong>
         <p style="color: #d1d1e0; line-height: 1.6; white-space: pre-wrap; margin: 0;">{{ task.description }}</p>
@@ -17,21 +17,21 @@
             ✅ ეს დავალება უკვე შესრულებულია!
         </div>
         <div style="margin-top: 20px; text-align: center;">
-            <a href="{{ url_for('dashboard') }}" style="background: #33334d; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none;">← უკან დაშბორდზე</a>
+            <a href="{{ url_for('dashboard') }}#tasks-section" style="background: #33334d; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none;">← უკან დავალებებზე</a>
         </div>
     {% else %}
         <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
             <div>
                 <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">შენი პასუხი / შესრულებული სამუშაო:</label>
-                <textarea name="user_answer" rows="6" required placeholder="ჩაწერე შენი პასუხი ან მიაბი შესაბამისი მონაცემები..." 
+                <textarea name="user_answer" rows="6" required placeholder="ჩაწერე შენი პასუხი ან მიაბი შესაბამისი მონაცემები..."
                           style="width: 100%; padding: 12px; background: #161622; border: 1px solid #33334d; color: #fff; border-radius: 8px; box-sizing: border-box;"></textarea>
             </div>
-            
+
             <div style="display: flex; gap: 10px;">
                 <button type="submit" style="background: #00ffcc; color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1;">
                     პასუხის გაგზავნა და ჯილდოს მიღება
                 </button>
-                <a href="{{ url_for('dashboard') }}" style="background: #33334d; color: #fff; text-align: center; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                <a href="{{ url_for('dashboard') }}#tasks-section" style="background: #33334d; color: #fff; text-align: center; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: flex; align-items: center; justify-content: center;">
                     გაუქმება
                 </a>
             </div>

@@ -78,6 +78,19 @@ class Question(db.Model):
     user_phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+class Advertisement(db.Model):
+    __tablename__ = 'advertisements'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    video_url = db.Column(db.String(255), nullable=False)  # YouTube embed ან ვიდეო ლინკი
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+class UserAdView(db.Model):
+    __tablename__ = 'user_ad_views'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    ad_id = db.Column(db.Integer, db.ForeignKey('advertisements.id'), nullable=False)
+
 class RegionScore(db.Model):
     __tablename__ = 'region_scores'
     id = db.Column(db.Integer, primary_key=True)
@@ -160,7 +173,7 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        region = request.form.get('region', 'tbilisi')  # <--- რეგიონის მიღება ფორმიდან
+        region = request.form.get('region', 'tbilisi')
         
         if User.query.filter_by(username=username).first():
             flash("მომხმარებელი ამ სახელით უკვე არსებობს!", "danger")
@@ -226,6 +239,25 @@ def add_score():
     
     return jsonify({"success": False, "message": "Region not found"}), 400
 
+@app.route('/api/get_next_ad')
+@login_required
+def get_next_ad():
+    viewed_ads_subq = db.session.query(UserAdView.ad_id).filter_by(user_id=current_user.id)
+    next_ad = Advertisement.query.filter(~Advertisement.id.in_(viewed_ads_subq)).first()
+    
+    if not next_ad:
+        UserAdView.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+        next_ad = Advertisement.query.first()
+
+    if next_ad:
+        new_view = UserAdView(user_id=current_user.id, ad_id=next_ad.id)
+        db.session.add(new_view)
+        db.session.commit()
+        return jsonify({"success": True, "title": next_ad.title, "video_url": next_ad.video_url})
+    
+    return jsonify({"success": False, "message": "რეკლამები არ არის"})
+
 @app.route('/complete_task/<int:task_id>')
 @login_required
 def complete_task(task_id):
@@ -236,7 +268,7 @@ def complete_task(task_id):
         new_trans = Transaction(user_id=current_user.id, task_title=task.title, amount=task.reward)
         db.session.add(new_trans)
         db.session.commit()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('dashboard') + '#tasks-section')
 
 @app.route('/leaderboard')
 @login_required
@@ -270,15 +302,13 @@ def task_detail(task_id):
     if request.method == 'POST':
         if task.is_completed:
             flash("ეს დავალება უკვე შესრულებულია!", "warning")
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('dashboard') + '#tasks-section')
         
-        # მომხმარებლის მიერ გამოგზავნილი პასუხი
         user_answer = request.form.get('user_answer')
         if not user_answer:
             flash("გთხოვთ, შეიყვანოთ პასუხი!", "danger")
             return redirect(url_for('task_detail', task_id=task.id))
 
-        # ვნიშნავთ შესრულებულად და ვუწერთ ბალანსს
         task.is_completed = True
         task.user_id = current_user.id
         current_user.balance += task.reward
@@ -288,7 +318,7 @@ def task_detail(task_id):
         db.session.commit()
         
         flash(f"დავალება წარმატებით შესრულდა! დაირიცხა {task.reward} ₾", "success")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('dashboard') + '#tasks-section')
 
     return render_template('task_detail.html', task=task)
 
@@ -320,7 +350,6 @@ def admin_dashboard():
     withdrawals = WithdrawalRequest.query.filter_by(status='pending').all()
     regions = RegionScore.query.all()
     
-    # ვამოწმებთ რომელი რეგიონის სპონსორის ფოტო არსებობს ფიზიკურად
     ads_folder = os.path.join(app.root_path, 'static', 'ads')
     os.makedirs(ads_folder, exist_ok=True)
     
@@ -435,18 +464,34 @@ def admin_reset_region_score(region_id):
     flash(f"რეგიონის ({region.region_name}) კლიკები განულდა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-@app.route('/admin/ads/manage', methods=['GET', 'POST'])
+@app.route('/admin/ads', methods=['GET', 'POST'])
 @login_required
 def admin_manage_ads():
     if not current_user.is_admin:
         abort(403)
     if request.method == 'POST':
-        # მარტივი ლოგიკა გლობალური რეკლამის ტექსტის/ბმულის შესანახად
-        ad_text = request.form.get('ad_text')
-        ad_link = request.form.get('ad_link')
-        flash("რეკლამის პარამეტრები შენახულია!", "success")
+        title = request.form.get('title')
+        video_url = request.form.get('video_url')
+        if title and video_url:
+            new_ad = Advertisement(title=title, video_url=video_url)
+            db.session.add(new_ad)
+            db.session.commit()
+            flash("რეკლამა წარმატებით აიტვირთა!", "success")
         return redirect(url_for('admin_manage_ads'))
-    return render_template('admin_ads.html')
+    
+    ads = Advertisement.query.all()
+    return render_template('admin_ads.html', ads=ads)
+
+@app.route('/admin/ads/<int:ad_id>/delete', methods=['POST'])
+@login_required
+def admin_delete_ad(ad_id):
+    if not current_user.is_admin:
+        abort(403)
+    ad = Advertisement.query.get_or_404(ad_id)
+    db.session.delete(ad)
+    db.session.commit()
+    flash("რეკლამა წაშლილია!", "success")
+    return redirect(url_for('admin_manage_ads'))
 
 @app.route('/logout')
 def logout():

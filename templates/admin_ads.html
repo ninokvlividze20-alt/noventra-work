@@ -1,21 +1,50 @@
 {% extends 'base.html' %}
 {% block content %}
-<div style="max-width: 800px; margin: 0 auto; background: #111118; border: 1px solid #222233; border-radius: 16px; padding: 30px; color: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+<div style="max-width: 900px; margin: 0 auto; background: #111118; border: 1px solid #222233; border-radius: 16px; padding: 30px; color: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="color: #00ffcc; margin: 0;">📢 საიტის რეკლამის მართვა</h2>
+        <h2 style="color: #00ffcc; margin: 0;">📢 სარეკლამო ვიდეოების მართვა (სულ: {{ ads|length }})</h2>
         <a href="{{ url_for('admin_dashboard') }}" class="btn-sm" style="background: #ffcc00; color: #000; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: bold;">← პანელში დაბრუნება</a>
     </div>
 
-    <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+    <!-- ახალი რეკლამის დამატების ფორმა -->
+    <form method="POST" style="display: flex; flex-direction: column; gap: 15px; background: #161622; padding: 20px; border-radius: 12px; border: 1px solid #33334d; margin-bottom: 25px;">
+        <h3 style="color: #ffcc00; margin-top: 0; font-size: 15px;">➕ ახალი ვიდეო-რეკლამის დამატება</h3>
         <div>
-            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">რეკლამის ტექსტი / სლოგანი:</label>
-            <textarea name="ad_text" rows="4" style="background: #161622; border: 1px solid #33334d; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box;" placeholder="ჩაწერე სარეკლამო ტექსტი..."></textarea>
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">რეკლამის სათაური:</label>
+            <input type="text" name="title" required class="input-field" placeholder="მაგ: სფეისის ვიდეო რეკლამა">
         </div>
         <div>
-            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">სარეკლამო ბმული (URL):</label>
-            <input type="text" name="ad_link" style="background: #161622; border: 1px solid #33334d; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box;" placeholder="https://example.com">
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">ვიდეოს ბმული (YouTube Embed / URL):</label>
+            <input type="text" name="video_url" required class="input-field" placeholder="https://www.youtube.com/embed/...">
         </div>
-        <button type="submit" style="background: #00ffcc; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">💾 რეკლამის შენახვა და გააქტიურება</button>
+        <button type="submit" style="background: #00ffcc; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">💾 რეკლამის ატვირთვა</button>
     </form>
+
+    <!-- ატვირთული რეკლამების სია -->
+    <h3 style="color: #fff; font-size: 16px;">📋 უკვე ატვირთული რეკლამები</h3>
+    <div style="overflow-x: auto;">
+        <table class="admin-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="border-bottom: 1px solid #33334d; color: #ffcc00; text-align: left; font-size: 12px;">
+                    <th style="padding: 10px;">სათაური</th>
+                    <th style="padding: 10px;">ბმული</th>
+                    <th style="padding: 10px;">მოქმედება</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ad in ads %}
+                <tr style="border-bottom: 1px solid #222233; font-size: 13px;">
+                    <td style="padding: 10px;"><strong>{{ ad.title }}</strong></td>
+                    <td style="padding: 10px; color: #888; max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{{ ad.video_url }}</td>
+                    <td style="padding: 10px;">
+                        <form action="{{ url_for('admin_delete_ad', ad_id=ad.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ წაშლა?');">
+                            <button type="submit" class="btn-sm" style="background: #ff4757; color: #fff; padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer;">წაშლა</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

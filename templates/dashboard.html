@@ -111,7 +111,7 @@
         padding: 25px;
         border-radius: 16px;
         width: 90%;
-        max-width: 400px;
+        max-width: 500px;
         text-align: center;
         box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
     }
@@ -158,20 +158,22 @@
         </div>
         <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
 
-        <!-- 🎬 მოდალური ფანჯარა (რეკლამა ან დავალება მონაცვლეობით) -->
+        <!-- 🎬 მოდალური ფანჯარა ვიდეო რეკლამისათვის (იხსნება ადგილზევე, გვერდიდან გაუსვლელად) -->
         <div id="adModal" class="ad-modal">
             <div class="ad-modal-content">
-                <h3 style="color: #ffcc00; margin-top: 0;">⚡ ენერგია ამოიწურა!</h3>
-                <p style="font-size: 13px; color: #a1a1aa; line-height: 1.5; margin-bottom: 15px;">
-                    კლიკების შესავსებად აირჩიე მეთოდი: უყურე სარეკლამო ვიდეოს ან შეასრულე AI დავალება.
+                <h3 id="adTitle" style="color: #ffcc00; margin-top: 0;">⚡ ენერგია ამოიწურა!</h3>
+                <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 15px;">
+                    ენერგიის აღსადგენად უყურე სარეკლამო ვიდეოს ბოლომდე:
                 </p>
                 
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button onclick="watchAd()" class="btn btn-primary" id="watchAdBtn">▶️ უყურე სარეკლამო ვიდეოს</button>
-                    <a href="/dashboard" class="btn" style="background: #222233; color: #ffcc00; font-size: 13px; text-decoration: none;">🎯 გადადი AI დავალებების ცენტრში</a>
+                <!-- ვიდეო პლეერი (გვერდიდან გაუსვლელად) -->
+                <div id="videoContainer" style="position: relative; width: 100%; height: 240px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 15px;">
+                    <iframe id="adIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                 </div>
+
+                <div id="adProgressText" style="color: #00ffcc; font-weight: bold; margin-bottom: 15px; font-size: 13px;"></div>
                 
-                <div id="adProgressText" style="color: #00ffcc; font-weight: bold; margin-top: 15px; font-size: 13px;"></div>
+                <button onclick="confirmAdWatched()" class="btn btn-primary" id="claimEnergyBtn" style="display: none;">✅ ვიდეო ვნახე - ენერგიის აღდგენა</button>
             </div>
         </div>
 
@@ -205,13 +207,13 @@
         <p style="font-size: 12px; color: #888; margin-bottom: 15px;">რეპუტაციის ქულა: {{ current_user.reputation }}</p>
         
         <form action="{{ url_for('request_withdrawal') }}" method="POST">
-            <input type="number" name="amount" placeholder="თანხა (ლარი)" required min="1">
+            <input type="number" name="amount" placeholder="თანხა (ლარი)" required min="1" class="input-field" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #161622; border: 1px solid #33334d; color: #fff; border-radius: 8px;">
             <button type="submit" class="btn btn-danger">თანხის გატანის მოთხოვნა</button>
         </form>
     </div>
 
-    <!-- AI დავალებების ნაკადი -->
-    <div class="card">
+    <!-- AI დავალებების ნაკადი (აი-დი დაემატა დაბრუნებისთვის) -->
+    <div class="card" id="tasks-section">
         <h3>🎯 AI დავალებების ცენტრი</h3>
         {% if tasks %}
             {% for task in tasks %}
@@ -241,9 +243,8 @@
             <p style="margin: 4px 0 0 0;">შესრულების დონე: <strong>{{ completion_rate }}%</strong></p>
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
-            <a href="/add_task" class="btn" style="background: #222233; color: #00ffcc; font-size: 13px; padding: 10px;">➕ ახალი დავალების დამატება</a>
-            <a href="{{ url_for('admin_users') }}" class="btn" style="background: #222233; color: #fff; font-size: 13px; padding: 10px;">📋 მომხმარებლების მართვა</a>
-            <a href="{{ url_for('admin_withdrawals') }}" class="btn" style="background: #222233; color: #ff4757; font-size: 13px; padding: 10px;">🔔 გატანის მოთხოვნები</a>
+            <a href="/admin" class="btn" style="background: #222233; color: #00ffcc; font-size: 13px; padding: 10px; text-decoration: none;">⚙️ პროფესიონალური ადმინ-პანელი</a>
+            <a href="/add_task" class="btn" style="background: #222233; color: #fff; font-size: 13px; padding: 10px; text-decoration: none;">➕ ახალი დავალების დამატება</a>
         </div>
     </div>
     {% endif %}
@@ -265,22 +266,21 @@
 <script>
 let clickLimit = 100; 
 let adsWatched = 0;   
-let pendingPoints = 0; // ქულები, რომლებიც დროებით გროვდება სანამ სერვერზე გაიგზავნება
+let pendingPoints = 0; 
 
 function boostRegion(event) {
     let regionId = document.getElementById('userRegionSelect').value;
     
     if (clickLimit <= 0) {
         document.getElementById('adModal').style.display = 'flex';
+        watchAd();
         return;
     }
 
-    // 1️⃣ მომენტალური ვიზუალური რეაგირება (0 წამიანი დაყოვნება)
     clickLimit--;
     pendingPoints++;
     document.getElementById('clicksLeft').innerText = clickLimit;
 
-    // 💥 ამოფრენილი ტექსტის ეფექტი
     let btn = document.getElementById('boostBtn');
     let fx = document.createElement('div');
     fx.className = 'click-fx';
@@ -294,8 +294,6 @@ function boostRegion(event) {
 
     document.getElementById('clickResponse').innerText = "🔥 +1 ქულა რეგიონს! (დარჩენილია: " + clickLimit + ")";
 
-    // 2️⃣ ფონური გაგზავნა სერვერზე (რომ ბაზა არ ჩაიტვირთოს და აკლიკოს სწრაფად)
-    // სერვერთან ზარი ხდება ფონში, მომხმარებელი ამას ვერ ამჩნევს
     clearTimeout(window.syncTimeout);
     window.syncTimeout = setTimeout(() => {
         let pointsToSend = pendingPoints;
@@ -310,36 +308,65 @@ function boostRegion(event) {
             .then(response => response.json())
             .then(data => {
                 if(data.success) {
-                    // სერვერის ზუსტი ჯამური ქულის ჩვენება
                     document.getElementById('clickResponse').innerText = "🔥 ქულა შენს რეგიონს მიემატა! (სულ: " + data.new_score + ")";
                 }
             })
             .catch(err => console.error(err));
         }
-    }, 1000); // აგზავნის ფონში დაკლიკების დასრულებიდან 1 წამში
+    }, 1000);
 }
 
-// რეკლამის ყურების ლოგიკა (2 რეკლამა)
+// 🎬 რეკლამის ყურების ლოგიკა (გვერდიდან გაუსვლელად, უნიკალური რეკლამების როტაციით)
 function watchAd() {
-    let btn = document.getElementById('watchAdBtn');
-    btn.disabled = true;
-    document.getElementById('adProgressText').innerText = `⏳ იტვირთება რეკლამა (${adsWatched + 1}/2)... უყურე ბოლომდე!`;
+    document.getElementById('adModal').style.display = 'flex';
+    document.getElementById('claimEnergyBtn').style.display = 'none';
+    loadNextUniqueAd();
+}
 
-    setTimeout(() => {
-        adsWatched++;
-        btn.disabled = false;
-        
-        if (adsWatched >= 2) {
-            clickLimit = 100;
-            adsWatched = 0;
-            document.getElementById('clicksLeft').innerText = clickLimit;
-            document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (100 კლიკი)!";
-            document.getElementById('adModal').style.display = 'none'; 
-            document.getElementById('adProgressText').innerText = "";
+function loadNextUniqueAd() {
+    fetch('/api/get_next_ad')
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            document.getElementById('adTitle').innerText = "📢 " + data.title;
+            let embedUrl = data.video_url;
+            if (embedUrl.includes("watch?v=")) {
+                embedUrl = embedUrl.replace("watch?v=", "embed/");
+            }
+            document.getElementById('adIframe').src = embedUrl;
+            document.getElementById('adProgressText').innerText = `⏳ უყურე ვიდეოს (${adsWatched + 1}/2)... ბოლომდე`;
+            
+            // 5 წამის შემდეგ გამოჩნდება ღილაკი
+            setTimeout(() => {
+                document.getElementById('claimEnergyBtn').style.display = 'block';
+                document.getElementById('adProgressText').innerText = `✅ მზადაა! შეგიძლია დააჭირო.`;
+            }, 5000);
         } else {
-            document.getElementById('adProgressText').innerText = `✅ 1 რეკლამა ნახულია! დარჩა კიდევ 1.`;
+            document.getElementById('adProgressText').innerText = "აქტიური სარეკლამო ვიდეოები დროებით არ არის.";
+            setTimeout(() => {
+                clickLimit = 100;
+                document.getElementById('clicksLeft').innerText = clickLimit;
+                document.getElementById('adModal').style.display = 'none';
+            }, 2000);
         }
-    }, 2500);
+    });
+}
+
+function confirmAdWatched() {
+    adsWatched++;
+    document.getElementById('claimEnergyBtn').style.display = 'none';
+    document.getElementById('adIframe').src = "";
+    
+    if (adsWatched >= 2) {
+        clickLimit = 100;
+        adsWatched = 0;
+        document.getElementById('clicksLeft').innerText = clickLimit;
+        document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (100 კლიკი)!";
+        document.getElementById('adModal').style.display = 'none';
+    } else {
+        document.getElementById('adProgressText').innerText = `✅ 1 რეკლამა ნახულია! იტვირთება მეორე...`;
+        loadNextUniqueAd();
+    }
 }
 </script>
 {% endblock %}
