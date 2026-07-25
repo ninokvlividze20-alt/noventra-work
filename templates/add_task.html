@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="card" style="padding: 20px; background: #0d0d0d; border: 1px solid #333; border-radius: 10px; max-width: 600px; margin: 20px auto;">
-    <h1 style="color: #00ffcc; text-align: center;">➕ ახალი დავალების შექმნა</h1>
+<div style="max-width: 600px; margin: 40px auto; background: #111118; border: 1px solid #222233; border-radius: 16px; padding: 30px; color: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+    <h2 style="color: #00ffcc; margin-top: 0; margin-bottom: 20px;">➕ ახალი AI დავალების შექმნა</h2>
     
-    <form method="POST">
-        <input type="text" name="title" placeholder="დავალების სახელი" required 
-               style="display: block; width: 100%; margin: 10px 0; padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 5px;">
-        
-        <textarea name="description" placeholder="აღწერა" 
-                  style="display: block; width: 100%; margin: 10px 0; padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 5px; height: 100px;"></textarea>
-        
-        <input type="number" step="0.01" name="reward" placeholder="ჯილდო (ლარი)" required 
-               style="display: block; width: 100%; margin: 10px 0; padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 5px;">
-        
-        <button type="submit" 
-                style="display: block; width: 100%; background: #00ffcc; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;">
-            დავალების დამატება
-        </button>
+    <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+        <div>
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">დავალების სათაური:</label>
+            <input type="text" name="title" required class="input-field" style="background: #161622; border: 1px solid #33334d; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box;" placeholder="მაგ: შექმენი პითონის სკრიპტი...">
+        </div>
+        <div>
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">აღწერა / ინსტრუქცია:</label>
+            <textarea name="description" rows="4" required style="background: #161622; border: 1px solid #33334d; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box;" placeholder="დაწვრილებით აღწერე დავალება..."></textarea>
+        </div>
+        <div>
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">ჯილდო (GEL):</label>
+            <input type="number" step="0.1" name="reward" value="5.0" required style="background: #161622; border: 1px solid #33334d; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box;">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button type="submit" style="background: #00ffcc; color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1;">შექმნა</button>
+            <a href="{{ url_for('admin_dashboard') }}" style="background: #33334d; color: #fff; text-align: center; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">გაუქმება</a>
+        </div>
     </form>
 </div>
 {% endblock %}
