@@ -262,6 +262,24 @@ def request_withdrawal():
         flash("მოთხოვნა გაგზავნილია ადმინისტრატორთან!", "success")
     return redirect(url_for('dashboard'))
 
+# 🎯 დაამატე მხოლოდ ეს ნაწილი ადმინის როუტების თავში
+@app.route('/add_task', methods=['GET', 'POST'])
+@login_required
+def add_task():
+    if not current_user.is_admin:
+        abort(403)
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        reward = float(request.form.get('reward', 5.0))
+        if title and description:
+            new_task = Task(title=title, description=description, reward=reward)
+            db.session.add(new_task)
+            db.session.commit()
+            flash("ახალი დავალება წარმატებით დაემატა!", "success")
+            return redirect(url_for('admin_dashboard'))
+    return render_template('add_task.html')
+
 @app.route('/admin')
 @login_required
 def admin_dashboard():
