@@ -6,17 +6,25 @@
         <a href="{{ url_for('admin_dashboard') }}" class="btn-sm" style="background: #ffcc00; color: #000; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: bold;">← პანელში დაბრუნება</a>
     </div>
 
-    <!-- ახალი რეკლამის დამატების ფორმა -->
-    <form method="POST" style="display: flex; flex-direction: column; gap: 15px; background: #161622; padding: 20px; border-radius: 12px; border: 1px solid #33334d; margin-bottom: 25px;">
+    <!-- ახალი რეკლამის დამატების ფორმა (enctype დაემატა) -->
+    <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px; background: #161622; padding: 20px; border-radius: 12px; border: 1px solid #33334d; margin-bottom: 25px;">
         <h3 style="color: #ffcc00; margin-top: 0; font-size: 15px;">➕ ახალი ვიდეო-რეკლამის დამატება</h3>
+        
         <div>
             <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">რეკლამის სათაური:</label>
-            <input type="text" name="title" required class="input-field" placeholder="მაგ: სფეისის ვიდეო რეკლამა">
+            <input type="text" name="title" required class="input-field" placeholder="მაგ: სპეისის ვიდეო რეკლამა" style="width: 100%; padding: 10px; background: #111118; border: 1px solid #33334d; color: #fff; border-radius: 8px; box-sizing: border-box;">
         </div>
+        
         <div>
-            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">ვიდეოს ბმული (YouTube Embed / URL):</label>
-            <input type="text" name="video_url" required class="input-field" placeholder="https://www.youtube.com/embed/...">
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">ვარიანტი A: ვიდეოს ბმული (YouTube / URL):</label>
+            <input type="text" name="video_url" class="input-field" placeholder="https://..." style="width: 100%; padding: 10px; background: #111118; border: 1px solid #33334d; color: #fff; border-radius: 8px; box-sizing: border-box;">
         </div>
+
+        <div>
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">ვარიანტი B: ან ატვირთე ვიდეო ფაილი კომპიუტერიდან (.mp4):</label>
+            <input type="file" name="video_file" accept="video/mp4,video/*" class="input-field" style="width: 100%; padding: 6px; background: #111118; border: 1px solid #33334d; color: #fff; border-radius: 8px; box-sizing: border-box;">
+        </div>
+
         <button type="submit" style="background: #00ffcc; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">💾 რეკლამის ატვირთვა</button>
     </form>
 
@@ -27,7 +35,7 @@
             <thead>
                 <tr style="border-bottom: 1px solid #33334d; color: #ffcc00; text-align: left; font-size: 12px;">
                     <th style="padding: 10px;">სათაური</th>
-                    <th style="padding: 10px;">ბმული</th>
+                    <th style="padding: 10px;">ბმული / ფაილი</th>
                     <th style="padding: 10px;">მოქმედება</th>
                 </tr>
             </thead>
