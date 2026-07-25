@@ -38,7 +38,7 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     phone = db.Column(db.String(20), default="")
     bank_account = db.Column(db.String(50), default="")
-    region = db.Column(db.String(50), default="tbilisi")  # <--- აი ეს ხაზი დაემატა
+    region = db.Column(db.String(50), default="tbilisi")
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
     last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -77,7 +77,6 @@ class Question(db.Model):
     user_phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-# --- ახალი ცხრილი რეგიონული შეჯიბრისთვის (ქულები და სარეკლამო ბმულები) ---
 class RegionScore(db.Model):
     __tablename__ = 'region_scores'
     id = db.Column(db.Integer, primary_key=True)
@@ -86,7 +85,6 @@ class RegionScore(db.Model):
     score = db.Column(db.Integer, default=0)
 
 def init_regions():
-    """ავტომატურად ამატებს საქართველოს 12 რეგიონს ბაზაში თუ ისინი არ არსებობს"""
     regions = [
         ("tbilisi", "თბილისი"),
         ("imereti", "იმერეთი"),
@@ -161,11 +159,14 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        region = request.form.get('region', 'tbilisi')  # <--- რეგიონის მიღება ფორმიდან
+        
         if User.query.filter_by(username=username).first():
             flash("მომხმარებელი ამ სახელით უკვე არსებობს!", "danger")
             return redirect(url_for('register'))
+            
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, email=email, password=hashed_password)
+        new_user = User(username=username, email=email, password=hashed_password, region=region)
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -200,8 +201,6 @@ def dashboard():
         completion_rate = int((completed_tasks / total_tasks) * 100)
     
     new_questions_count = Question.query.filter(Question.created_at > current_user.last_seen_board).count()
-    
-    # ვეძებთ რეგიონების ლიდერბორდს
     regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
 
     return render_template('dashboard.html', 
@@ -211,7 +210,6 @@ def dashboard():
                          completion_rate=completion_rate,
                          regions=regions)
 
-# --- ახალი API ენდპოინტები რეგიონული კლიკებისა და ქულებისთვის ---
 @app.route('/api/score', methods=['POST'])
 @login_required
 def add_score():
@@ -301,7 +299,7 @@ def logout():
 
 with app.app_context():
     db.create_all()
-    init_regions()  # ბაზის შექმნისას ავტომატურად ვავსებთ რეგიონებს
+    init_regions()
 
 if __name__ == '__main__':
     app.run(debug=True)
