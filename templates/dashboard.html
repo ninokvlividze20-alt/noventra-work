@@ -123,28 +123,6 @@
         </div>
     </div>
 
-        <!-- რეგიონების ცოცხალი ლიდერბორდის ცხრილი -->
-        <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
-            <h4 style="color: #ffcc00; margin: 0 0 10px 0; font-size: 14px;">📊 რეგიონების რეიტინგი (Top List)</h4>
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>რეგიონი</th>
-                        <th style="text-align: right;">ქულები</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for reg in regions %}
-                    <tr>
-                        <td>{{ reg.region_name }}</td>
-                        <td style="text-align: right; color: #00ffcc; font-weight: bold;">{{ reg.score }} ⚡</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- ციფრული საფულე -->
     <div class="card">
         <h3>💰 ციფრული საფულე</h3>
@@ -217,12 +195,11 @@ function boostRegion() {
     let regionId = document.getElementById('userRegionSelect').value;
     
     if (clickLimit <= 0) {
-        // სარეკლამო სიმულაცია
         let watchAd = confirm("⚡ შენი ენერგია ამოიწურა! რეგიონისთვის ქულების დასამატებლად უყურე 5-წამიან სარეკლამო ვიდეოს.");
         if (watchAd) {
-            document.getElementById('clickResponse.innerText').innerText = "⏳ რეკლამის ჩატვირთვა...";
+            document.getElementById('clickResponse').innerText = "⏳ რეკლამის ჩატვირთვა...";
             setTimeout(() => {
-                clickLimit = 3; // რეკლამის შემდეგ ისევ ეძლევა კლიკები
+                clickLimit = 3; 
                 document.getElementById('clickResponse').innerText = "✅ რეკლამა დასრულდა! ენერგია აღდგენილია.";
             }, 2000);
         }
@@ -239,7 +216,6 @@ function boostRegion() {
         if(data.success) {
             clickLimit--;
             document.getElementById('clickResponse').innerText = "🔥 წარმატება! რეგიონის ქულა გაიზარდა (ჯამური: " + data.new_score + "). დარჩენილი ენერგია: " + clickLimit;
-            // ავტომატურად ვარეფრეშებთ გვერდს 1.5 წამში, რომ ლიდერბორდში ქულები განახლდეს
             setTimeout(() => { location.reload(); }, 1200);
         }
     })
