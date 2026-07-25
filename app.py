@@ -76,6 +76,36 @@ class Question(db.Model):
     user_phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+# --- ახალი ცხრილი რეგიონული შეჯიბრისთვის (ქულები და სარეკლამო ბმულები) ---
+class RegionScore(db.Model):
+    __tablename__ = 'region_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    region_id = db.Column(db.String(50), unique=True, nullable=False)
+    region_name = db.Column(db.String(100), nullable=False)
+    score = db.Column(db.Integer, default=0)
+
+def init_regions():
+    """ავტომატურად ამატებს საქართველოს 12 რეგიონს ბაზაში თუ ისინი არ არსებობს"""
+    regions = [
+        ("tbilisi", "თბილისი"),
+        ("imereti", "იმერეთი"),
+        ("adjara", "აჭარის ა.რ."),
+        ("kakheti", "კახეთი"),
+        ("samegrelo", "სამეგრელო-ზემო სვანეთი"),
+        ("guria", "გურია"),
+        ("racha_lechkhumi", "რაჭა-ლეჩხუმი"),
+        ("samtskhe_javakheti", "სამცხე-ჯავახეთი"),
+        ("shida_kartli", "შიდა ქართლი"),
+        ("kvemo_kartli", "ქვემო ქართლი"),
+        ("mtskheta_mtianeti", "მცხეთა-მთიანეთი"),
+        ("abkhazia", "აფხაზეთის ა.რ.")
+    ]
+    for r_id, r_name in regions:
+        exists = RegionScore.query.filter_by(region_id=r_id).first()
+        if not exists:
+            db.session.add(RegionScore(region_id=r_id, region_name=r_name, score=0))
+    db.session.commit()
+
 def is_safe(text):
     if re.search(r'(http|https|www|\.com|\.ge|\.org)', text, re.IGNORECASE):
         return False
@@ -118,7 +148,6 @@ def board():
         else:
             flash("მესიჯი არღვევს წესებს!", "danger")
     
-    # მომხმარებელმა ნახა დაფა, ვაახლებთ დროს
     current_user.last_seen_board = db.func.current_timestamp()
     db.session.commit()
     
@@ -162,24 +191,40 @@ def login():
 @login_required
 def dashboard():
     all_tasks = Task.query.all()
-    
-    # ვითვლით სტატისტიკას ადმინისტრატორისთვის
     total_tasks = Task.query.count()
     completed_tasks = Task.query.filter_by(is_completed=True).count()
     
-    # ვითვლით შესრულების პროცენტს (თუ დავალებები არსებობს)
     completion_rate = 0
     if total_tasks > 0:
         completion_rate = int((completed_tasks / total_tasks) * 100)
     
-    # ვითვლით ახალ კითხვებს
     new_questions_count = Question.query.filter(Question.created_at > current_user.last_seen_board).count()
     
+    # ვეძებთ რეგიონების ლიდერბორდს
+    regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
+
     return render_template('dashboard.html', 
-                           tasks=all_tasks, 
-                           new_questions_count=new_questions_count,
-                           total_tasks=total_tasks,
-                           completion_rate=completion_rate)
+                         tasks=all_tasks, 
+                         new_questions_count=new_questions_count,
+                         total_tasks=total_tasks,
+                         completion_rate=completion_rate,
+                         regions=regions)
+
+# --- ახალი API ენდპოინტები რეგიონული კლიკებისა და ქულებისთვის ---
+@app.route('/api/score', methods=['POST'])
+@login_required
+def add_score():
+    data = request.get_json() or {}
+    region_id = data.get('region_id')
+    points = int(data.get('points', 1))
+    
+    region = RegionScore.query.filter_by(region_id=region_id).first()
+    if region:
+        region.score += points
+        db.session.commit()
+        return jsonify({"success": True, "new_score": region.score})
+    
+    return jsonify({"success": False, "message": "Region not found"}), 400
 
 @app.route('/complete_task/<int:task_id>')
 @login_required
@@ -255,6 +300,7 @@ def logout():
 
 with app.app_context():
     db.create_all()
+    init_regions()  # ბაზის შექმნისას ავტომატურად ვავსებთ რეგიონებს
 
 if __name__ == '__main__':
     app.run(debug=True)
