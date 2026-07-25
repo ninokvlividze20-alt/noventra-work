@@ -7,7 +7,26 @@
         <form method="POST" action="{{ url_for('register') }}">
             <input type="text" name="username" placeholder="სახელი" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff;">
             <input type="email" name="email" placeholder="ელ-ფოსტა" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff;">
-            <input type="password" name="password" placeholder="პაროლი" required style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff;">
+            <input type="password" name="password" placeholder="პაროლი" required style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff;">
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 5px;">შენი რეგიონი:</label>
+                <select name="region" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 14px;">
+                    <option value="tbilisi">🏙️ თბილისი</option>
+                    <option value="imereti">⛰️ იმერეთი</option>
+                    <option value="adjara">🌊 აჭარის ა.რ.</option>
+                    <option value="kakheti">🍇 კახეთი</option>
+                    <option value="samegrelo">🌊 სამეგრელო-ზემო სვანეთი</option>
+                    <option value="guria">🌳 გურია</option>
+                    <option value="racha_lechkhumi">🏔️ რაჭა-ლეჩხუმი</option>
+                    <option value="samtskhe_javakheti">🏰 სამცხე-ჯავახეთი</option>
+                    <option value="shida_kartli">🌾 შიდა ქართლი</option>
+                    <option value="kvemo_kartli">⚒️ ქვემო ქართლი</option>
+                    <option value="mtskheta_mtianeti">⛪ მცხეთა-მთიანეთი</option>
+                    <option value="abkhazia">🌊 აფხაზეთის ა.რ.</option>
+                </select>
+            </div>
+
             <button type="submit" style="width: 100%; padding: 12px; background-color: #00ffcc; border: none; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer;">რეგისტრაცია</button>
         </form>
     </div>

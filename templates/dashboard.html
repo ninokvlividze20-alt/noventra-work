@@ -90,22 +90,38 @@
 
 <div class="dashboard-grid">
     
-    <!-- 🌟 მთავარი არენა: რეგიონული შეჯიბრი და ლიდერბორდი -->
+    <!-- 🌟 მთავარი არენა: რეგიონული შეჯიბრი (ფიქსირებული მომხმარებლის რეგიონი) -->
     <div class="card" style="border-color: #ffcc00;">
         <h3 style="color: #ffcc00;">🏆 რეგიონების ბრძოლა (Live Arena)</h3>
-        <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 15px;">აირჩიე შენი რეგიონი და გაზარდე მისი რეიტინგი კვირის ჯეკპოტისთვის!</p>
+        <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 15px;">შენი რეგიონი: <strong style="color: #00ffcc; text-transform: uppercase;">{{ current_user.region }}</strong></p>
         
-        <div style="margin-bottom: 15px;">
-            <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 5px;">შენი რეგიონი:</label>
-            <select id="userRegionSelect">
-                {% for reg in regions %}
-                    <option value="{{ reg.region_id }}">{{ reg.region_name }}</option>
-                {% endfor %}
-            </select>
-        </div>
+        <!-- ვინახავთ რეგიონის აიდის ფარულად, რომ ჯავასკრიპტმა წაიკითხოს -->
+        <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
 
-        <button onclick="boostRegion()" class="btn btn-warning" id="boostBtn">⚡ დააკლიკე და დაუმატე ქულა რეგიონს!</button>
+        <button onclick="boostRegion()" class="btn btn-warning" id="boostBtn">⚡ დააკლიკე და მიაშველე ქულა შენს რეგიონს!</button>
         <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
+
+        <!-- რეგიონების ცოცხალი ლიდერბორდის ცხრილი -->
+        <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
+            <h4 style="color: #ffcc00; margin: 0 0 10px 0; font-size: 14px;">📊 რეგიონების რეიტინგი (Top List)</h4>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>რეგიონი</th>
+                        <th style="text-align: right;">ქულები</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in regions %}
+                    <tr {% if reg.region_id == current_user.region %}style="background: rgba(0, 255, 204, 0.05);"{% endif %}>
+                        <td>{{ reg.region_name }} {% if reg.region_id == current_user.region %}📍 (შენი){% endif %}</td>
+                        <td style="text-align: right; color: #00ffcc; font-weight: bold;">{{ reg.score }} ⚡</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
         <!-- რეგიონების ცოცხალი ლიდერბორდის ცხრილი -->
         <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
