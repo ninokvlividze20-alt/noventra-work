@@ -482,16 +482,30 @@ def admin_manage_ads():
     ads = Advertisement.query.all()
     return render_template('admin_ads.html', ads=ads)
 
-@app.route('/admin/ads/<int:ad_id>/delete', methods=['POST'])
+@app.route('/admin/ads', methods=['GET', 'POST'])
 @login_required
-def admin_delete_ad(ad_id):
+def admin_manage_ads():
     if not current_user.is_admin:
         abort(403)
-    ad = Advertisement.query.get_or_404(ad_id)
-    db.session.delete(ad)
-    db.session.commit()
-    flash("რეკლამა წაშლილია!", "success")
-    return redirect(url_for('admin_manage_ads'))
+    if request.method == 'POST':
+        title = request.form.get('title')
+        video_file = request.files.get('video_file')
+        if title and video_file:
+            filename = f"ad_{datetime.datetime.now().timestamp()}.mp4"
+            ads_folder = os.path.join(app.root_path, 'static', 'ads_videos')
+            os.makedirs(ads_folder, exist_ok=True)
+            filepath = os.path.join(ads_folder, filename)
+            video_file.save(filepath)
+            
+            # ვინახავთ ფაილის გზას ბაზაში
+            new_ad = Advertisement(title=title, video_url=url_for('static', filename=f'ads_videos/{filename}'))
+            db.session.add(new_ad)
+            db.session.commit()
+            flash("ვიდეო-რეკლამა წარმატებით აიტვირთა!", "success")
+        return redirect(url_for('admin_manage_ads'))
+    
+    ads = Advertisement.query.all()
+    return render_template('admin_ads.html', ads=ads)
 
 @app.route('/logout')
 def logout():
