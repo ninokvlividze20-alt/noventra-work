@@ -9,7 +9,7 @@
     .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #222233; color: #fff; }
     .admin-table th { color: #ffcc00; text-transform: uppercase; font-size: 11px; }
     .input-field { background: #161622; border: 1px solid #33334d; color: #fff; padding: 8px 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 13px; }
-    .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
     .btn-success { background: #00ffcc; color: #000; }
     .btn-success:hover { background: #00cca3; }
     .btn-danger { background: #ff4757; color: #fff; }
@@ -17,12 +17,16 @@
     .btn-warning { background: linear-gradient(135deg, #ffcc00, #ff9900); color: #000; font-weight: bold; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media(max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+    .sponsor-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #444; }
 </style>
 
 <div class="admin-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1 style="color: #fff; font-size: 22px; margin: 0;">⚙️ პროფესიონალური ადმინ-პანელი</h1>
-        <a href="{{ url_for('dashboard') }}" class="btn-sm btn-warning" style="text-decoration: none;">← დაშბორდზე დაბრუნება</a>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('admin_manage_ads') }}" class="btn-sm btn-success" style="text-decoration: none; display: flex; align-items: center; gap: 5px;">📢 რეკლამის მართვა</a>
+            <a href="{{ url_for('dashboard') }}" class="btn-sm btn-warning" style="text-decoration: none;">← დაშბორდზე დაბრუნება</a>
+        </div>
     </div>
 
     <!-- 💰 ფინანსური მოთხოვნები -->
@@ -62,33 +66,67 @@
     </div>
 
     <div class="grid-2">
-        <!-- 📍 რეგიონების სპონსორების ფოტოების მართვა -->
+        <!-- 📍 რეგიონების სპონსორების ფოტოები და ზომები -->
         <div class="admin-section">
-            <h3>🖼️ რეგიონის სპონსორის ბანერის შეცვლა</h3>
-            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
-                <div>
-                    <label style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 5px;">აირჩიე რეგიონი:</label>
-                    <select name="region_id" class="input-field">
-                        {% for reg in regions %}
-                        <option value="{{ reg.region_id }}">{{ reg.region_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 5px;">ატვირთე ფოტო (.jpg):</label>
-                    <input type="file" name="sponsor_image" accept="image/*" required class="input-field" style="padding: 6px;">
-                </div>
-                <button type="submit" class="btn-sm btn-success" style="padding: 10px; margin-top: 5px;">💾 სპონსორის ფოტოს განახლება</button>
+            <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
+            <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: <strong>600x400 px</strong> (.jpg)</p>
+            
+            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                <select name="region_id" class="input-field">
+                    {% for reg in regions %}
+                    <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
+                    {% endfor %}
+                </select>
+                <input type="file" name="sponsor_image" accept="image/*" required class="input-field" style="padding: 4px;">
+                <button type="submit" class="btn-sm btn-success" style="padding: 8px;">💾 სპონსორის ატვირთვა</button>
             </form>
+
+            <div style="max-height: 180px; overflow-y: auto;">
+                <table class="admin-table" style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th>რეგიონი</th>
+                            <th>სპონსორის ფოტო</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in regions %}
+                        <tr>
+                            <td>{{ reg.region_name }}</td>
+                            <td>
+                                {% if region_sponsors[reg.region_id] %}
+                                    <img src="{{ region_sponsors[reg.region_id] }}" class="sponsor-preview" alt="Sponsor">
+                                {% else %}
+                                    <span style="color: #ff4757; font-size: 11px;">სპონსორი არ ჰყავს</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    {% if region_sponsors[reg.region_id] %}
+                                    <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST">
+                                        <button type="submit" class="btn-sm btn-danger" style="padding: 3px 6px; font-size: 10px;">წაშლა</button>
+                                    </form>
+                                    {% endif %}
+                                    <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST">
+                                        <button type="submit" class="btn-sm btn-warning" style="padding: 3px 6px; font-size: 10px; color:#000;">ქულების განულება</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- 🎯 AI დავალებების მართვა -->
         <div class="admin-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h3 style="margin: 0; border: none;">🎯 AI დავალებები</h3>
-                <a href="/add_task" class="btn-sm btn-success" style="text-decoration: none;">➕ ახალი დავალება</a>
+                <a href="{{ url_for('add_task') }}" class="btn-sm btn-success" style="text-decoration: none;">➕ ახალი დავალება</a>
             </div>
-            <div style="max-height: 240px; overflow-y: auto;">
+            <div style="max-height: 250px; overflow-y: auto;">
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -113,14 +151,15 @@
         </div>
     </div>
 
-    <!-- 👥 მომხმარებლების სრული კონტროლი -->
+    <!-- 👥 მომხმარებლების სრული კონტროლი რეგიონების მიხედვით -->
     <div class="admin-section" style="margin-top: 25px;">
-        <h3>👥 მომხმარებელთა მართვა და ბალანსები</h3>
+        <h3>👥 მომხმარებელთა მართვა (რეგიონების მიხედვით)</h3>
         <div style="overflow-x: auto;">
             <table class="admin-table">
                 <thead>
                     <tr>
                         <th>იუზერი</th>
+                        <th>რეგიონი</th>
                         <th>ელ-ფოსტა</th>
                         <th>ბალანსი (₾)</th>
                         <th>რეპუტაცია</th>
@@ -131,14 +170,24 @@
                 <tbody>
                     {% for u in users %}
                     <tr>
+                        <td><strong>{{ u.username }}</strong></td>
+                        <td><span style="color: #ffcc00; text-transform: uppercase; font-size: 11px;">{{ u.region }}</span></td>
+                        <td style="color: #888; font-size: 12px;">{{ u.email }}</td>
                         <form action="{{ url_for('admin_update_user', user_id=u.id) }}" method="POST">
-                            <td><strong>{{ u.username }}</strong></td>
-                            <td style="color: #888; font-size: 12px;">{{ u.email }}</td>
-                            <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 90px;"></td>
-                            <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 80px;"></td>
+                            <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 80px;"></td>
+                            <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 70px;"></td>
                             <td style="text-align: center;"><input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %} style="transform: scale(1.2);"></td>
-                            <td><button type="submit" class="btn-sm btn-success" style="padding: 6px 12px;">შენახვა</button></td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    <button type="submit" class="btn-sm btn-success" style="padding: 5px 8px;">შენახვა</button>
+                                </div>
+                            </td>
                         </form>
+                        <td>
+                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ მომხმარებლის წაშლა?');">
+                                <button type="submit" class="btn-sm btn-danger" style="padding: 5px 8px;">წაშლა</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

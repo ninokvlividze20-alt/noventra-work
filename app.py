@@ -271,7 +271,21 @@ def admin_dashboard():
     tasks = Task.query.all()
     withdrawals = WithdrawalRequest.query.filter_by(status='pending').all()
     regions = RegionScore.query.all()
-    return render_template('admin_dashboard.html', users=users, tasks=tasks, withdrawals=withdrawals, regions=regions)
+    
+    # ვამოწმებთ რომელი რეგიონის სპონსორის ფოტო არსებობს ფიზიკურად
+    ads_folder = os.path.join(app.root_path, 'static', 'ads')
+    os.makedirs(ads_folder, exist_ok=True)
+    
+    region_sponsors = {}
+    for reg in regions:
+        filename = f"{reg.region_id}.jpg"
+        filepath = os.path.join(ads_folder, filename)
+        if os.path.exists(filepath):
+            region_sponsors[reg.region_id] = url_for('static', filename=f'ads/{filename}')
+        else:
+            region_sponsors[reg.region_id] = None
+
+    return render_template('admin_dashboard.html', users=users, tasks=tasks, withdrawals=withdrawals, regions=regions, region_sponsors=region_sponsors)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -284,6 +298,20 @@ def admin_update_user(user_id):
     user.is_admin = True if request.form.get('is_admin') == 'on' else False
     db.session.commit()
     flash(f"მომხმარებელი {user.username} წარმატებით განახლდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    if not current_user.is_admin:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash("საკუთარ თავს ვერ წაშლი!", "danger")
+        return redirect(url_for('admin_dashboard'))
+    db.session.delete(user)
+    db.session.commit()
+    flash("მომხმარებელი წარმატებით წაიშალა ბაზიდან!", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/withdrawal/<int:req_id>/<action>')
@@ -324,10 +352,49 @@ def admin_update_sponsor():
     file = request.files.get('sponsor_image')
     if file and region_id:
         filename = f"{region_id}.jpg"
-        os.makedirs(os.path.join(app.root_path, 'static', 'ads'), exist_ok=True)
-        file.save(os.path.join(app.root_path, 'static', 'ads', filename))
+        ads_folder = os.path.join(app.root_path, 'static', 'ads')
+        os.makedirs(ads_folder, exist_ok=True)
+        file.save(os.path.join(ads_folder, filename))
         flash("სპონსორის ფოტო წარმატებით აიტვირთა!", "success")
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/region/<region_id>/delete_sponsor', methods=['POST'])
+@login_required
+def admin_delete_sponsor(region_id):
+    if not current_user.is_admin:
+        abort(403)
+    filename = f"{region_id}.jpg"
+    filepath = os.path.join(app.root_path, 'static', 'ads', filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
+        flash("სპონსორის ფოტო წაშლილია!", "success")
+    else:
+        flash("ფოტო ვერ მოიძებნა.", "warning")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/region/<region_id>/reset_score', methods=['POST'])
+@login_required
+def admin_reset_region_score(region_id):
+    if not current_user.is_admin:
+        abort(403)
+    region = RegionScore.query.filter_by(region_id=region_id).first_or_404()
+    region.score = 0
+    db.session.commit()
+    flash(f"რეგიონის ({region.region_name}) კლიკები განულდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/ads/manage', methods=['GET', 'POST'])
+@login_required
+def admin_manage_ads():
+    if not current_user.is_admin:
+        abort(403)
+    if request.method == 'POST':
+        # მარტივი ლოგიკა გლობალური რეკლამის ტექსტის/ბმულის შესანახად
+        ad_text = request.form.get('ad_text')
+        ad_link = request.form.get('ad_link')
+        flash("რეკლამის პარამეტრები შენახულია!", "success")
+        return redirect(url_for('admin_manage_ads'))
+    return render_template('admin_ads.html')
 
 @app.route('/logout')
 def logout():

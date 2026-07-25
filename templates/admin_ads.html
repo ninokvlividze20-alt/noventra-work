@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; background: #111118; border: 1px solid #222233; border-radius: 16px; padding: 30px; color: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: #00ffcc; margin: 0;">📢 საიტის რეკლამის მართვა</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn-sm" style="background: #ffcc00; color: #000; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: bold;">← პანელში დაბრუნება</a>
+    </div>
+
+    <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+        <div>
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">რეკლამის ტექსტი / სლოგანი:</label>
+            <textarea name="ad_text" rows="4" style="background: #161622; border: 1px solid #33334d; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box;" placeholder="ჩაწერე სარეკლამო ტექსტი..."></textarea>
+        </div>
+        <div>
+            <label style="display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px;">სარეკლამო ბმული (URL):</label>
+            <input type="text" name="ad_link" style="background: #161622; border: 1px solid #33334d; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box;" placeholder="https://example.com">
+        </div>
+        <button type="submit" style="background: #00ffcc; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">💾 რეკლამის შენახვა და გააქტიურება</button>
+    </form>
+</div>
+{% endblock %}
