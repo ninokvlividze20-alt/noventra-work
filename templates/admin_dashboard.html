@@ -8,7 +8,7 @@
     .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
     .admin-table th, .admin-table td { padding: 10px; text-align: left; border-bottom: 1px solid #222233; color: #fff; vertical-align: middle; }
     .admin-table th { color: #ffcc00; text-transform: uppercase; font-size: 11px; }
-    .input-field { background: #161622; border: 1px solid #33334d; color: #fff; padding: 6px 10px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 13px; }
+    .input-field { background: #161622; border: 1px solid #33334d; color: #fff; padding: 8px 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 13px; }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
     .btn-success { background: #00ffcc; color: #000; }
     .btn-success:hover { background: #00cca3; }
@@ -38,22 +38,50 @@
                     <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">კვირის საპრიზო ფონდი (₾):</label>
                     <input type="text" name="prize_pool" value="{{ current_week_prize_pool | default('1200') }}" required class="input-field">
                 </div>
-                <button type="submit" class="btn-sm btn-success" style="margin-top: 18px; padding: 8px 15px;">შენახვა</button>
+                <button type="submit" class="btn-sm btn-success" style="margin-top: 18px; padding: 10px 15px;">შენახვა</button>
             </form>
 
             <div style="display: flex; flex-direction: column; gap: 10px; border-left: 1px solid #222233; padding-left: 20px;">
                 <!-- თამაშის ჩართვა/გამორთვა (სეზონის შეჩერება) -->
                 <form action="{{ url_for('admin_toggle_game') }}" method="POST">
-                    <button type="submit" class="btn-sm btn-warning" style="width: 100%; padding: 8px;">
+                    <button type="submit" class="btn-sm btn-warning" style="width: 100%; padding: 10px;">
                         ⚡ თამაშის რეჟიმის გადართვა (ჩართ./გამორთ.)
                     </button>
                 </form>
                 
                 <!-- სეზონის დასრულება / ქულების განულება -->
                 <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
-                    <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 8px;">🔴 სეზონის დასრულება / ქულების განულება</button>
+                    <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- 🧮 გამარჯვებული რეგიონის საპრიზო თანხების პროცენტული კალკულატორი -->
+    <div class="admin-section" style="border-color: #00ffcc;">
+        <h3>🧮 გამარჯვებული რეგიონის თანხების პროცენტული გადანაწილება</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">აირჩიე რეგიონი და მიუთითე საპრიზო თანხა, რომ პროგრამამ ავტომატურად გამოთვალოს განაწილება აქტიურ მოთამაშეებზე.</p>
+        
+        <div class="grid-2" style="align-items: flex-end;">
+            <div>
+                <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">აირჩიე რეგიონი:</label>
+                <select id="calcRegion" class="input-field">
+                    {% for reg in regions %}
+                    <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">საპრიზო თანხა (₾):</label>
+                <input type="number" id="calcAmount" value="{{ current_week_prize_pool | default('1200') }}" class="input-field">
+            </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <button type="button" onclick="calculateDistribution()" class="btn-sm btn-success" style="padding: 10px 20px;">📊 პროცენტული გადანაწილების გამოთვლა</button>
+        </div>
+
+        <div id="calcResult" style="margin-top: 15px; background: #161622; padding: 15px; border-radius: 10px; border: 1px solid #33334d; display: none; font-size: 13px; color: #fff;">
+            <!-- აქ გამოჩნდება ავტომატური გათვლა -->
         </div>
     </div>
 
@@ -112,116 +140,86 @@
             </div>
         </div>
 
-        <!-- 🎯 დავალებების მართვა -->
-        <div class="admin-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="margin: 0; border: none;">🎯 დავალებების მართვა</h3>
-                <a href="{{ url_for('add_task') }}" class="btn-sm btn-success" style="text-decoration: none;">➕ ახალი დავალება</a>
-            </div>
-            <div style="max-height: 250px; overflow-y: auto;">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>სათაური</th>
-                            <th>ჯილდო</th>
-                            <th>მოქმედება</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in tasks %}
-                        <tr>
-                            <td>{{ task.title }}</td>
-                            <td style="color: #00ffcc; font-weight: bold;">{{ task.reward }} GEL</td>
-                            <td>
-                                <a href="{{ url_for('admin_delete_task', task_id=task.id) }}" class="btn-sm btn-danger" style="padding: 4px 10px;">წაშლა</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- 👥 მომხმარებლების 100%-იანი მართვა რეგიონების მიხედვით -->
-    <div class="admin-section" style="margin-top: 25px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-            <h3 style="margin: 0; border: none;">👥 მომხმარებლების სრული კონტროლი (ბალანსი, კლიკები, ბანი, რეგიონი)</h3>
-            
-            <div style="width: 100%; max-width: 300px;">
-                <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="🔍 მოძებნე იუზერი სახელით..." class="input-field">
-            </div>
-        </div>
-        
-        {% for reg_id, data in users_by_region.items() %}
-            <div class="region-user-block" style="margin-bottom: 25px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
-                <h4 style="color: #ffcc00; margin-top: 0; border-bottom: 1px solid #222233; padding-bottom: 8px; font-size: 15px;">
-                    📍 {{ data.name }} (იუზერები: {{ data.users|length }})
-                </h4>
-
-                {% if data.users %}
-                <div style="overflow-x: auto;">
-                    <table class="admin-table" style="margin-top: 5px;">
-                        <thead>
-                            <tr>
-                                <th>იუზერი</th>
-                                <th>ბალანსი (₾)</th>
-                                <th>რეპუტაცია</th>
-                                <th>კლიკები</th>
-                                <th>რეგიონი</th>
-                                <th>სტატუსები</th>
-                                <th>მოქმედება</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in data.users %}
-                            <tr>
-                                <td><strong>{{ u.username }}</strong><br><small style="color: #888;">{{ u.email }}</small></td>
-                                <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST">
-                                    <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 70px;"></td>
-                                    <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 60px;"></td>
-                                    <td><input type="number" name="clicks_left" value="{{ u.clicks_left }}" class="input-field" style="width: 60px;"></td>
-                                    <td>
-                                        <select name="region" class="input-field" style="width: 110px; font-size: 11px;">
-                                            <option value="tbilisi" {% if u.region == 'tbilisi' %}selected{% endif %}>თბილისი</option>
-                                            <option value="imereti" {% if u.region == 'imereti' %}selected{% endif %}>იმერეთი</option>
-                                            <option value="adjara" {% if u.region == 'adjara' %}selected{% endif %}>აჭარა</option>
-                                            <option value="kakheti" {% if u.region == 'kakheti' %}selected{% endif %}>კახეთი</option>
-                                            <option value="samegrelo" {% if u.region == 'samegrelo' %}selected{% endif %}>სამეგრელო</option>
-                                            <option value="guria" {% if u.region == 'guria' %}selected{% endif %}>გურია</option>
-                                            <option value="racha_lechkhumi" {% if u.region == 'racha_lechkhumi' %}selected{% endif %}>რაჭა-ლეჩხუმი</option>
-                                            <option value="samtskhe_javakheti" {% if u.region == 'samtskhe_javakheti' %}selected{% endif %}>სამცხე-ჯავახ.</option>
-                                            <option value="shida_kartli" {% if u.region == 'shida_kartli' %}selected{% endif %}>შიდა ქართლი</option>
-                                            <option value="kvemo_kartli" {% if u.region == 'kvemo_kartli' %}selected{% endif %}>ქვემო ქართლი</option>
-                                            <option value="mtskheta_mtianeti" {% if u.region == 'mtskheta_mtianeti' %}selected{% endif %}>მცხეთა-მთიან.</option>
-                                            <option value="abkhazia" {% if u.region == 'abkhazia' %}selected{% endif %}>აფხაზეთი</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <div style="display: flex; gap: 10px; font-size: 11px; align-items: center;">
-                                            <label style="cursor: pointer;"><input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %}> ადმინი</label>
-                                            <label style="cursor: pointer; color: #ff4757;"><input type="checkbox" name="is_banned" {% if u.is_banned %}checked{% endif %}> ბანი</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style="display: flex; gap: 5px;">
-                                            <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
-                                </form>
-                                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('წავშალო მომხმარებელი?');">
-                                                <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <!-- 👥 მომხმარებლების 100%-იანი მართვა რეგიონების მიხედვით -->
+        <div class="admin-section" style="grid-column: 1 / -1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                <h3 style="margin: 0; border: none;">👥 მომხმარებლების სრული კონტროლი (ბალანსი, კლიკები, ბანი, რეგიონი)</h3>
+                
+                <div style="width: 100%; max-width: 300px;">
+                    <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="🔍 მოძებნე იუზერი სახელით..." class="input-field">
                 </div>
-                {% else %}
-                <p style="color: #777; font-size: 12px; margin: 5px 0 0 0;">ამ რეგიონში მომხმარებლები არ არიან.</p>
-                {% endif %}
             </div>
-        {% endfor %}
+            
+            {% for reg_id, data in users_by_region.items() %}
+                <div class="region-user-block" style="margin-bottom: 25px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
+                    <h4 style="color: #ffcc00; margin-top: 0; border-bottom: 1px solid #222233; padding-bottom: 8px; font-size: 15px;">
+                        📍 {{ data.name }} (იუზერები: {{ data.users|length }})
+                    </h4>
+
+                    {% if data.users %}
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table" style="margin-top: 5px;">
+                            <thead>
+                                <tr>
+                                    <th>იუზერი</th>
+                                    <th>ბალანსი (₾)</th>
+                                    <th>რეპუტაცია</th>
+                                    <th>კლიკები</th>
+                                    <th>რეგიონი</th>
+                                    <th>სტატუსები</th>
+                                    <th>მოქმედება</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in data.users %}
+                                <tr>
+                                    <td><strong>{{ u.username }}</strong><br><small style="color: #888;">{{ u.email }}</small></td>
+                                    <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST">
+                                        <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 70px;"></td>
+                                        <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 60px;"></td>
+                                        <td><input type="number" name="clicks_left" value="{{ u.clicks_left }}" class="input-field" style="width: 60px;"></td>
+                                        <td>
+                                            <select name="region" class="input-field" style="width: 110px; font-size: 11px;">
+                                                <option value="tbilisi" {% if u.region == 'tbilisi' %}selected{% endif %}>თბილისი</option>
+                                                <option value="imereti" {% if u.region == 'imereti' %}selected{% endif %}>იმერეთი</option>
+                                                <option value="adjara" {% if u.region == 'adjara' %}selected{% endif %}>აჭარა</option>
+                                                <option value="kakheti" {% if u.region == 'kakheti' %}selected{% endif %}>კახეთი</option>
+                                                <option value="samegrelo" {% if u.region == 'samegrelo' %}selected{% endif %}>სამეგრელო</option>
+                                                <option value="guria" {% if u.region == 'guria' %}selected{% endif %}>გურია</option>
+                                                <option value="racha_lechkhumi" {% if u.region == 'racha_lechkhumi' %}selected{% endif %}>რაჭა-ლეჩხუმი</option>
+                                                <option value="samtskhe_javakheti" {% if u.region == 'samtskhe_javakheti' %}selected{% endif %}>სამცხე-ჯავახ.</option>
+                                                <option value="shida_kartli" {% if u.region == 'shida_kartli' %}selected{% endif %}>შიდა ქართლი</option>
+                                                <option value="kvemo_kartli" {% if u.region == 'kvemo_kartli' %}selected{% endif %}>ქვემო ქართლი</option>
+                                                <option value="mtskheta_mtianeti" {% if u.region == 'mtskheta_mtianeti' %}selected{% endif %}>მცხეთა-მთიან.</option>
+                                                <option value="abkhazia" {% if u.region == 'abkhazia' %}selected{% endif %}>აფხაზეთი</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; gap: 10px; font-size: 11px; align-items: center;">
+                                                <label style="cursor: pointer;"><input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %}> ადმინი</label>
+                                                <label style="cursor: pointer; color: #ff4757;"><input type="checkbox" name="is_banned" {% if u.is_banned %}checked{% endif %}> ბანი</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; gap: 5px;">
+                                                <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
+                                    </form>
+                                                <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('წავშალო მომხმარებელი?');">
+                                                    <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p style="color: #777; font-size: 12px; margin: 5px 0 0 0;">ამ რეგიონში მომხმარებლები არ არიან.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
@@ -254,6 +252,25 @@ function filterUsers() {
             block.style.display = "none";
         }
     });
+}
+
+function calculateDistribution() {
+    let amount = parseFloat(document.getElementById('calcAmount').value) || 0;
+    let regionName = document.getElementById('calcRegion').selectedOptions[0].text;
+    let resultDiv = document.getElementById('calcResult');
+    
+    // ვანაწილებთ პროცენტულად: ტოპ 1 მოთამაშე - 50%, მე-2 ადგილი - 30%, დანარჩენები - 20%
+    let top1 = (amount * 0.50).toFixed(2);
+    let top2 = (amount * 0.30).toFixed(2);
+    let rest = (amount * 0.20).toFixed(2);
+
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `
+        <strong style="color: #ffcc00;">📍 რეგიონი: ${regionName} | ჯამური საპრიზო ფონდი: ${amount} ₾</strong><br><br>
+        • 🥇 <strong>1-ელ ადგილზე გასულ აქტიურ მოთამაშეს (50%):</strong> <span style="color:#00ffcc;">${top1} ₾</span><br>
+        • 🥈 <strong>მე-2 ადგილზე გასულ მოთამაშეს (30%):</strong> <span style="color:#00ffcc;">${top2} ₾</span><br>
+        • 🥉 <strong>დანარჩენ აქტიურ მოთამაშეებზე (20%):</strong> <span style="color:#00ffcc;">${rest} ₾</span>
+    `;
 }
 </script>
 {% endblock %}

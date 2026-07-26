@@ -38,7 +38,7 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     phone = db.Column(db.String(20), default="")
     bank_account = db.Column(db.String(50), default="")
-    clicks_left = db.Column(db.Integer, default=100)
+    clicks_left = db.Column(db.Integer, default=250)
     region = db.Column(db.String(50), default="tbilisi")
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
@@ -47,7 +47,7 @@ class User(db.Model, UserMixin):
 class Task(db.Model):
     __tablename__ = 'tasks'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(250), nullable=False)
     description = db.Column(db.Text, nullable=False)
     reward = db.Column(db.Float, default=5.0)
     is_completed = db.Column(db.Boolean, default=False)
@@ -249,12 +249,25 @@ def dashboard():
     new_questions_count = Question.query.filter(Question.created_at > current_user.last_seen_board).count()
     regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
 
+    # საპრიზო ფონდი, გამარჯვებული და თამაშის სტატუსი ბაზიდან
+    prize_setting = Settings.query.filter_by(key='prize_pool').first()
+    current_week_prize_pool = prize_setting.value if prize_setting else "1200"
+
+    winner_setting = Settings.query.filter_by(key='last_winner').first()
+    last_winner_region = winner_setting.value if winner_setting else "იმერეთი"
+
+    game_status_setting = Settings.query.filter_by(key='game_status').first()
+    game_status = game_status_setting.value if game_status_setting else "active"
+
     return render_template('dashboard.html', 
                          tasks=all_tasks, 
                          new_questions_count=new_questions_count,
                          total_tasks=total_tasks,
                          completion_rate=completion_rate,
-                         regions=regions)
+                         regions=regions,
+                         current_week_prize_pool=current_week_prize_pool,
+                         last_winner_region=last_winner_region,
+                         game_status=game_status)
 
 @app.route('/api/score', methods=['POST'])
 @login_required
@@ -378,26 +391,25 @@ def admin_dashboard():
     if not current_user.is_admin:
         abort(403)
     
-    # ამოვქაჩოთ რეგიონები და მომხმარებლები, დავალებების სია და მოთხოვნები
+    # ამოვქაჩოთ რეგიონები და მომხმარებლები
     users = User.query.all()
-    tasks = Task.query.all()
-    withdrawals = WithdrawalRequest.query.filter_by(status='pending').all()
     regions = RegionScore.query.all()
     
-    # თითოეული მომხმარებლისთვის დავთვალოთ შესრულებული დავალებები და ნახული რეკლამები
+    # წამოვქაჩოთ საპრიზო ფონდი პარამეტრებიდან
+    prize_setting = Settings.query.filter_by(key='prize_pool').first()
+    current_week_prize_pool = prize_setting.value if prize_setting else "1200"
+
+    # თითოეული მომხმარებლისთვის აქტიურობის დათვლა
     user_stats = {}
     for u in users:
-        completed_tasks_count = Task.query.filter_by(user_id=u.id, is_completed=True).count()
         watched_ads_count = UserAdView.query.filter_by(user_id=u.id).count()
         
         user_stats[u.id] = {
-            'completed_tasks': completed_tasks_count,
             'watched_ads': watched_ads_count,
-            # აქტიურობის ქულა: მაგალითად (100 - clicks_left) + შესრულებული დავალებები * 5 + ნახული რეკლამები * 2
-            'activity_score': (100 - u.clicks_left) + (completed_tasks_count * 5) + (watched_ads_count * 2)
+            'activity_score': (100 - u.clicks_left) + (watched_ads_count * 2)
         }
 
-    # მომხმარებლები დავალაგოთ აქტიურობის მიხედვით (პირველები ყველაზე აქტიურები)
+    # მომხმარებლები დავალაგოთ აქტიურობის მიხედვით
     users_sorted = sorted(users, key=lambda x: user_stats[x.id]['activity_score'], reverse=True)
 
     # რეგიონების მიხედვით დაჯგუფება
@@ -424,10 +436,9 @@ def admin_dashboard():
                            users=users_sorted, 
                            users_by_region=users_by_region,
                            user_stats=user_stats,
-                           tasks=tasks, 
-                           withdrawals=withdrawals, 
                            regions=regions, 
-                           region_sponsors=region_sponsors)
+                           region_sponsors=region_sponsors,
+                           current_week_prize_pool=current_week_prize_pool)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -622,7 +633,7 @@ def admin_reset_season():
             db.session.add(Settings(key='last_winner', value=winner_name))
 
     RegionScore.query.update({RegionScore.score: 0})
-    User.query.update({User.clicks_left: 100})
+    User.query.update({User.clicks_left: 250})
     db.session.commit()
     
     flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები განულდა.", "success")
@@ -678,7 +689,7 @@ with app.app_context():
     db.create_all()
     init_regions()
     try:
-        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS clicks_left INTEGER DEFAULT 100;"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS clicks_left INTEGER DEFAULT 250;"))
         db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
         db.session.commit()
@@ -693,6 +704,14 @@ with app.app_context():
     if not Settings.query.filter_by(key='game_status').first():
         db.session.add(Settings(key='game_status', value='active')) # active ან paused
     db.session.commit()
+
+# 🎮 ენერგიის აღდგენის API მინი-თამაშის გავლის შემდეგ
+@app.route('/api/restore_energy', methods=['POST'])
+@login_required
+def restore_energy():
+    current_user.clicks_left = 250
+    db.session.commit()
+    return jsonify({"success": True, "new_clicks": 250})
 
 if __name__ == '__main__':
     app.run(debug=True)

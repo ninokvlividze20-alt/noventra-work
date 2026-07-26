@@ -207,28 +207,44 @@ updateCountdown();
         <!-- ვინახავთ რეგიონის აიდის ფარულად, რომ ჯავასკრიპტმა წაიკითხოს -->
         <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
 
-        <!-- დინამიკური კლიკის ღილაკი ციფრით -->
-        <div style="position: relative; display: inline-block; width: 100%;">
-            <button onclick="boostRegion(event)" class="btn btn-warning" id="boostBtn">
-                ⚡ დააკლიკე და მიაშველე ქულა! (<span id="clicksLeft">100</span>)
-            </button>
-        </div>
-        <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
+        <!-- ვინახავთ რეგიონის აიდის ფარულად, რომ ჯავასკრიპტმა წაიკითხოს -->
+        <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
 
-        <!-- 🎬 მოდალური ფანჯარა ვიდეო რეკლამისათვის -->
+        {% if game_status == 'paused' %}
+            <!-- 🔴 როცა ადმინი გამორთავს თამაშს (სეზონი შეჩერებულია) -->
+            <div style="background: rgba(255, 71, 87, 0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);">
+                <h3 style="color: #ff4757; margin-top: 0; font-size: 20px;">🔴 სეზონი შეჩერებულია!</h3>
+                <p style="color: #fff; font-size: 14px; line-height: 1.6; margin: 0;">
+                    მიმდინარეობს გამარჯვებული რეგიონის თანხების დაანგარიშება და გადანაწილება. <br>
+                    <strong>თამაში განახლდება ორშაბათს, დილის 09:00 საათიდან! ⏳🔥</strong>
+                </p>
+            </div>
+        {% else %}
+            <!-- 🟢 როცა თამაში ჩართულია, ჩანს შენი დაკლიკების ღილაკი -->
+            <div style="position: relative; display: inline-block; width: 100%; margin-top: 20px;">
+                <button onclick="boostRegion(event)" class="btn btn-warning" id="boostBtn">
+                    ⚡ დააკლიკე და მიაშველე ქულა! (<span id="clicksLeft">100</span>)
+                </button>
+            </div>
+            <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
+        {% endif %}
+
+        <!-- 🎮 მოდალური ფანჯარა მინი-თამაშისათვის (ენერგიის ამოწურვისას) -->
         <div id="adModal" class="ad-modal">
             <div class="ad-modal-content">
-                <h3 id="adTitle" style="color: #ffcc00; margin-top: 0;">⚡ ენერგია ამოიწურა!</h3>
-                <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 15px;" id="adDescText">
-                    ენერგიის აღსადგენად გახსენი სარეკლამო ბმული, უყურე და მიიღე ენერგია:
+                <h3 style="color: #ffcc00; margin-top: 0;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
+                <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">
+                    ენერგიის სრულად აღსადგენად და სათამაშოდ ჩართე ერთ-ერთი სახალისო მინი-თამაში:
                 </p>
                 
-                <!-- რეკლამის ბმულის ღილაკი -->
+                <!-- მინი-თამაშზე გადასვლის ღილაკი -->
                 <div style="margin-bottom: 20px;">
-                    <a id="adLinkBtn" href="#" target="_blank" onclick="startAdTimer()" class="btn btn-warning" style="display: inline-block; text-decoration: none; width: 100%; box-sizing: border-box; color: #000;">
-                        🔗 სარეკლამო ბმულის გახსნა
+                    <a href="#" id="playGameBtn" class="btn btn-warning" style="display: inline-block; text-decoration: none; width: 100%; box-sizing: border-box; color: #000; font-weight: bold; padding: 14px;">
+                        🎮 მინი-თამაშის დაწყება 🚀
                     </a>
                 </div>
+            </div>
+        </div>
 
                 <div id="adProgressText" style="color: #00ffcc; font-weight: bold; margin-bottom: 15px; font-size: 13px;"></div>
                 
@@ -292,17 +308,18 @@ updateCountdown();
 </div>
 
 <script>
-let clickLimit = 100; 
-let adsWatched = 0;    
+let clickLimit = {{ current_user.clicks_left }}; 
 let pendingPoints = 0; 
-let currentAdUrl = "";
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById('clicksLeft').innerText = clickLimit;
+});
 
 function boostRegion(event) {
     let regionId = document.getElementById('userRegionSelect').value;
     
     if (clickLimit <= 0) {
         document.getElementById('adModal').style.display = 'flex';
-        watchAd();
         return;
     }
 
@@ -345,70 +362,24 @@ function boostRegion(event) {
     }, 1000);
 }
 
-// 🎬 რეკლამის ყურების ლოგიკა (გახსნა ახალ ჩანართში + ტაიმერი)
-function watchAd() {
-    document.getElementById('adModal').style.display = 'flex';
-    document.getElementById('claimEnergyBtn').style.display = 'none';
-    document.getElementById('adProgressText').innerText = "";
-    loadNextUniqueAd();
-}
-
-function loadNextUniqueAd() {
-    fetch('/api/get_next_ad')
+// 🎮 მინი-თამაშის გავლით ენერგიის სრული აღდგენა (250 კლიკი)
+function completeMiniGame(event) {
+    if (event) event.preventDefault();
+    
+    fetch('/api/restore_energy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
     .then(res => res.json())
     .then(data => {
         if(data.success) {
-            document.getElementById('adTitle').innerText = "📢 " + data.title;
-            currentAdUrl = data.video_url;
-            let linkBtn = document.getElementById('adLinkBtn');
-            linkBtn.href = currentAdUrl;
-            document.getElementById('adProgressText').innerText = "მიაწექი ზედა ღილაკს, რომ გახსნათ რეკლამა!";
-        } else {
-            document.getElementById('adProgressText').innerText = "აქტიური რეკლამები დროებით არ არის. ენერგია აღდგა!";
-            setTimeout(() => {
-                clickLimit = 100;
-                document.getElementById('clicksLeft').innerText = clickLimit;
-                document.getElementById('adModal').style.display = 'none';
-            }, 2000);
+            clickLimit = data.new_clicks;
+            document.getElementById('clicksLeft').innerText = clickLimit;
+            document.getElementById('adModal').style.display = 'none';
+            document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (250 კლიკი)!";
         }
-    });
-}
-
-// ტაიმერი ლინკზე დაჭერის მერე (5 წამი)
-function startAdTimer() {
-    let timeLeft = 5;
-    let progress = document.getElementById('adProgressText');
-    let claimBtn = document.getElementById('claimEnergyBtn');
-    
-    progress.innerText = `⏳ მიმდინარეობს ყურება... (${timeLeft}წმ)`;
-    
-    let timer = setInterval(() => {
-        timeLeft--;
-        if (timeLeft > 0) {
-            progress.innerText = `⏳ მიმდინარეობს ყურება... (${timeLeft}წმ)`;
-        } else {
-            clearInterval(timer);
-            progress.innerText = `✅ რეკლამა ნანახია! შეგიძლია დააჭირო ღილაკს.`;
-            claimBtn.style.display = 'block';
-        }
-    }, 1000);
-}
-
-function confirmAdWatched() {
-    adsWatched++;
-    document.getElementById('claimEnergyBtn').style.display = 'none';
-    document.getElementById('adProgressText').innerText = "";
-    
-    if (adsWatched >= 2) {
-        clickLimit = 100;
-        adsWatched = 0;
-        document.getElementById('clicksLeft').innerText = clickLimit;
-        document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (100 კლიკი)!";
-        document.getElementById('adModal').style.display = 'none';
-    } else {
-        document.getElementById('adProgressText').innerText = `✅ 1 რეკლამა დასრულდა! გახსენი მეორე...`;
-        loadNextUniqueAd();
-    }
+    })
+    .catch(err => console.error(err));
 }
 </script>
 {% endblock %}
