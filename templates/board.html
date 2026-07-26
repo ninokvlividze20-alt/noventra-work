@@ -28,7 +28,7 @@
     }
 
     .messages-list { 
-        height: 450px; 
+        height: 420px; 
         overflow-y: auto; 
         overflow-x: hidden;
         padding-right: 5px; 
@@ -56,42 +56,47 @@
         align-self: flex-end; 
     }
 
-    /* 🎯 დაბალანსებული და ლამაზი ფორმა */
+    /* 🎯 პროფესიონალური მრავალხაზიანი ფორმა */
     .chat-form { 
         display: flex; 
         gap: 10px; 
-        align-items: center; 
+        align-items: flex-end; /* ღილაკი და ტექსტური ველი სწორდება ქვედა კიდით */
         width: 100%;
         box-sizing: border-box;
     }
 
-    .chat-input { 
-        flex: 1; /* სრულად იკავებს დარჩენილ ადგილს */
-        min-width: 0; /* აუცილებელია რომ ინპუტი არ გაცდეს ეკრანს */
+    .chat-textarea { 
+        flex: 1; 
+        min-width: 0; 
         background: #161622; 
         border: 1px solid #33334d; 
         color: #fff; 
-        padding: 14px 16px; 
+        padding: 12px 14px; 
         border-radius: 12px; 
         font-size: 16px; /* იცავს მობილურს ავტომატური ზუმისგან */
         outline: none; 
+        resize: none; /* რომ მომხმარებელმა ხელით არ გაწიოს ზომაში უშნოდ */
+        height: 60px; /* ზუსტად 2-3 ხაზის ტევადობა */
+        line-height: 1.4;
         touch-action: manipulation;
         box-sizing: border-box;
+        font-family: inherit;
     }
-    .chat-input:focus { border-color: #00ffcc; }
+    .chat-textarea:focus { border-color: #00ffcc; }
 
     .chat-btn { 
         background: #00ffcc; 
         color: #000; 
         border: none; 
-        padding: 14px 20px; 
+        height: 60px; /* ზომაში ზუსტად ერწყმის ტექსტურველს */
+        padding: 0 18px; 
         border-radius: 12px; 
         font-weight: bold; 
         cursor: pointer; 
         transition: 0.3s;
         font-size: 14px;
-        white-space: nowrap; /* ტექსტი არ გადაიტანოს ღილაკზე ორ ხაზად */
-        flex-shrink: 0; /* არ აპატარავებს ღილაკს */
+        white-space: nowrap; 
+        flex-shrink: 0; 
         touch-action: manipulation;
     }
     .chat-btn:hover { background: #00cca3; }
@@ -118,12 +123,12 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <p style="color: #777; text-align: center; margin-top: 180px;">ჩატი ცარიელია. იყავი პირველი, ვინც მისწერს რეგიონელებს! 🔥</p>
+                <p style="color: #777; text-align: center; margin-top: 150px;">ჩატი ცარიელია. იყავი პირველი, ვინც მისწერს რეგიონელებს! 🔥</p>
             {% endif %}
         </div>
 
         <form method="POST" class="chat-form" id="chatForm">
-            <input type="text" name="message" id="messageInput" placeholder="დაწერე შეტყობინება..." required class="chat-input" autocomplete="off">
+            <textarea name="message" id="messageInput" placeholder="დაწერე შეტყობინება..." required class="chat-textarea" autocomplete="off"></textarea>
             <button type="submit" class="chat-btn">გაგზავნა 🚀</button>
         </form>
     </div>
@@ -135,5 +140,13 @@
         chatList.scrollTop = chatList.scrollHeight;
     }
     window.onload = scrollToBottom;
+
+    // Enter ღილაკით გაგზავნა, ხოლო Shift + Enter ახალ ხაზზე გადასვლა
+    document.getElementById('messageInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            this.form.submit();
+        }
+    });
 </script>
 {% endblock %}
