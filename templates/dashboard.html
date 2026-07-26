@@ -281,12 +281,10 @@ updateCountdown();
 </div>
 
 <div class="board-card">
-    <h3 style="color: #00ffcc; margin-bottom: 12px; font-size: 16px;">კომუნიკაცია და მხარდაჭერა</h3>
-    <a href="{{ url_for('board') }}" class="btn" style="background: #161622; border: 1px solid #00ffcc; color: #00ffcc;">
-        💬 საჯარო დაფა და შეკითხვები
-        {% if new_questions_count > 0 %}
-            <span class="badge">{{ new_questions_count }}</span>
-        {% endif %}
+    <h3 style="color: #00ffcc; margin-bottom: 12px; font-size: 16px;">💬 რეგიონული კომუნიკაცია</h3>
+    <p style="font-size: 12px; color: #a1a1aa; margin-bottom: 15px;">შენი რეგიონის დახურული ჩატი ტაქტიკისა და აზრების გასაზიარებლად.</p>
+    <a href="{{ url_for('region_chat', region_id=current_user.region) }}" class="btn" style="background: #161622; border: 1px solid #00ffcc; color: #00ffcc;">
+        🚀 შედი {{ current_user.region | upper }} რეგიონის ჩატში
     </a>
     <div style="margin-top: 15px;">
         <a href="/logout" style="color: #ff4757; text-decoration: none; font-size: 13px;">🚪 სისტემიდან გასვლა</a>

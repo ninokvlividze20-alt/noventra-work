@@ -76,6 +76,7 @@ class Question(db.Model):
     text = db.Column(db.Text, nullable=False)
     username = db.Column(db.String(50))
     user_phone = db.Column(db.String(20))
+    region_id = db.Column(db.String(50), default="tbilisi") # 👈 ეს დავუმატეთ რეგიონებისთვის
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class Advertisement(db.Model):
@@ -149,23 +150,40 @@ def profile():
         return redirect(url_for('profile'))
     return render_template('profile.html')
 
-@app.route('/board', methods=['GET', 'POST'])
+@app.route('/region_chat/<region_id>', methods=['GET', 'POST'])
 @login_required
-def board():
-    if request.method == 'POST':
-        text = request.form.get('text')
-        if is_safe(text):
-            new_q = Question(text=text, username=current_user.username, user_phone=current_user.phone)
-            db.session.add(new_q)
-            db.session.commit()
-        else:
-            flash("მესიჯი არღვევს წესებს!", "danger")
+def region_chat(region_id):
+    if current_user.region != region_id and not current_user.is_admin:
+        flash("შენ არ გაქვს სხვა რეგიონის ჩატზე წვდომა!", "danger")
+        return redirect(url_for('region_chat', region_id=current_user.region))
     
+    if request.method == 'POST':
+        text = request.form.get('message')
+        if text and text.strip():
+            if is_safe(text):
+                new_q = Question(
+                    text=text.strip(), 
+                    username=current_user.username, 
+                    user_phone=current_user.phone,
+                    region_id=region_id
+                )
+                db.session.add(new_q)
+                db.session.commit()
+            else:
+                flash("მესიჯი არღვევს წესებს!", "danger")
+        return redirect(url_for('region_chat', region_id=region_id))
+            
     current_user.last_seen_board = db.func.current_timestamp()
     db.session.commit()
     
-    questions = Question.query.order_by(Question.id.desc()).all()
-    return render_template('board.html', questions=questions)
+    messages = Question.query.filter_by(region_id=region_id).order_by(Question.id.asc()).all()
+    return render_template('board.html', region_id=region_id, messages=messages)
+
+# ძველი /board მისამართი რომ არ გაფუჭდეს და ავტომატურად უშვებდეს რეგიონულ ჩატში:
+@app.route('/board')
+@login_required
+def board():
+    return redirect(url_for('region_chat', region_id=current_user.region))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
