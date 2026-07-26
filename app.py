@@ -99,6 +99,20 @@ class RegionScore(db.Model):
     region_name = db.Column(db.String(100), nullable=False)
     score = db.Column(db.Integer, default=0)
 
+class Settings(db.Model):
+    __tablename__ = 'settings'
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.String(255), nullable=False)
+
+class MiniGame(db.Model):
+    __tablename__ = 'mini_games'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    folder_name = db.Column(db.String(100), unique=True, nullable=False) # static/games/folder_name
+    is_active = db.Column(db.Boolean, default=True)
+
 def init_regions():
     regions = [
         ("tbilisi", "თბილისი"),
@@ -559,6 +573,102 @@ def admin_delete_ad(ad_id):
     flash("რეკლამა წარმატებით წაიშალა!", "success")
     return redirect(url_for('admin_manage_ads'))
 
+# საპრიზო ფონდის განახლება
+@app.route('/admin/settings/prize', methods=['POST'])
+@login_required
+def admin_update_prize():
+    if not current_user.is_admin:
+        abort(403)
+    new_prize = request.form.get('prize_pool')
+    if new_prize:
+        setting = Settings.query.filter_by(key='prize_pool').first()
+        if setting:
+            setting.value = new_prize
+        else:
+            db.session.add(Settings(key='prize_pool', value=new_prize))
+        db.session.commit()
+        flash("საპრიზო ფონდი წარმატებით განახლდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# თამაშის ჩართვა/გამორთვა (სეზონის შეჩერება)
+@app.route('/admin/settings/toggle_game', methods=['POST'])
+@login_required
+def admin_toggle_game():
+    if not current_user.is_admin:
+        abort(403)
+    setting = Settings.query.filter_by(key='game_status').first()
+    if setting:
+        setting.value = 'paused' if setting.value == 'active' else 'active'
+    else:
+        db.session.add(Settings(key='game_status', value='paused'))
+    db.session.commit()
+    flash("თამაშის რეჟიმი შეიცვალა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# სეზონის დასრულება / ქულების განულება
+@app.route('/admin/season/reset', methods=['POST'])
+@login_required
+def admin_reset_season():
+    if not current_user.is_admin:
+        abort(403)
+    
+    top_region = RegionScore.query.order_by(RegionScore.score.desc()).first()
+    if top_region:
+        winner_name = top_region.region_name
+        setting = Settings.query.filter_by(key='last_winner').first()
+        if setting:
+            setting.value = winner_name
+        else:
+            db.session.add(Settings(key='last_winner', value=winner_name))
+
+    RegionScore.query.update({RegionScore.score: 0})
+    User.query.update({User.clicks_left: 100})
+    db.session.commit()
+    
+    flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები განულდა.", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# მომხმარებლის სრული მართვა (ბანი, ბალანსი, რეგიონი, ა.შ.)
+@app.route('/admin/user/<int:user_id>/full_update', methods=['POST'])
+@login_required
+def admin_full_update_user(user_id):
+    if not current_user.is_admin:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    user.balance = float(request.form.get('balance', user.balance))
+    user.reputation = int(request.form.get('reputation', user.reputation))
+    user.clicks_left = int(request.form.get('clicks_left', user.clicks_left))
+    user.region = request.form.get('region', user.region)
+    user.is_admin = True if request.form.get('is_admin') == 'on' else False
+    user.is_banned = True if request.form.get('is_banned') == 'on' else False
+    db.session.commit()
+    flash(f"მომხმარებელი {user.username} განახლდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# ადმინის გლობალური ჩატების ჰაბი (ყველა რეგიონის მესიჯები)
+@app.route('/admin/chats')
+@login_required
+def admin_chats():
+    if not current_user.is_admin:
+        abort(403)
+    regions = RegionScore.query.all()
+    selected_region = request.args.get('region', 'tbilisi')
+    messages = Question.query.filter_by(region_id=selected_region).order_by(Question.id.asc()).all()
+    return render_template('admin_chats.html', regions=regions, selected_region=selected_region, messages=messages)
+
+@app.route('/admin/chats/send', methods=['POST'])
+@login_required
+def admin_chats_send():
+    if not current_user.is_admin:
+        abort(403)
+    region_id = request.form.get('region_id')
+    text = request.form.get('message')
+    if text and text.strip() and region_id:
+        new_q = Question(text=text.strip(), username=f"👑 ადმინი ({current_user.username})", user_phone="", region_id=region_id)
+        db.session.add(new_q)
+        db.session.commit()
+    return redirect(url_for('admin_chats', region=region_id))
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -570,9 +680,19 @@ with app.app_context():
     try:
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS clicks_left INTEGER DEFAULT 100;"))
         db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
+    
+    # საწყისი პარამეტრები
+    if not Settings.query.filter_by(key='prize_pool').first():
+        db.session.add(Settings(key='prize_pool', value='1200'))
+    if not Settings.query.filter_by(key='last_winner').first():
+        db.session.add(Settings(key='last_winner', value='იმერეთი'))
+    if not Settings.query.filter_by(key='game_status').first():
+        db.session.add(Settings(key='game_status', value='active')) # active ან paused
+    db.session.commit()
 
 if __name__ == '__main__':
     app.run(debug=True)
