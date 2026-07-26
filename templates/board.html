@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 <style>
-    /* 🚀 ჰორიზონტალური ძრავის და ხტომის სრული ბლოკირება მობილურზე */
     html, body {
         max-width: 100%;
         overflow-x: hidden;
@@ -28,11 +27,11 @@
     }
 
     .messages-list { 
-        height: 420px; 
+        height: 400px; 
         overflow-y: auto; 
         overflow-x: hidden;
         padding-right: 5px; 
-        margin-bottom: 20px; 
+        margin-bottom: 15px; 
         display: flex; 
         flex-direction: column; 
         gap: 12px; 
@@ -56,27 +55,26 @@
         align-self: flex-end; 
     }
 
-    /* 🎯 პროფესიონალური მრავალხაზიანი ფორმა */
+    /* 🎯 სრულად გამოყოფილი და უსაფრთხო ფორმა */
     .chat-form { 
         display: flex; 
+        flex-direction: column; 
         gap: 10px; 
-        align-items: flex-end; /* ღილაკი და ტექსტური ველი სწორდება ქვედა კიდით */
         width: 100%;
         box-sizing: border-box;
     }
 
     .chat-textarea { 
-        flex: 1; 
-        min-width: 0; 
+        width: 100%; 
         background: #161622; 
         border: 1px solid #33334d; 
         color: #fff; 
         padding: 12px 14px; 
         border-radius: 12px; 
-        font-size: 16px; /* იცავს მობილურს ავტომატური ზუმისგან */
+        font-size: 16px; 
         outline: none; 
-        resize: none; /* რომ მომხმარებელმა ხელით არ გაწიოს ზომაში უშნოდ */
-        height: 60px; /* ზუსტად 2-3 ხაზის ტევადობა */
+        resize: vertical; 
+        min-height: 80px; 
         line-height: 1.4;
         touch-action: manipulation;
         box-sizing: border-box;
@@ -88,16 +86,15 @@
         background: #00ffcc; 
         color: #000; 
         border: none; 
-        height: 60px; /* ზომაში ზუსტად ერწყმის ტექსტურველს */
-        padding: 0 18px; 
+        width: 100%; 
+        padding: 14px; 
         border-radius: 12px; 
         font-weight: bold; 
         cursor: pointer; 
         transition: 0.3s;
-        font-size: 14px;
-        white-space: nowrap; 
-        flex-shrink: 0; 
+        font-size: 15px;
         touch-action: manipulation;
+        box-sizing: border-box;
     }
     .chat-btn:hover { background: #00cca3; }
 </style>
@@ -140,13 +137,5 @@
         chatList.scrollTop = chatList.scrollHeight;
     }
     window.onload = scrollToBottom;
-
-    // Enter ღილაკით გაგზავნა, ხოლო Shift + Enter ახალ ხაზზე გადასვლა
-    document.getElementById('messageInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            this.form.submit();
-        }
-    });
 </script>
 {% endblock %}
