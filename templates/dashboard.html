@@ -194,24 +194,21 @@ updateCountdown();
     <div class="card" style="border-color: #ffcc00;">
         <h3 style="color: #ffcc00;">🏆 რეგიონების ბრძოლა (Live Arena)</h3>
         <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 10px;">შენი რეგიონი: <strong style="color: #00ffcc; text-transform: uppercase;">{{ current_user.region }}</strong></p>
-        
-        <!-- 📢 შენი რეგიონის სპონსორის/კომპანიის რეკლამა (გაზდილი, დიდი და თვალსაჩინო ბანერი) -->
+         
+        <!-- 📢 შენი რეგიონის სპონსორის ბანერი -->
         <div style="background: #161622; border: 2px solid #ffcc00; border-radius: 14px; padding: 14px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(255, 204, 0, 0.15);">
             <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: bold;">📍 შენი რეგიონის გენერალური სპონსორი</span>
             <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
             <p style="font-size: 12px; color: #d1d1d6; margin: 0; line-height: 1.5;">
-                ⚠️ <strong>ყურადღება:</strong>კლიკების ამოწურვისას ჩაირთვება სახალისო მინი-თამაში! ითამაშე, გაიმარჯვე და მიაშველე ენერგია შენს რეგიონს! 🎮🔥
+                ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას ჩაირთვება სახალისო მინი-თამაში! ითამაშე, გაიმარჯვე და მიაშველე ენერგია შენს რეგიონს! 🎮🔥
             </p>
         </div>
 
-        <!-- ვინახავთ რეგიონის აიდის ფარულად, რომ ჯავასკრიპტმა წაიკითხოს -->
-        <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
-
-        <!-- ვინახავთ რეგიონის აიდის ფარულად, რომ ჯავასკრიპტმა წაიკითხოს -->
+        <!-- რეგიონის აიდი (სუფთად, ერთადერთი ცალი) -->
         <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
 
         {% if game_status == 'paused' %}
-            <!-- 🔴 როცა ადმინი გამორთავს თამაშს (სეზონი შეჩერებულია) -->
+            <!-- 🔴 სეზონი შეჩერებულია (მხოლოდ მაშინ ჩანს, როცა ადმინი გათიშავს) -->
             <div style="background: rgba(255, 71, 87, 0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);">
                 <h3 style="color: #ff4757; margin-top: 0; font-size: 20px;">🔴 სეზონი შეჩერებულია!</h3>
                 <p style="color: #fff; font-size: 14px; line-height: 1.6; margin: 0;">
@@ -220,10 +217,10 @@ updateCountdown();
                 </p>
             </div>
         {% else %}
-            <!-- 🟢 როცა თამაში ჩართულია, ჩანს შენი დაკლიკების ღილაკი -->
+            <!-- 🟢 ჩვეულებრივი აქტიური რეჟიმი (დაკლიკების ღილაკი) -->
             <div style="position: relative; display: inline-block; width: 100%; margin-top: 20px;">
                 <button onclick="boostRegion(event)" class="btn btn-warning" id="boostBtn">
-                    ⚡ დააკლიკე და მიაშველე ქულა! (<span id="clicksLeft">100</span>)
+                    ⚡ დააკლიკე და მიაშველე ქულა! (<span id="clicksLeft">250</span>)
                 </button>
             </div>
             <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
@@ -236,23 +233,15 @@ updateCountdown();
                 <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">
                     ენერგიის სრულად აღსადგენად და სათამაშოდ ჩართე ერთ-ერთი სახალისო მინი-თამაში:
                 </p>
-                
-                <!-- მინი-თამაშზე გადასვლის ღილაკი -->
                 <div style="margin-bottom: 20px;">
-                    <a href="#" id="playGameBtn" class="btn btn-warning" style="display: inline-block; text-decoration: none; width: 100%; box-sizing: border-box; color: #000; font-weight: bold; padding: 14px;">
-                        🎮 მინი-თამაშის დაწყება 🚀
-                    </a>
+                    <button onclick="completeMiniGame(event)" class="btn btn-warning" style="width: 100%; padding: 14px; color: #000; font-weight: bold; cursor: pointer;">
+                        🎮 მინი-თამაშის გავლით ენერგიის აღდგენა 🚀
+                    </button>
                 </div>
             </div>
         </div>
 
-                <div id="adProgressText" style="color: #00ffcc; font-weight: bold; margin-bottom: 15px; font-size: 13px;"></div>
-                
-                <button onclick="confirmAdWatched()" class="btn btn-primary" id="claimEnergyBtn" style="display: none;">✅ რეკლამა ვნახე - ენერგიის აღდგენა</button>
-            </div>
-        </div>
-
-        <!-- რეგიონების ცოცხალი ლიდერბორდის ცხრილი -->
+        <!-- რეგიონების ლიდერბორდის ცხრილი -->
         <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
             <h4 style="color: #ffcc00; margin: 0 0 10px 0; font-size: 14px;">📊 რეგიონების რეიტინგი (Top List)</h4>
             <table class="leaderboard-table">

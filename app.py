@@ -701,8 +701,11 @@ with app.app_context():
         db.session.add(Settings(key='prize_pool', value='1200'))
     if not Settings.query.filter_by(key='last_winner').first():
         db.session.add(Settings(key='last_winner', value='იმერეთი'))
-    if not Settings.query.filter_by(key='game_status').first():
-        db.session.add(Settings(key='game_status', value='active')) # active ან paused
+    
+    # უსაფრთხოების შემოწმება: თუ თამაშის სტატუსი არ არის, ვქმნით როგორც 'active'
+    game_status_st = Settings.query.filter_by(key='game_status').first()
+    if not game_status_st:
+        db.session.add(Settings(key='game_status', value='active'))
     db.session.commit()
 
 # 🎮 ენერგიის აღდგენის API მინი-თამაშის გავლის შემდეგ
