@@ -117,14 +117,17 @@
     }
 </style>
 
-<!-- 🌟 სპონსორების ოფიციალური ზოლი -->
-<div class="sponsor-bar">
-    <span>🤝 კვირის გენერალური პარტნიორები:</span>
-    <div class="sponsor-logos">
-        <span>⚡ NOVAPAY</span>
-        <span>🛡️ CYBERSEC GEORGIA</span>
-        <span>🚀 AI LABS</span>
-    </div>
+<!-- 🏆 გასული კვირის ისტორია და მოტივაცია -->
+<div style="background: #161622; border: 1px solid #33334d; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 13px;">
+    <details style="cursor: pointer;">
+        <summary style="color: #ffcc00; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+            <span>🎉 გასული კვირის გამარჯვებული: <strong style="color: #00ffcc;">{{ last_winner_region | default('იმერეთი') }}</strong> (იხილე დეტალები ▼)</span>
+        </summary>
+        <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px; color: #d1d1d6; font-size: 12px;">
+            <p style="margin: 0 0 5px 0;">💰 განაწილდა შრომის პრინციპით. აქტიურმა მოთამაშეებმა მიიღეს სოლიდური პრემიები თავიანთ ვირტუალურ საფულეებში.</p>
+            <p style="margin: 0; color: #00ffcc; font-weight: bold;">🔥 გახსოვდეს: კვირის ბოლოს მხოლოდ ერთი რეგიონი ხდება გამარჯვებული! იაქტიურე და მიაშველე ქულები შენს რეგიონს!</p>
+        </div>
+    </details>
 </div>
 
 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -133,23 +136,59 @@
 
 <div class="dashboard-grid">
     
-    <!-- 📅 კვირის სეზონის ტაიმერი და საპრიზო ფონდი -->
-    <div style="background: linear-gradient(135deg, #161622, #111118); border: 1px solid #00ffcc; padding: 16px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-        <div>
-            <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 3px;">🏆 მიმდინარე კვირის საპრიზო ფონდი</span>
-            <div style="font-size: 24px; color: #00ffcc; font-weight: bold;">{{ current_week_prize_pool | default(1200) }} ₾</div>
-        </div>
-        <div style="text-align: right;">
-            <span style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 3px;">⏳ სეზონის პერიოდი (ორშაბათი - კვირა 22:00)</span>
-            <div style="font-size: 13px; color: #fff; font-weight: bold;" id="seasonStatusText">
-                {% if season_active | default(true) %}
-                    🟢 სეზონი აქტიურია (ბრძოლა მიმდინარეობს)
-                {% else %}
-                    🔴 სეზონი დასრულებულია — მიმდინარეობს დაანგარიშება
-                {% endif %}
-            </div>
-        </div>
+    <!-- 📅 კვირის სეზონის ტაიმერი და მკვეთრი საპრიზო ფონდი -->
+<div style="background: linear-gradient(135deg, #1b1b2f, #111118); border: 2px solid #00ffcc; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 0 25px rgba(0, 255, 204, 0.15); margin-bottom: 20px;">
+    <div>
+        <span style="font-size: 12px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: bold; letter-spacing: 0.5px;">🏆 მიმდინარე კვირის საპრიზო ფონდი</span>
+        <div style="font-size: 32px; color: #00ffcc; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,204,0.3);">{{ current_week_prize_pool | default(1200) }} ₾</div>
     </div>
+    <div style="text-align: right;">
+        <span style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 4px; font-weight: bold;">⏳ კვირის დასრულებამდე დარჩენილია:</span>
+        <div style="font-size: 18px; color: #ff4757; font-weight: bold; font-family: monospace;" id="liveCountdown">
+            იტვირთება...
+        </div>
+        <div style="font-size: 11px; color: #888; margin-top: 3px;">(სეზონი სრულდება კვირას 22:00 სთ-ზე)</div>
+    </div>
+</div>
+
+<!-- ⏱️ რეალური დროის ცოცხალი ტაიმერის სკრიპტი -->
+<script>
+function updateCountdown() {
+    // ვთვლით მომდევნო კვირის კვირა დღის 22:00-ს
+    const now = new Date();
+    const target = new Date();
+    // ვპოულობთ მიმდინარე კვირის კვირას (Sunday = 0, ან გადათვლა)
+    let day = now.getDay();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let seconds = now.getSeconds();
+
+    // მიახლოებითი დასასრული: კვირა დღის 22:00
+    target.setDate(now.getDate() + (7 - day) % 7);
+    target.setHours(22, 0, 0, 0);
+
+    // თუ უკვე კვირაა და 22:00 გადაცილებულია, ვუმიზნებთ შემდეგ კვირას
+    if (now > target) {
+        target.setDate(target.getDate() + 7);
+    }
+
+    const diff = target - now;
+    if (diff <= 0) {
+        document.getElementById("liveCountdown").innerText = "🔴 სეზონი დასრულებულია!";
+        return;
+    }
+
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    document.getElementById("liveCountdown").innerText = `${d}დ დღე : ${h}სთ : ${m}წთ : ${s}წმ`;
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
 
     <!-- 🌟 მთავარი არენა: რეგიონული შეჯიბრი (ფიქსირებული მომხმარებლის რეგიონი) -->
     <div class="card" style="border-color: #ffcc00;">
@@ -161,7 +200,7 @@
             <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: bold;">📍 შენი რეგიონის გენერალური სპონსორი</span>
             <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
             <p style="font-size: 12px; color: #d1d1d6; margin: 0; line-height: 1.5;">
-                ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას სარეკლამო ვიდეოების ყურება უზრუნველყოფს შენი და შენი რეგიონის წინსვლას!
+                ⚠️ <strong>ყურადღება:</strong>კლიკების ამოწურვისას ჩაირთვება სახალისო მინი-თამაში! ითამაშე, გაიმარჯვე და მიაშველე ენერგია შენს რეგიონს! 🎮🔥
             </p>
         </div>
 
