@@ -569,6 +569,7 @@ with app.app_context():
     init_regions()
     try:
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS clicks_left INTEGER DEFAULT 100;"))
+        db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
