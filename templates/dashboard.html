@@ -133,17 +133,35 @@
 
 <div class="dashboard-grid">
     
+    <!-- 📅 კვირის სეზონის ტაიმერი და საპრიზო ფონდი -->
+    <div style="background: linear-gradient(135deg, #161622, #111118); border: 1px solid #00ffcc; padding: 16px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 3px;">🏆 მიმდინარე კვირის საპრიზო ფონდი</span>
+            <div style="font-size: 24px; color: #00ffcc; font-weight: bold;">{{ current_week_prize_pool | default(1200) }} ₾</div>
+        </div>
+        <div style="text-align: right;">
+            <span style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 3px;">⏳ სეზონის პერიოდი (ორშაბათი - კვირა 22:00)</span>
+            <div style="font-size: 13px; color: #fff; font-weight: bold;" id="seasonStatusText">
+                {% if season_active | default(true) %}
+                    🟢 სეზონი აქტიურია (ბრძოლა მიმდინარეობს)
+                {% else %}
+                    🔴 სეზონი დასრულებულია — მიმდინარეობს დაანგარიშება
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     <!-- 🌟 მთავარი არენა: რეგიონული შეჯიბრი (ფიქსირებული მომხმარებლის რეგიონი) -->
     <div class="card" style="border-color: #ffcc00;">
         <h3 style="color: #ffcc00;">🏆 რეგიონების ბრძოლა (Live Arena)</h3>
         <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 10px;">შენი რეგიონი: <strong style="color: #00ffcc; text-transform: uppercase;">{{ current_user.region }}</strong></p>
         
-        <!-- 📢 შენი რეგიონის სპონსორის/კომპანიის რეკლამა (მუდმივად ჩანს ღილაკის ზემოთ) -->
-        <div style="background: #161622; border: 1px solid #33334d; border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: center;">
-            <span style="font-size: 10px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 5px;">📍 შენი რეგიონის გენერალური სპონსორი</span>
-            <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #222233;">
-            <p style="font-size: 11px; color: #a1a1aa; margin: 0; line-height: 1.4;">
-                ⚠️ <strong>ყურადღება:</strong> ენერგიის ამოწურვისას 2 სარეკლამო ვიდეოს ბოლომდე ყურება არის შენი და შენი რეგიონის გამომუშავება!
+        <!-- 📢 შენი რეგიონის სპონსორის/კომპანიის რეკლამა (გაზდილი, დიდი და თვალსაჩინო ბანერი) -->
+        <div style="background: #161622; border: 2px solid #ffcc00; border-radius: 14px; padding: 14px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(255, 204, 0, 0.15);">
+            <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: bold;">📍 შენი რეგიონის გენერალური სპონსორი</span>
+            <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
+            <p style="font-size: 12px; color: #d1d1d6; margin: 0; line-height: 1.5;">
+                ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას სარეკლამო ვიდეოების ყურება უზრუნველყოფს შენი და შენი რეგიონის წინსვლას!
             </p>
         </div>
 
@@ -201,52 +219,23 @@
         </div>
     </div>
 
-    <!-- ციფრული საფულე -->
+    <!-- ციფრული საფულე (თანხის მოთხოვნის გრაფის გარეშე, ავტომატური დარიცხვით) -->
     <div class="card">
         <h3>💰 ციფრული საფულე</h3>
         <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
         <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;">{{ current_user.balance }} ₾</div>
-        <p style="font-size: 12px; color: #888; margin-bottom: 15px;">რეპუტაციის ქულა: {{ current_user.reputation }}</p>
-        
-        <form action="{{ url_for('request_withdrawal') }}" method="POST">
-            <input type="number" name="amount" placeholder="თანხა (ლარი)" required min="1" class="input-field" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #161622; border: 1px solid #33334d; color: #fff; border-radius: 8px;">
-            <button type="submit" class="btn btn-danger">თანხის გატანის მოთხოვნა</button>
-        </form>
-    </div>
-
-    <!-- AI დავალებების ნაკადი (აი-დი დაემატა დაბრუნებისთვის) -->
-    <div class="card" id="tasks-section">
-        <h3>🎯 AI დავალებების ცენტრი</h3>
-        {% if tasks %}
-            {% for task in tasks %}
-                <div style="background: #161622; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid {% if task.is_completed %}#00ffcc{% else %}#ffcc00{% endif %};">
-                    <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                        <strong>{{ task.title }}</strong>
-                        <span style="font-size: 10px; color: #888; text-transform: uppercase;">
-                            {% if task.is_completed %}დასრულებული{% else %}მიმდინარე{% endif %}
-                        </span>
-                    </div>
-                    <p style="font-size: 12px; color: #aaa; margin: 6px 0;">ჯილდო: <span style="color: #00ffcc;">{{ task.reward }} GEL</span></p>
-                    {% if not task.is_completed %}
-                        <a href="{{ url_for('task_detail', task_id=task.id) }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; display: inline-block; margin-top: 5px;">დავალების შესრულება</a>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            <p style="font-size: 13px; color: #777; text-align: center;">ამჟამად აქტიური დავალებები არ არის.</p>
-        {% endif %}
+        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: {{ current_user.reputation }}</p>
+        <p style="font-size: 11px; color: #00ffcc; margin: 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
     </div>
 
     {% if current_user.is_admin %}
     <div class="card" style="border-color: #00ffcc;">
         <h3 style="color: #00ffcc;">⚙️ ადმინ-პანელი</h3>
         <div style="background: #161622; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;">
-            <p style="margin: 0;">სულ დავალებები: <strong>{{ total_tasks }}</strong></p>
-            <p style="margin: 4px 0 0 0;">შესრულების დონე: <strong>{{ completion_rate }}%</strong></p>
+            <p style="margin: 0;">სულ დავალებები: <strong>{{ total_tasks | default(0) }}</strong></p>
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
             <a href="/admin" class="btn" style="background: #222233; color: #00ffcc; font-size: 13px; padding: 10px; text-decoration: none;">⚙️ პროფესიონალური ადმინ-პანელი</a>
-            <a href="/add_task" class="btn" style="background: #222233; color: #fff; font-size: 13px; padding: 10px; text-decoration: none;">➕ ახალი დავალების დამატება</a>
         </div>
     </div>
     {% endif %}
@@ -267,7 +256,7 @@
 
 <script>
 let clickLimit = 100; 
-let adsWatched = 0;   
+let adsWatched = 0;    
 let pendingPoints = 0; 
 let currentAdUrl = "";
 
