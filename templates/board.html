@@ -56,24 +56,25 @@
         align-self: flex-end; 
     }
 
+    /* 🎯 დაბალანსებული და ლამაზი ფორმა */
     .chat-form { 
         display: flex; 
-        gap: 8px; 
+        gap: 10px; 
         align-items: center; 
         width: 100%;
         box-sizing: border-box;
     }
 
     .chat-input { 
-        flex-grow: 1; 
+        flex: 1; /* სრულად იკავებს დარჩენილ ადგილს */
+        min-width: 0; /* აუცილებელია რომ ინპუტი არ გაცდეს ეკრანს */
         background: #161622; 
         border: 1px solid #33334d; 
         color: #fff; 
         padding: 14px 16px; 
         border-radius: 12px; 
-        font-size: 16px; 
+        font-size: 16px; /* იცავს მობილურს ავტომატური ზუმისგან */
         outline: none; 
-        min-width: 0;
         touch-action: manipulation;
         box-sizing: border-box;
     }
@@ -83,13 +84,14 @@
         background: #00ffcc; 
         color: #000; 
         border: none; 
-        padding: 14px 18px; 
+        padding: 14px 20px; 
         border-radius: 12px; 
         font-weight: bold; 
         cursor: pointer; 
         transition: 0.3s;
         font-size: 14px;
-        flex-shrink: 0;
+        white-space: nowrap; /* ტექსტი არ გადაიტანოს ღილაკზე ორ ხაზად */
+        flex-shrink: 0; /* არ აპატარავებს ღილაკს */
         touch-action: manipulation;
     }
     .chat-btn:hover { background: #00cca3; }
