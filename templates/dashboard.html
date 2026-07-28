@@ -350,7 +350,6 @@ function boostRegion(event) {
                 if(data.success) {
                     document.getElementById('clickResponse').innerText = "🔥 ქულა შენს რეგიონს მიემატა! (სულ: " + data.new_score + ")";
                     
-                    // 🌟 ლაივ რეჟიმში ვანახლებთ შესაბამისი რეგიონის ქულას ცხრილში
                     let row = document.querySelector(`#regionsTableBody tr[data-region-id="${regionId}"]`);
                     if (row) {
                         let scoreCell = row.querySelector('.region-score-cell');
@@ -365,7 +364,7 @@ function boostRegion(event) {
     }, 1000);
 }
 
-// 🧠 ვიქტორინის ჩატვირთვა API-დან (ბანერით და კითხვით)
+// 🧠 ვიქტორინის ჩატვირთვა API-დან
 function loadQuiz() {
     let container = document.getElementById('quizContainer');
     container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება სარეკლამო ვიქტორინა... ⏳</h3>';
@@ -440,10 +439,13 @@ function submitQuiz(q_id, chosen_opt) {
     });
 }
 
-// 🎮 მინი-თამაშის გავლით ენერგიის სრული აღდგენა (250 კლიკი) - ერთადერთი და სწორი ვერსია
+// 🎮 ენერგიის სრული აღდგენა (250 კლიკი)
 function completeMiniGame(event) {
     if (event) event.preventDefault();
     
+    // ვასუფთავებთ ინტერვალს თუ თამაშისას იყო ჩართული
+    if (window.moveInterval) clearInterval(window.moveInterval);
+
     fetch('/api/restore_energy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -460,26 +462,132 @@ function completeMiniGame(event) {
     .catch(err => console.error(err));
 }
 
-// 🎮 ახალი მინი-თამაშის მოდალში ჩატვირთვის ფუნქცია
+// 🎮 მთავარი მინი-თამაშების ძრავა (4 თამაშის ავტომატური რენდერი ტიპის მიხედვით)
 function loadRandomGameModal() {
     let container = document.getElementById('quizContainer');
-    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება თამაში... ⏳</h3>';
+    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება მინი-თამაში... ⏳</h3>';
+    
     fetch('/api/get_random_game')
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            container.innerHTML = `
-                <div style="background: #161622; border: 1px solid #00ffcc; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 15px;">
-                    <h4 style="color: #00ffcc; margin-top: 0; font-size: 16px;">🎮 ${data.title}</h4>
-                    <p style="color: #d1d1d6; font-size: 13px; margin-bottom: 15px;">${data.description}</p>
-                    <a href="${data.game_url}" target="_blank" class="btn btn-primary" style="display: block; text-align: center; margin-bottom: 10px; text-decoration: none;">თამაშის გახსნა 🚀</a>
-                </div>
-                <button onclick="completeMiniGame(event)" class="btn btn-warning" style="width: 100%; padding: 10px; font-weight: bold; cursor: pointer;">
-                    ✅ ენერგიის აღდგენა
-                </button>
-            `;
+            renderMiniGame(data, container);
+        } else {
+            container.innerHTML = '<p style="color: #ff4757;">აქტიური თამაშები ვერ მოიძებნა.</p>';
         }
+    })
+    .catch(err => {
+        console.error(err);
+        container.innerHTML = '<p style="color: #ff4757;">შეცდომა ჩატვირთვისას.</p>';
     });
+}
+
+// 🎨 4-ვე თამაშის ინტერაქტიული ლოგიკა
+function renderMiniGame(data, container) {
+    let imgTag = data.sponsor_image ? `<img src="${data.sponsor_image}" style="width:100%; height:130px; object-fit:cover; border-radius:8px; margin-bottom:8px; border:1px solid #333;">` : '';
+    
+    if (data.game_type === 'puzzle') {
+        container.innerHTML = `
+            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">🧩 პაზლი: ${data.sponsor_name}</h4>
+            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
+            ${imgTag}
+            <p style="font-size:12px; color:#ffcc00; margin-bottom:8px;">ააწყვე უჯრები თანმიმდევრობით (1-დან 4-მდე):</p>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
+                <button onclick="checkPuzzleStep(1)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 1</button>
+                <button onclick="checkPuzzleStep(2)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 2</button>
+                <button onclick="checkPuzzleStep(3)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 3</button>
+                <button onclick="checkPuzzleStep(4)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 4</button>
+            </div>
+            <div id="puzzleMsg" style="font-size:12px; color:#00ffcc; font-weight:bold; text-align:center;"></div>
+        `;
+        window.puzzleStep = 1;
+
+    } else if (data.game_type === 'basket') {
+        container.innerHTML = `
+            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">🧺 დაიჭირე ლოგო: ${data.sponsor_name}</h4>
+            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
+            ${imgTag}
+            <div style="background:#0a0a0f; height:130px; position:relative; border-radius:8px; overflow:hidden; border:1px solid #333; margin-bottom:10px;" id="basketField">
+                <div id="targetItem" onclick="catchItem()" style="position:absolute; top:20px; left:50px; cursor:pointer; font-size:24px; user-select:none;">⭐</div>
+            </div>
+            <p style="margin:0 0 10px 0; font-size:12px; text-align:center;">ქულა: <span id="catchScore" style="color:#00ffcc; font-weight:bold;">0</span> / 5</p>
+        `;
+        window.scoreCount = 0;
+        if (window.moveInterval) clearInterval(window.moveInterval);
+        window.moveInterval = setInterval(() => {
+            let item = document.getElementById('targetItem');
+            if(item) {
+                item.style.top = Math.floor(Math.random() * 80) + 'px';
+                item.style.left = Math.floor(Math.random() * 200) + 'px';
+            }
+        }, 900);
+
+    } else if (data.game_type === 'fix_text') {
+        container.innerHTML = `
+            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">✍️ ტექსტის შესწორება: ${data.sponsor_name}</h4>
+            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
+            ${imgTag}
+            <input type="text" id="fixInput" placeholder="ჩაწერე სწორი სიტყვა / პასუხი" style="width:100%; padding:10px; background:#000; color:#fff; border:1px solid #00ffcc; border-radius:6px; margin:8px 0; box-sizing:border-box;">
+            <button onclick="checkTextFix()" class="btn btn-warning" style="width:100%; padding:10px; font-weight:bold;">შემოწმება</button>
+            <div id="textMsg" style="font-size:12px; margin-top:8px; text-align:center;"></div>
+        `;
+
+    } else if (data.game_type === 'spot_diff') {
+        container.innerHTML = `
+            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">🔍 იპოვე განსხვავება: ${data.sponsor_name}</h4>
+            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
+            <div style="position:relative; display:inline-block; width:100%; text-align:center;" onclick="checkDiff(event)">
+                ${imgTag}
+                <div style="position:absolute; top:20px; right:20px; width:40px; height:40px; border:2px dashed #ff4757; cursor:pointer;" title="დააკლიკე აქ"></div>
+            </div>
+            <div id="diffMsg" style="font-size:12px; color:#ffcc00; margin-top:5px; text-align:center;">დააკლიკე ბანერის მონიშნულ წერტილს!</div>
+        `;
+    }
+}
+
+// თამაშების შიდა შემოწმების ფუნქციები:
+function checkPuzzleStep(step) {
+    if (step === window.puzzleStep) {
+        window.puzzleStep++;
+        if (window.puzzleStep > 4) {
+            document.getElementById('puzzleMsg').innerText = "🎉 პაზლი წარმატებით აწყობილია!";
+            setTimeout(completeMiniGame, 1000);
+        } else {
+            document.getElementById('puzzleMsg').innerText = `სწორია! გადადით შემდეგზე (${window.puzzleStep}/4)`;
+        }
+    } else {
+        document.getElementById('puzzleMsg').innerText = "❌ არასწორი თანმიმდევრობაა, თავიდან სცადე!";
+        window.puzzleStep = 1;
+    }
+}
+
+function catchItem() {
+    window.scoreCount++;
+    let scoreEl = document.getElementById('catchScore');
+    if (scoreEl) scoreEl.innerText = window.scoreCount;
+    if (window.scoreCount >= 5) {
+        if (window.moveInterval) clearInterval(window.moveInterval);
+        alert("🎉 გილოცავ! ენერგია წარმატებით აღდგა!");
+        completeMiniGame();
+    }
+}
+
+function checkTextFix() {
+    let val = document.getElementById('fixInput').value.trim();
+    if (val.length > 0) {
+        document.getElementById('textMsg').style.color = '#00ffcc';
+        document.getElementById('textMsg').innerText = "🎉 სწორი პასუხია!";
+        setTimeout(completeMiniGame, 1000);
+    } else {
+        document.getElementById('textMsg').style.color = '#ff4757';
+        document.getElementById('textMsg').innerText = "❌ გთხოვთ ჩაწეროთ პასუხი.";
+    }
+}
+
+function checkDiff(e) {
+    document.getElementById('diffMsg').style.color = '#00ffcc';
+    document.getElementById('diffMsg').innerText = "🎉 განსხვავება ნაპოვნია! ენერგია აღდგა.";
+    setTimeout(completeMiniGame, 1000);
 }
 </script>
 {% endblock %}
