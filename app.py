@@ -546,15 +546,20 @@ def admin_dashboard():
         else:
             region_sponsors[reg.region_id] = None
 
+    quiz_questions = QuizQuestion.query.all()
+    mini_games = MiniGameItem.query.all()
+
     return render_template('admin_dashboard.html', 
-                          users=users_sorted, 
-                          users_by_region=users_by_region,
-                          user_stats=user_stats,
-                          regions=regions, 
-                          region_sponsors=region_sponsors,
-                          current_week_prize_pool=current_week_prize_pool,
-                          top_region=top_region,
-                          top_region_users=top_region_users)
+                           users=users_sorted, 
+                           users_by_region=users_by_region,
+                           user_stats=user_stats,
+                           regions=regions, 
+                           region_sponsors=region_sponsors,
+                           current_week_prize_pool=current_week_prize_pool,
+                           top_region=top_region,
+                           top_region_users=top_region_users,
+                           quiz_questions=quiz_questions,
+                           mini_games=mini_games)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -893,6 +898,26 @@ def admin_add_quiz_question():
         
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/quiz/delete/<int:quiz_id>', methods=['POST'])
+@login_required
+def admin_delete_quiz(quiz_id):
+    if not current_user.is_admin:
+        abort(403)
+    quiz = QuizQuestion.query.get_or_404(quiz_id)
+    # თუ სარეკლამო ფოტო აქვს, ფიზიკურადაც წავშალოთ ფოლდერიდან სუფთა სივრცისთვის
+    if quiz.sponsor_image:
+        try:
+            # path-ის ამოღება /static/... 
+            img_path = os.path.join(app.root_path, quiz.sponsor_image.lstrip('/'))
+            if os.path.exists(img_path):
+                os.remove(img_path)
+        except:
+            pass
+    db.session.delete(quiz)
+    db.session.commit()
+    flash("ვიქტორინის კითხვა წარმატებით წაიშალა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
 # 🎮 მინი-თამაშის დამატების მარშრუტი (რაც აკლდა)
 @app.route('/admin/mini_game/add', methods=['POST'])
 @login_required
@@ -908,6 +933,17 @@ def admin_add_mini_game():
     db.session.add(new_game)
     db.session.commit()
     flash("მინი-თამაში წარმატებით დაემატა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/mini_game/delete/<int:game_id>', methods=['POST'])
+@login_required
+def admin_delete_mini_game(game_id):
+    if not current_user.is_admin:
+        abort(403)
+    game = MiniGameItem.query.get_or_404(game_id)
+    db.session.delete(game)
+    db.session.commit()
+    flash("მინი-თამაში წარმატებით წაიშალა!", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/logout')

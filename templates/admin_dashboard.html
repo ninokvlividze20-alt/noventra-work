@@ -202,6 +202,88 @@ function previewQuizImage(event) {
         </form>
     </div>
 
+<!-- 📚 ატვირთული ვიქტორინების სრული სია და მართვა -->
+    <div class="admin-section" style="border-color: #ffcc00;">
+        <details>
+            <summary style="color: #00ffcc; cursor: pointer; font-size: 16px; font-weight: bold;">📚 ატვირთული ვიქტორინების სია (სულ: {{ quiz_questions|length }})</summary>
+            <div style="margin-top: 15px; overflow-x: auto;">
+                {% if quiz_questions %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>სპონსორი</th>
+                            <th>პაკეტი</th>
+                            <th>კითხვა</th>
+                            <th>ბანერი</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for q in quiz_questions %}
+                        <tr>
+                            <td><strong>{{ q.sponsor_name }}</strong></td>
+                            <td><span style="color: {% if q.package_type == 'Gold' %}#ffcc00{% else %}#00ffcc{% endif %};">{{ q.package_type }}</span></td>
+                            <td>{{ q.question_text[:50] }}...</td>
+                            <td>
+                                {% if q.sponsor_image %}
+                                <img src="{{ q.sponsor_image }}" class="sponsor-preview" alt="Quiz Banner">
+                                {% else %}
+                                <span style="color: #888; font-size: 11px;">არ აქვს</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin_delete_quiz', quiz_id=q.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ კითხვის წაშლა?');">
+                                    <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="color: #a1a1aa; font-size: 13px; margin-top: 10px;">ბაზაში ვიქტორინის კითხვები ჯერ არ არის.</p>
+                {% endif %}
+            </div>
+        </details>
+    </div>
+
+    <!-- 🎮 ატვირთული მინი-თამაშების სრული სია და მართვა -->
+    <div class="admin-section" style="border-color: #00ffcc;">
+        <details>
+            <summary style="color: #00ffcc; cursor: pointer; font-size: 16px; font-weight: bold;">🎮 ატვირთული მინი-თამაშების სია (სულ: {{ mini_games|length }})</summary>
+            <div style="margin-top: 15px; overflow-x: auto;">
+                {% if mini_games %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>თამაშის სათაური</th>
+                            <th>აღწერა</th>
+                            <th>ბმული</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in mini_games %}
+                        <tr>
+                            <td><strong>{{ game.title }}</strong></td>
+                            <td>{{ game.description[:60] }}...</td>
+                            <td style="color: #00ffcc; font-family: monospace;">{{ game.game_url }}</td>
+                            <td>
+                                <form action="{{ url_for('admin_delete_mini_game', game_id=game.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ თამაშის წაშლა?');">
+                                    <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="color: #a1a1aa; font-size: 13px; margin-top: 10px;">ბაზაში მინი-თამაშები ჯერ არ არის.</p>
+                {% endif %}
+            </div>
+        </details>
+    </div>
+
     <div class="grid-2">
         <!-- 📍 რეგიონების სპონსორების ფოტოები და ზომები -->
         <div class="admin-section">
@@ -258,7 +340,7 @@ function previewQuizImage(event) {
         </div>
     </div>
 
-    <!-- 👥 მომხმარებლების 100%-იანი მართვა რეგიონების მიხედვით -->
+    <!-- 👥 მომხმარებლების სრული კონტროლი რეგიონების მიხედვით (ჩამოსაშლელებით) -->
     <div class="admin-section" style="grid-column: 1 / -1;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
             <h3 style="margin: 0; border: none;">👥 მომხმარებლების სრული კონტროლი (ბალანსი, კლიკები, ბანი, რეგიონი)</h3>
@@ -269,11 +351,11 @@ function previewQuizImage(event) {
         </div>
        
         {% for reg_id, data in users_by_region.items() %}
-            <div class="region-user-block" style="margin-bottom: 25px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
-                <h4 style="color: #ffcc00; margin-top: 0; border-bottom: 1px solid #222233; padding-bottom: 8px; font-size: 15px;">
-                    📍 {{ data.name }} (იუზერები: {{ data.users|length }})
-                </h4>
-
+        <details class="region-user-block" style="margin-bottom: 15px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
+            <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px;">
+                📍 {{ data.name }} (იუზერები: {{ data.users|length }})
+            </summary>
+            <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px;">
                 {% if data.users %}
                 <div style="overflow-x: auto;">
                     <table class="admin-table" style="margin-top: 5px;">
@@ -321,7 +403,7 @@ function previewQuizImage(event) {
                                     <td>
                                         <div style="display: flex; gap: 5px;">
                                             <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
-                                </form>
+                                        </form>
                                             <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('წავშალო მომხმარებელი?');">
                                                 <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
                                             </form>
@@ -336,6 +418,7 @@ function previewQuizImage(event) {
                 <p style="color: #777; font-size: 12px; margin: 5px 0 0 0;">ამ რეგიონში მომხმარებლები არ არიან.</p>
                 {% endif %}
             </div>
+        </details>
         {% endfor %}
     </div>
 </div>
