@@ -2,42 +2,50 @@
 
 {% block content %}
 <style>
-    .about-container { max-width: 850px; margin: 40px auto; padding: 35px; background: #111118; border-radius: 20px; border: 1px solid #222233; box-shadow: 0 10px 40px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+    .about-container { max-width: 900px; margin: 40px auto; padding: 40px; background: #111118; border-radius: 20px; border: 1px solid #222233; box-shadow: 0 10px 40px rgba(0,0,0,0.7); position: relative; overflow: hidden; }
     .about-container::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #00ffcc, #ffcc00); }
-    .about-container h2 { color: #ffcc00; margin-bottom: 25px; text-align: center; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
-    .about-container h3 { color: #00ffcc; margin-top: 35px; border-bottom: 1px solid #222233; padding-bottom: 10px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-    .about-container p { color: #d1d1d6; line-height: 1.7; margin-bottom: 15px; font-size: 14px; }
+    .about-container h2 { color: #ffcc00; margin-bottom: 15px; text-align: center; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
+    .about-subtitle { text-align: center; color: #00ffcc; font-size: 15px; margin-bottom: 30px; font-weight: bold; }
+    .about-container h3 { color: #ffcc00; margin-top: 35px; border-bottom: 1px solid #222233; padding-bottom: 10px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+    .about-container p { color: #d1d1d6; line-height: 1.8; margin-bottom: 15px; font-size: 14px; }
     .about-container ul { color: #d1d1d6; padding-left: 20px; font-size: 14px; }
-    .about-container li { margin-bottom: 12px; line-height: 1.5; }
+    .about-container li { margin-bottom: 14px; line-height: 1.6; }
     .highlight { color: #00ffcc; font-weight: bold; }
     .gold-text { color: #ffcc00; font-weight: bold; }
-    .feature-box { background: #161622; border: 1px solid #33334d; padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; }
+    .feature-box { background: #161622; border: 1px solid #33334d; padding: 20px; border-radius: 14px; margin-bottom: 20px; box-shadow: inset 0 0 15px rgba(0,255,204,0.03); }
+    .cta-box { background: linear-gradient(135deg, #1b1b2f, #161622); border: 2px solid #00ffcc; padding: 25px; border-radius: 16px; text-align: center; margin-top: 40px; box-shadow: 0 0 25px rgba(0,255,204,0.15); }
+    .cta-btn { display: inline-block; background: linear-gradient(135deg, #ffcc00, #ff9900); color: #000; font-weight: bold; padding: 14px 30px; border-radius: 12px; text-decoration: none; margin-top: 15px; font-size: 16px; transition: 0.3s; box-shadow: 0 4px 15px rgba(255,204,0,0.3); }
+    .cta-btn:hover { transform: scale(1.03); opacity: 0.95; }
 </style>
 
 <div class="about-container">
-    <h2>🎮 Noventra Play - რეგიონების ცოცხალი არენა</h2>
+    <h2>🎮 Noventra Play - სად იწყება რეგიონების დიდი ბრძოლა</h2>
+    <div class="about-subtitle">⚡ იაქტიურე, მიაშველე ქულა შენს მხარეს და გახადე შენი რეგიონი ჩემპიონი!</div>
 
-    <h3>🎯 1. Who We Are / ვინ ვართ ჩვენ</h3>
     <div class="feature-box">
-        <p><strong>EN:</strong> Noventra Play is an innovative competitive gaming and engagement platform in Georgia where regions battle in real-time, complete daily tasks, earn energy through mini-games, and compete for weekly cash prize pools.</p>
-        <p style="margin-bottom: 0;"><strong>GE:</strong> Noventra Play არის ინოვაციური სათამაშო და სამეჯიბრო პლატფორმა საქართველოში, სადაც რეგიონები რეალურ დროში ეჯიბრებიან ერთმანეთს, ასრულებენ ყოველდღიურ დავალებებს, აღადგენენ ენერგიას მინი-თამაშებით და იბრძვიან ყოველკვირეული ფულადი პრიზებისთვის.</p>
+        <p><strong>რა არის Noventra Play?</strong> ეს არ არის უბრალოდ ვებსაიტი — ეს არის პირველი მასშტაბური ინტერაქტიული არენა საქართველოში, რომელიც აერთიანებს აზარტს, გეიმფიკაციას, სპონსორების ბანერებსა და რეალურ ფულად პრიზებს. აქ თითოეული კლიკი და თითოეული აქტიური მოთამაშე წყვეტს იმას, თუ რომელი რეგიონი აიღებს კვირის მთავარ ტიტულსა და სოლიდურ საპრიზო ფონდს!</p>
     </div>
 
-    <h3>⚡ 2. How It Works / როგორ მუშაობს თამაში</h3>
+    <h3>🏆 როგორ მუშაობს შეჯიბრი? (დეტალური მექანიკა)</h3>
     <ul>
-        <li><span class="highlight">რეგიონული ბრძოლა (Live Arena):</span> თითოეული მომხმარებელი აფიქსირებს თავის რეგიონს და კლიკებით აგროვებს ქულებს, რათა თავისი მხარე ლიდერთა სიის სათავეში მოიყვანოს.<br><em>(Each user represents their region and boosts scores with clicks to lead the leaderboard.)</em></li>
-        <li><span class="highlight">ენერგია და მინი-თამაშები:</span> კლიკების ამოწურვისას (250 კლიკი) ირთვება სახალისო მინი-თამაშები, რომელთა გავლითაც მოთამაშეები სრულად აღადგენენ ენერგიას და აგრძელებენ რეგიონის მხარდაჭერას.<br><em>(When clicks run out, mini-games activate to restore energy and keep the action going.)</em></li>
-        <li><span class="gold-text">საპრიზო ფონდი და ავტომატური დარიცხვა:</span> ყოველ კვირას სეზონის დასრულებისას გამარჯვებული რეგიონის აქტიური მონაწილეები იღებენ სოლიდურ პრემიებსა და თანხებს თავიანთ ციფრულ საფულეებში.<br><em>(Weekly seasons end with rewards distributed automatically to active participants of the winning region.)</em></li>
+        <li><span class="highlight">1. რეგისტრაცია და რეგიონის არჩევანი:</span> რეგისტრაციისას შენ ირჩევ შენს მშობლიურ ან საყვარელ რეგიონს (თბილისი, იმერეთი, აჭარა, კახეთი, სამეგრელო და ა.შ.). ამ მომენტიდან შენ ხდები ამ დიდი გუნდის წევრი და შენი ყოველი წარმატება შენს რეგიონს ეწერება!</li>
+        <li><span class="highlight">2. ლაივ არენა და კლიკების ძალა:</span> ყოველდღიურად შენ გეძლევა ფიქსირებული ენერგია (250 კლიკი). თითოეული დაკლიკებით შენ პირდაპირ ზრდი შენი რეგიონის საერთო ქულას ცოცხალ ლიდერბორდში. რეიტინგი იცვლება წამებში — ყოველი კლიკი წონადია!</li>
+        <li><span class="highlight">3. მინი-თამაშები და ენერგიის აღდგენა:</span> როცა 250 კლიკი ამოიწურება, ენერგია არ მთავრდება! სისტემა გთავაზობს სახალისო მინი-თამაშებსა და პროცესებს, რომელთა გავლითაც შეგიძლია მომენტალურად აღადგინო ძალები და ბრძოლა განაახლო.</li>
+        <li><span class="gold-text">4. ყოველკვირეული საპრიზო ფონდი და მოგება:</span> ყოველ კვირას (კვირა დღის ბოლოს) სეზონი იხურება. სისტემა ადგენს გამარჯვებულ რეგიონს, ხოლო საპრიზო ფონდი (რომელიც მუდმივად იზრდება) ავტომატურად ნაწილდება აქტიურ მოთამაშეებზე. თანხები ირიცხება შენს ციფრულ საფულეში რეალური გატანის პერსპექტივით!</li>
     </ul>
 
-    <h3>🛡️ 3. Technology & Fair Play / ტექნოლოგიები და სამართლიანი თამაში</h3>
+    <h3>🤝 რეგიონული სპონსორები და კომუნიკაცია</h3>
     <div class="feature-box">
-        <p><strong>EN:</strong> Powered by a robust Python/Flask and PostgreSQL architecture, Noventra Play ensures lightning-fast live score synchronization, secure user data handling, and absolute transparency in the competition process.</p>
-        <p style="margin-bottom: 0;"><strong>GE:</strong> მძლავრ Python/Flask და PostgreSQL ინფრასტრუქტურაზე აგებული Noventra Play უზრუნველყოფს ქულების ელვისებურ ლაივ სინქრონიზაციას, მომხმარებელთა მონაცემების მკაცრ უსაფრთხოებასა და შეჯიბრის აბსოლუტურ გამჭვირვალობას.</p>
+        <p>თითოეულ რეგიონს ჰყავს საკუთარი გენერალური სპონსორი/კომპანია, რომლის ვიზუალური ბანერიც ამშვენებს შენს სამუშაო პანელს. გარდა ამისა, თითოეულ რეგიონს აქვს <strong>დახურული შიდა ჩატი</strong>, სადაც თანამემამულეები გეგმავენ ტაქტიკას, ეცნობიან სიახლეებს და ერთმანეთს უზიარებენ ენერგიას.</p>
     </div>
 
-    <h3>🚀 4. Join the Battle / შემოუერთდი ბრძოლას</h3>
-    <p><strong>EN:</strong> Choose your region, invite friends, use your daily energy wisely, and help your homeland become this week's champion on Noventra Play!</p>
-    <p><strong>GE:</strong> აირჩიე შენი რეგიონი, მოიწვიე მეგობრები, გონივრულად გამოიყენე ყოველდღიური ენერგია და მიაშველე ძალა შენს მხარეს, რომ გახდეს Noventra Play-ს მიმდინარე კვირის ჩემპიონი!</p>
+    <h3>🛡️ ტექნოლოგიური უსაფრთხოება და სამართლიანი თამაში</h3>
+    <p>პლატფორმა აგებულია თანამედროვე, მძლავრ ტექნოლოგიურ სტანდარტებზე (Python/Flask & PostgreSQL ინფრასტრუქტურა). ეს უზრუნველყოფს მონაცემთა აბსოლუტურ უსაფრთხოებას, კლიკების დათვლის ლაივ სიზუსტეს და სრულად გამჭვირვალე სატურნირო გარემოს ყოველგვარი ხარვეზის გარეშე.</p>
+
+    <div class="cta-box">
+        <h3 style="color: #00ffcc; border: none; margin-top: 0; justify-content: center;">🔥 მზად ხარ ბრძოლისთვის?</h3>
+        <p style="margin-bottom: 10px; color: #fff;">არ დატოვო შენი რეგიონი უპატრონოდ! შემოუერთდი ათასობით მოთამაშეს, დაამტკიცე შენი მხარის ძალა და მოიგე შენი წილი პრიზი.</p>
+        <a href="{{ url_for('dashboard') }}" class="cta-btn">🚀 გადადი არენაზე და დაიწყე დაკლიკება!</a>
+    </div>
 </div>
 {% endblock %}
