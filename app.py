@@ -279,8 +279,14 @@ def add_score():
     region = RegionScore.query.filter_by(region_id=region_id).first()
     if region:
         region.score += points
+        # აქვე ვუახლებთ მომხმარებელს დარჩენილ კლიკებსაც ბაზაში
+        if current_user.clicks_left >= points:
+            current_user.clicks_left -= points
+        else:
+            current_user.clicks_left = 0
+            
         db.session.commit()
-        return jsonify({"success": True, "new_score": region.score})
+        return jsonify({"success": True, "new_score": region.score, "clicks_left": current_user.clicks_left})
     
     return jsonify({"success": False, "message": "Region not found"}), 400
 

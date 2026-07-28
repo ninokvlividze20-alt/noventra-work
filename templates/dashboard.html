@@ -251,14 +251,14 @@ updateCountdown();
                         <th style="text-align: right;">ქულები</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for reg in regions %}
-                    <tr {% if reg.region_id == current_user.region %}style="background: rgba(0, 255, 204, 0.05);"{% endif %}>
-                        <td>{{ reg.region_name }} {% if reg.region_id == current_user.region %}📍 (შენი){% endif %}</td>
-                        <td style="text-align: right; color: #00ffcc; font-weight: bold;">{{ reg.score }} ⚡</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                <tbody id="regionsTableBody">
+    {% for reg in regions %}
+    <tr data-region-id="{{ reg.region_id }}" {% if reg.region_id == current_user.region %}style="background: rgba(0, 255, 204, 0.05);"{% endif %}>
+        <td>{{ reg.region_name }} {% if reg.region_id == current_user.region %}📍 (შენი){% endif %}</td>
+        <td class="region-score-cell" style="text-align: right; color: #00ffcc; font-weight: bold;">{{ reg.score }} ⚡</td>
+    </tr>
+    {% endfor %}
+</tbody>
             </table>
         </div>
     </div>
@@ -344,6 +344,15 @@ function boostRegion(event) {
             .then(data => {
                 if(data.success) {
                     document.getElementById('clickResponse').innerText = "🔥 ქულა შენს რეგიონს მიემატა! (სულ: " + data.new_score + ")";
+                    
+                    // 🌟 ლაივ რეჟიმში ვანახლებთ შესაბამისი რეგიონის ქულას ცხრილში
+                    let row = document.querySelector(`#regionsTableBody tr[data-region-id="${regionId}"]`);
+                    if (row) {
+                        let scoreCell = row.querySelector('.region-score-cell');
+                        if (scoreCell) {
+                            scoreCell.innerText = data.new_score + " ⚡";
+                        }
+                    }
                 }
             })
             .catch(err => console.error(err));
