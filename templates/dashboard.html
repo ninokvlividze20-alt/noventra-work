@@ -226,17 +226,22 @@ updateCountdown();
             <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
         {% endif %}
 
-        <!-- 🎮 მოდალური ფანჯარა მინი-თამაშისათვის (ენერგიის ამოწურვისას) -->
+       <!-- 🪟 მოდალური ფანჯარა ვიქტორინისა და თამაშების სიით -->
         <div id="adModal" class="ad-modal">
             <div class="ad-modal-content">
                 <h3 style="color: #ffcc00; margin-top: 0;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
                 <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">
-                    ენერგიის სრულად აღსადგენად და სათამაშოდ ჩართე ერთ-ერთი სახალისო მინი-თამაში:
+                    ენერგიის სრულად აღსადგენად აირჩიე ერთ-ერთი გზა:
                 </p>
-                <div style="margin-bottom: 20px;">
-                    <button onclick="completeMiniGame(event)" class="btn btn-warning" style="width: 100%; padding: 14px; color: #000; font-weight: bold; cursor: pointer;">
-                        🎮 მინი-თამაშის გავლით ენერგიის აღდგენა 🚀
-                    </button>
+                <div id="quizContainer" style="margin-bottom: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button onclick="loadQuiz()" class="btn btn-warning" style="width: 100%; padding: 12px; color: #000; font-weight: bold; cursor: pointer;">
+                            🎁 სპონსორის ვიქტორინა (პასუხი და ენერგია)
+                        </button>
+                        <button onclick="loadRandomGameModal()" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: bold; cursor: pointer;">
+                            🎮 სწრაფი მინი-თამაში 🚀
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -439,6 +444,48 @@ function completeMiniGame(event) {
         }
     })
     .catch(err => console.error(err));
+}
+
+// 🎮 მინი-თამაშის გავლით ენერგიის სრული აღდგენა (250 კლიკი)
+function completeMiniGame(event) {
+    if (event) event.preventDefault();
+    
+    fetch('/api/restore_energy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            clickLimit = data.new_clicks;
+            document.getElementById('clicksLeft').innerText = clickLimit;
+            document.getElementById('adModal').style.display = 'none';
+            document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (250 კლიკი)!";
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+// 🎮 ახალი მინი-თამაშის მოდალში ჩატვირთვის ფუნქცია
+function loadRandomGameModal() {
+    let container = document.getElementById('quizContainer');
+    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება თამაში... ⏳</h3>';
+    fetch('/api/get_random_game')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            container.innerHTML = `
+                <div style="background: #161622; border: 1px solid #00ffcc; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 15px;">
+                    <h4 style="color: #00ffcc; margin-top: 0; font-size: 16px;">🎮 ${data.title}</h4>
+                    <p style="color: #d1d1d6; font-size: 13px; margin-bottom: 15px;">${data.description}</p>
+                    <a href="${data.game_url}" target="_blank" class="btn btn-primary" style="display: block; text-align: center; margin-bottom: 10px; text-decoration: none;">თამაშის გახსნა 🚀</a>
+                </div>
+                <button onclick="completeMiniGame(event)" class="btn btn-warning" style="width: 100%; padding: 10px; font-weight: bold; cursor: pointer;">
+                    ✅ ენერგიის აღდგენა
+                </button>
+            `;
+        }
+    });
 }
 </script>
 {% endblock %}

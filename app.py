@@ -881,6 +881,23 @@ def admin_add_quiz_question():
         
     return redirect(url_for('admin_dashboard'))
 
+# 🎮 მინი-თამაშის დამატების მარშრუტი (რაც აკლდა)
+@app.route('/admin/mini_game/add', methods=['POST'])
+@login_required
+def admin_add_mini_game():
+    if not current_user.is_admin:
+        abort(403)
+    new_game = MiniGameItem(
+        title=request.form.get('title'),
+        description=request.form.get('description'),
+        game_url=request.form.get('game_url', '#'),
+        is_active=True
+    )
+    db.session.add(new_game)
+    db.session.commit()
+    flash("მინი-თამაში წარმატებით დაემატა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/logout')
 def logout():
     logout_user()
