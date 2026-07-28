@@ -57,28 +57,49 @@
         </div>
     </div>
 
-    <!-- 🧮 გამარჯვებული რეგიონის საპრიზო თანხების პროცენტული კალკულატორი -->
+    <!-- 🧮 გამარჯვებული რეგიონის საპრიზო თანხების მართვა და ჩარიცხვა -->
     <div class="admin-section" style="border-color: #00ffcc;">
-        <h3>🧮 გამარჯვებული რეგიონის თანხების პროცენტული გადანაწილება</h3>
-        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">აირჩიე რეგიონი და მიუთითე საპრიზო თანხა, რომ პროგრამამ ავტომატურად გამოთვალოს განაწილება აქტიურ მოთამაშეებზე.</p>
+        <h3>🧮 გამარჯვებული რეგიონის თანხების ავტომატური გადანაწილება</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">სისტემა ავტომატურად ამჟღავნებს ლიდერ რეგიონს, მის აქტიურ მოთამაშეებსა და მათ საბანკო რეკვიზიტებს პროფილებიდან.</p>
         
-        <div class="grid-2" style="align-items: flex-end;">
-            <div>
-                <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">აირჩიე რეგიონი:</label>
-                <select id="calcRegion" class="input-field">
-                    {% for reg in regions %}
-                    <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
-                    {% endfor %}
-                </select>
+        <div style="background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d; margin-top: 15px;">
+            <p style="color: #ffcc00; font-size: 14px; margin-top: 0;"><strong>🏆 მიმდინარე ლიდერი რეგიონი:</strong> <span style="color: #00ffcc;">{{ top_region.region_name if top_region else 'არ არის' }}</span> (სულ ქულა: {{ top_region.score if top_region else 0 }} ⚡)</p>
+            <p style="color: #fff; font-size: 13px;">საპრიზო ფონდი განაწილებისთვის: <strong style="color: #00ffcc;">{{ current_week_prize_pool }} ₾</strong></p>
+
+            {% if top_region_users %}
+            <div style="overflow-x: auto; margin-top: 15px;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>მომხმარებელი</th>
+                            <th>ტელეფონი (Profile)</th>
+                            <th>საბანკო ანგარიში IBAN (Profile)</th>
+                            <th>აქტიურობა (დახარჯული კლიკები)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tu in top_region_users[:5] %}
+                        <tr>
+                            <td><strong>{{ tu.username }}</strong></td>
+                            <td style="color: #00ffcc;">{{ tu.phone if tu.phone else 'არ არის მითითებული ⚠️' }}</td>
+                            <td style="color: #ffcc00; font-family: monospace;">{{ tu.bank_account if tu.bank_account else 'არ არის მითითებული ⚠️' }}</td>
+                            <td>{{ 250 - tu.clicks_left }} კლიკი</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div>
-                <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">საპრიზო თანხა (₾):</label>
-                <input type="number" id="calcAmount" value="{{ current_week_prize_pool | default('1200') }}" class="input-field">
-            </div>
+
+            <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" style="margin-top: 20px;" onsubmit="return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');">
+                <button type="submit" class="btn-sm btn-success" style="padding: 12px 25spx; font-size: 14px; width: 100%;">
+                    🚀 თანხების ავტომატურად ჩარიცხვა გამარჯვებულების საფულეებში
+                </button>
+            </form>
+            {% else %}
+            <p style="color: #ff4757; font-size: 13px; margin-bottom: 0;">ლიდერ რეგიონში აქტიური მოთამაშეები არ მოიძებნა.</p>
+            {% endif %}
         </div>
-        <div style="margin-top: 15px;">
-            <button type="button" onclick="calculateDistribution()" class="btn-sm btn-success" style="padding: 10px 20px;">📊 პროცენტული გადანაწილების გამოთვლა</button>
-        </div>
+    </div>
 
         <div id="calcResult" style="margin-top: 15px; background: #161622; padding: 15px; border-radius: 10px; border: 1px solid #33334d; display: none; font-size: 13px; color: #fff;">
             <!-- აქ გამოჩნდება ავტომატური გათვლა -->

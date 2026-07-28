@@ -397,28 +397,32 @@ def admin_dashboard():
     if not current_user.is_admin:
         abort(403)
     
-    # ამოვქაჩოთ რეგიონები და მომხმარებლები
     users = User.query.all()
-    regions = RegionScore.query.all()
+    regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
     
-    # წამოვქაჩოთ საპრიზო ფონდი პარამეტრებიდან
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
-    current_week_prize_pool = prize_setting.value if prize_setting else "1200"
+    current_week_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
 
-    # თითოეული მომხმარებლისთვის აქტიურობის დათვლა
+    # ვპოულობთ მიმდინარე ლიდერ (ან გამარჯვებულ) რეგიონს
+    top_region = RegionScore.query.order_by(RegionScore.score.desc()).first()
+    top_region_users = []
+    
+    if top_region:
+        # ამოვქაჩავთ ამ რეგიონის იუზერებს და დავალაგებთ აქტიურობის მიხედვით
+        region_users = [u for u in users if u.region == top_region.region_id and not u.is_admin]
+        # აქტიურობის ქულა: (250 - clicks_left)
+        top_region_users = sorted(region_users, key=lambda x: (250 - x.clicks_left), reverse=True)
+
     user_stats = {}
     for u in users:
         watched_ads_count = UserAdView.query.filter_by(user_id=u.id).count()
-        
         user_stats[u.id] = {
             'watched_ads': watched_ads_count,
-            'activity_score': (100 - u.clicks_left) + (watched_ads_count * 2)
+            'activity_score': (250 - u.clicks_left) + (watched_ads_count * 2)
         }
 
-    # მომხმარებლები დავალაგოთ აქტიურობის მიხედვით
     users_sorted = sorted(users, key=lambda x: user_stats[x.id]['activity_score'], reverse=True)
 
-    # რეგიონების მიხედვით დაჯგუფება
     users_by_region = {}
     for reg in regions:
         users_by_region[reg.region_id] = {
@@ -439,12 +443,14 @@ def admin_dashboard():
             region_sponsors[reg.region_id] = None
 
     return render_template('admin_dashboard.html', 
-                           users=users_sorted, 
-                           users_by_region=users_by_region,
-                           user_stats=user_stats,
-                           regions=regions, 
-                           region_sponsors=region_sponsors,
-                           current_week_prize_pool=current_week_prize_pool)
+                          users=users_sorted, 
+                          users_by_region=users_by_region,
+                          user_stats=user_stats,
+                          regions=regions, 
+                          region_sponsors=region_sponsors,
+                          current_week_prize_pool=current_week_prize_pool,
+                          top_region=top_region,
+                          top_region_users=top_region_users)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -685,6 +691,47 @@ def admin_chats_send():
         db.session.add(new_q)
         db.session.commit()
     return redirect(url_for('admin_chats', region=region_id))
+
+# 💰 გამარჯვებული რეგიონის მოთამაშეებზე საპრიზო თანხების ავტომატური და უსაფრთხო ჩარიცხვა
+@app.route('/admin/distribute_prizes', methods=['POST'])
+@login_required
+def admin_distribute_prizes():
+    if not current_user.is_admin:
+        abort(403)
+    
+    top_region = RegionScore.query.order_by(RegionScore.score.desc()).first()
+    if not top_region:
+        flash("რეგიონები ვერ მოიძებნა!", "danger")
+        return redirect(url_for('admin_dashboard'))
+
+    prize_setting = Settings.query.filter_by(key='prize_pool').first()
+    total_prize = float(prize_setting.value) if prize_setting else 1200.0
+
+    region_users = [u for u in User.query.filter_by(region=top_region.region_id).all() if not u.is_admin]
+    if not region_users:
+        flash("გამარჯვებულ რეგიონში აქტიური მომხმარებლები არ არიან!", "warning")
+        return redirect(url_for('admin_dashboard'))
+
+    # ვალაგებთ აქტიურობის მიხედვით
+    sorted_r_users = sorted(region_users, key=lambda x: (250 - x.clicks_left), reverse=True)
+
+    # პროცენტული გადანაწილება უსაფრთხო სერვერული ლოგიკით:
+    # 1-ლი ადგილი - 50%, მე-2 ადგილი - 30%, დანარჩენებზე თანაბრად იყოფა დარჩენილი 20%
+    if len(sorted_r_users) == 1:
+        sorted_r_users[0].balance += total_prize
+    elif len(sorted_r_users) == 2:
+        sorted_r_users[0].balance += total_prize * 0.60
+        sorted_r_users[1].balance += total_prize * 0.40
+    else:
+        sorted_r_users[0].balance += total_prize * 0.50
+        sorted_r_users[1].balance += total_prize * 0.30
+        rest_share = (total_prize * 0.20) / (len(sorted_r_users) - 2)
+        for u in sorted_r_users[2:]:
+            u.balance += rest_share
+
+    db.session.commit()
+    flash(f"საპრიზო თანხები ({total_prize} ₾) წარმატებით ჩაერიცხა გამარჯვებული რეგიონის ({top_region.region_name}) აქტიურ მოთამაშეებს!", "success")
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/logout')
 def logout():
