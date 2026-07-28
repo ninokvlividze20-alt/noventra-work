@@ -133,9 +133,11 @@ class QuizQuestion(db.Model):
 class MiniGameItem(db.Model):
     __tablename__ = 'mini_game_items'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
+    sponsor_name = db.Column(db.String(100), default="სპონსორი")
+    sponsor_image = db.Column(db.String(255), default="")
+    package_type = db.Column(db.String(20), default="Bronze")
+    game_type = db.Column(db.String(50), default="puzzle") # puzzle, basket, fix_text, spot_diff
     description = db.Column(db.Text, nullable=False)
-    game_url = db.Column(db.String(255), nullable=False) # თამაშის ბმული ან ფოლდერი
     is_active = db.Column(db.Boolean, default=True)
 
 # ----------------- ახალი API-ები ვიქტორინისა და თამაშებისთვის -----------------
@@ -148,16 +150,15 @@ def get_random_quiz():
     if not questions:
         return jsonify({"success": False, "message": "კითხვები არ არის ბაზაში"})
     
-    # სარეკლამო პაკეტების წონები (Gold პაკეტის კითხვები უფრო ხშირად ამოვარდება)
     weighted_pool = []
     for q in questions:
         weight = 1
         if q.package_type == 'Gold':
-            weight = 3  # Gold პაკეტი 3-ჯერ უფრო პრიორიტეტულია
+            weight = 3 
         elif q.package_type == 'Silver':
-            weight = 2  # Silver პაკეტი 2-ჯერ
+            weight = 2 
         else:
-            weight = 1  # Bronze პაკეტი სტანდარტული
+            weight = 1 
             
         for _ in range(weight):
             weighted_pool.append(q)
@@ -199,19 +200,20 @@ def get_random_game():
     import random
     games = MiniGameItem.query.filter_by(is_active=True).all()
     if not games:
-        # საბაზისო მინი-თამაში თუ არ არის შექმნილი
         return jsonify({
             "success": True,
-            "title": "სწრაფი ტაპერი (Fast Tap)",
-            "description": "დააკლიკე მფრინავ ვარსკვლავს დროის ამოწურვამდე!",
-            "game_url": "#"
+            "sponsor_name": "Noventra",
+            "sponsor_image": "",
+            "game_type": "puzzle",
+            "description": "აწყობილად ითამაშე პაზლი!",
         })
     selected_game = random.choice(games)
     return jsonify({
         "success": True,
-        "title": selected_game.title,
-        "description": selected_game.description,
-        "game_url": selected_game.game_url
+        "sponsor_name": selected_game.sponsor_name,
+        "sponsor_image": selected_game.sponsor_image,
+        "game_type": selected_game.game_type,
+        "description": selected_game.description
     })
 
 # აპლიკაციის კონტექსტში ცხრილების ავტომატური შექმნა:
@@ -298,7 +300,6 @@ def region_chat(region_id):
     messages = Question.query.filter_by(region_id=region_id).order_by(Question.id.asc()).all()
     return render_template('board.html', region_id=region_id, messages=messages)
 
-# ძველი /board მისამართი რომ არ გაფუჭდეს და ავტომატურად უშვებდეს რეგიონულ ჩატში:
 @app.route('/board')
 @login_required
 def board():
@@ -354,7 +355,6 @@ def dashboard():
     new_questions_count = Question.query.filter(Question.created_at > current_user.last_seen_board).count()
     regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
 
-    # საპრიზო ფონდი, გამარჯვებული და თამაშის სტატუსი ბაზიდან
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     current_week_prize_pool = prize_setting.value if prize_setting else "1200"
 
@@ -384,7 +384,7 @@ def add_score():
     region = RegionScore.query.filter_by(region_id=region_id).first()
     if region:
         region.score += points
-        current_user.total_clicks += points # ვუმატებთ ჯამურ კლიკებს
+        current_user.total_clicks += points 
         
         if current_user.clicks_left >= points:
             current_user.clicks_left -= points
@@ -451,7 +451,6 @@ def request_withdrawal():
         flash("მოთხოვნა გაგზავნილია ადმინისტრატორთან!", "success")
     return redirect(url_for('dashboard'))
 
-# 🎯 დავალების დეტალური ნახვა და შესრულება მომხმარებლისთვის
 @app.route('/task/<int:task_id>', methods=['GET', 'POST'])
 @login_required
 def task_detail(task_id):
@@ -479,7 +478,6 @@ def task_detail(task_id):
 
     return render_template('task_detail.html', task=task)
 
-# 🎯 ადმინის მიერ ახალი დავალების შექმნა
 @app.route('/add_task', methods=['GET', 'POST'])
 @login_required
 def add_task():
@@ -514,7 +512,6 @@ def admin_dashboard():
     
     if top_region:
         region_users = [u for u in users if u.region == top_region.region_id and not u.is_admin]
-        # ვალაგებთ რეალური ჯამური კლიკების მიხედვით (total_clicks)
         top_region_users = sorted(region_users, key=lambda x: x.total_clicks, reverse=True)
 
     user_stats = {}
@@ -550,16 +547,16 @@ def admin_dashboard():
     mini_games = MiniGameItem.query.all()
 
     return render_template('admin_dashboard.html', 
-                           users=users_sorted, 
-                           users_by_region=users_by_region,
-                           user_stats=user_stats,
-                           regions=regions, 
-                           region_sponsors=region_sponsors,
-                           current_week_prize_pool=current_week_prize_pool,
-                           top_region=top_region,
-                           top_region_users=top_region_users,
-                           quiz_questions=quiz_questions,
-                           mini_games=mini_games)
+                         users=users_sorted, 
+                         users_by_region=users_by_region,
+                         user_stats=user_stats,
+                         regions=regions, 
+                         region_sponsors=region_sponsors,
+                         current_week_prize_pool=current_week_prize_pool,
+                         top_region=top_region,
+                         top_region_users=top_region_users,
+                         quiz_questions=quiz_questions,
+                         mini_games=mini_games)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -605,7 +602,7 @@ def admin_withdrawal_action(req_id, action):
         req.status = 'rejected'
         user = User.query.get(req.user_id)
         if user:
-            user.balance += req.amount  # ზუსტად იმდენივე უბრუნდება, რამდენიც ჰქონდა მოთხოვნილი
+            user.balance += req.amount 
         flash("მოთხოვნა უარყოფილია, თანხა დაბრუნდა ბალანსზე.", "warning")
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
@@ -672,7 +669,6 @@ def admin_manage_ads():
         video_file = request.files.get('video_file')
         
         final_url = ""
-        # თუ ფაილი ატვირთა ადმინმა
         if video_file and video_file.filename != '':
             filename = f"ad_{datetime.datetime.now().timestamp()}.mp4"
             ads_folder = os.path.join(app.root_path, 'static', 'ads_videos')
@@ -680,7 +676,6 @@ def admin_manage_ads():
             filepath = os.path.join(ads_folder, filename)
             video_file.save(filepath)
             final_url = url_for('static', filename=f'ads_videos/{filename}')
-        # თუ ლინკი ჩაწერა
         elif video_url:
             final_url = video_url
 
@@ -705,7 +700,6 @@ def admin_delete_ad(ad_id):
     flash("რეკლამა წარმატებით წაიშალა!", "success")
     return redirect(url_for('admin_manage_ads'))
 
-# საპრიზო ფონდის განახლება
 @app.route('/admin/settings/prize', methods=['POST'])
 @login_required
 def admin_update_prize():
@@ -722,7 +716,6 @@ def admin_update_prize():
         flash("საპრიზო ფონდი წარმატებით განახლდა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# თამაშის ჩართვა/გამორთვა (სეზონის შეჩერება)
 @app.route('/admin/settings/toggle_game', methods=['POST'])
 @login_required
 def admin_toggle_game():
@@ -737,7 +730,6 @@ def admin_toggle_game():
     flash("თამაშის რეჟიმი შეიცვალა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# სეზონის დასრულება / ქულების განულება
 @app.route('/admin/season/reset', methods=['POST'])
 @login_required
 def admin_reset_season():
@@ -760,7 +752,6 @@ def admin_reset_season():
     flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები განულდა.", "success")
     return redirect(url_for('admin_dashboard'))
 
-# მომხმარებლის სრული მართვა (ბანი, ბალანსი, რეგიონი, ა.შ.)
 @app.route('/admin/user/<int:user_id>/full_update', methods=['POST'])
 @login_required
 def admin_full_update_user(user_id):
@@ -777,7 +768,6 @@ def admin_full_update_user(user_id):
     flash(f"მომხმარებელი {user.username} განახლდა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# ადმინის გლობალური ჩატების ჰაბი (ყველა რეგიონის მესიჯები)
 @app.route('/admin/chats')
 @login_required
 def admin_chats():
@@ -801,7 +791,6 @@ def admin_chats_send():
         db.session.commit()
     return redirect(url_for('admin_chats', region=region_id))
 
-# 💰 გამარჯვებული რეგიონის მოთამაშეებზე საპრიზო თანხების ავტომატური და უსაფრთხო ჩარიცხვა
 @app.route('/admin/distribute_prizes', methods=['POST'])
 @login_required
 def admin_distribute_prizes():
@@ -823,7 +812,6 @@ def admin_distribute_prizes():
 
     sorted_r_users = sorted(region_users, key=lambda x: x.total_clicks, reverse=True)
 
-    # ვანაწილებთ თანხებს და ვინახავთ ტრანზაქციებში ან პარამეტრებში
     p1, p2, rest = 0, 0, 0
     if len(sorted_r_users) == 1:
         p1 = total_prize
@@ -842,7 +830,6 @@ def admin_distribute_prizes():
         for u in sorted_r_users[2:]:
             u.balance += rest_share
 
-    # ვინახავთ ბოლო გამარჯვებულის სახელს Settings-ში, რომ დაშბორდზე გამოჩნდეს
     winner_st = Settings.query.filter_by(key='last_winner').first()
     winner_text = f"{top_region.region_name} (1-ლი ადგილი: {sorted_r_users[0].username} - {p1:.1f} ₾)"
     if winner_st:
@@ -869,7 +856,6 @@ def admin_add_quiz_question():
     option_4 = request.form.get('option_4')
     correct_option = int(request.form.get('correct_option', 1))
     
-    # ფოტოს ატვირთვის ლოგიკა
     image_url = ""
     file = request.files.get('sponsor_image')
     if file and file.filename != '':
@@ -904,10 +890,8 @@ def admin_delete_quiz(quiz_id):
     if not current_user.is_admin:
         abort(403)
     quiz = QuizQuestion.query.get_or_404(quiz_id)
-    # თუ სარეკლამო ფოტო აქვს, ფიზიკურადაც წავშალოთ ფოლდერიდან სუფთა სივრცისთვის
     if quiz.sponsor_image:
         try:
-            # path-ის ამოღება /static/... 
             img_path = os.path.join(app.root_path, quiz.sponsor_image.lstrip('/'))
             if os.path.exists(img_path):
                 os.remove(img_path)
@@ -918,21 +902,41 @@ def admin_delete_quiz(quiz_id):
     flash("ვიქტორინის კითხვა წარმატებით წაიშალა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# 🎮 მინი-თამაშის დამატების მარშრუტი (რაც აკლდა)
+# 🎮 მინი-თამაშის დამატება (განახლებული 4 თამაშის ლოგიკით)
 @app.route('/admin/mini_game/add', methods=['POST'])
 @login_required
 def admin_add_mini_game():
     if not current_user.is_admin:
         abort(403)
-    new_game = MiniGameItem(
-        title=request.form.get('title'),
-        description=request.form.get('description'),
-        game_url=request.form.get('game_url', '#'),
-        is_active=True
-    )
-    db.session.add(new_game)
-    db.session.commit()
-    flash("მინი-თამაში წარმატებით დაემატა!", "success")
+    
+    sponsor_name = request.form.get('sponsor_name')
+    package_type = request.form.get('package_type', 'Bronze')
+    game_type = request.form.get('game_type', 'puzzle')
+    description = request.form.get('description', '')
+    
+    image_url = ""
+    file = request.files.get('sponsor_image')
+    if file and file.filename != '':
+        filename = f"minigame_{datetime.datetime.now().timestamp()}.jpg"
+        ads_folder = os.path.join(app.root_path, 'static', 'minigame_ads')
+        os.makedirs(ads_folder, exist_ok=True)
+        filepath = os.path.join(ads_folder, filename)
+        file.save(filepath)
+        image_url = url_for('static', filename=f'minigame_ads/{filename}')
+
+    if sponsor_name:
+        new_game = MiniGameItem(
+            sponsor_name=sponsor_name,
+            sponsor_image=image_url,
+            package_type=package_type,
+            game_type=game_type,
+            description=description,
+            is_active=True
+        )
+        db.session.add(new_game)
+        db.session.commit()
+        flash("მინი-თამაში წარმატებით დაემატა და მიება ბაზას!", "success")
+        
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/mini_game/delete/<int:game_id>', methods=['POST'])
@@ -941,6 +945,13 @@ def admin_delete_mini_game(game_id):
     if not current_user.is_admin:
         abort(403)
     game = MiniGameItem.query.get_or_404(game_id)
+    if game.sponsor_image:
+        try:
+            img_path = os.path.join(app.root_path, game.sponsor_image.lstrip('/'))
+            if os.path.exists(img_path):
+                os.remove(img_path)
+        except:
+            pass
     db.session.delete(game)
     db.session.commit()
     flash("მინი-თამაში წარმატებით წაიშალა!", "success")
@@ -960,27 +971,23 @@ with app.app_context():
         db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
         
-        # 🔽 ახალი ცხრილების უსაფრთხო შექმნა ბაზაში
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
-        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS mini_game_items (id SERIAL PRIMARY KEY, title VARCHAR(100) NOT NULL, description TEXT NOT NULL, game_url VARCHAR(255) NOT NULL, is_active BOOLEAN DEFAULT TRUE);"))
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS mini_game_items (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) DEFAULT 'სპონსორი', sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', game_type VARCHAR(50) DEFAULT 'puzzle', description TEXT NOT NULL, is_active BOOLEAN DEFAULT TRUE);"))
         
         db.session.commit()
     except Exception as e:
         db.session.rollback()
     
-    # საწყისი პარამეტრები
     if not Settings.query.filter_by(key='prize_pool').first():
         db.session.add(Settings(key='prize_pool', value='1200'))
     if not Settings.query.filter_by(key='last_winner').first():
         db.session.add(Settings(key='last_winner', value='იმერეთი'))
     
-    # უსაფრთხოების შემოწმება: თუ თამაშის სტატუსი არ არის, ვქმნით როგორც 'active'
     game_status_st = Settings.query.filter_by(key='game_status').first()
     if not game_status_st:
         db.session.add(Settings(key='game_status', value='active'))
     db.session.commit()
 
-# 🎮 ენერგიის აღდგენის API მინი-თამაშის გავლის შემდეგ
 @app.route('/api/restore_energy', methods=['POST'])
 @login_required
 def restore_energy():
