@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <title>სპონსორის პაზლი - Noventra</title>
+    <style>
+        body { background: #0b0b10; color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .game-container { max-width: 400px; margin: 0 auto; background: #161622; border: 1px solid #333; padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #ffcc00; font-size: 18px; margin-bottom: 5px; }
+        p { color: #a1a1aa; font-size: 13px; margin-bottom: 15px; }
+        #puzzle-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 300px; height: 300px; margin: 0 auto 20px auto; background: #222; padding: 4px; border-radius: 8px; }
+        .tile { background-size: 300px 300px; cursor: pointer; border-radius: 4px; transition: transform 0.1s; }
+        .tile:hover { opacity: 0.9; }
+        .empty { background: #111 !important; cursor: default; }
+        .btn { background: #00ffcc; color: #000; border: none; padding: 10px 20px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 14px; display: none; }
+        .btn:hover { background: #00cca3; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h2>🧩 ააწყე სპონსორის ბანერი</h2>
+    <p>გადააადგილე ნაწილები ცარიელ ადგილთან, რომ მიიღო სრული სურათი!</p>
+    
+    <div id="puzzle-board"></div>
+    
+    <button id="winBtn" class="btn" onclick="restoreEnergy()">⚡ აღადგინე ენერგია (250 კლიკი)</button>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageUrl = urlParams.get('img') || '/static/quiz_ads/default.jpg';
+
+    const board = document.getElementById('puzzle-board');
+    const winBtn = document.getElementById('winBtn');
+    
+    let tiles = [];
+    let emptyIndex = 8;
+    const size = 3;
+
+    const img = new Image();
+    img.src = imageUrl;
+    img.onload = function() {
+        initGame();
+    };
+
+    function initGame() {
+        tiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        shuffle();
+        renderBoard();
+    }
+
+    function shuffle() {
+        for (let i = 0; i < 50; i++) {
+            let possibleMoves = getValidMoves(emptyIndex);
+            let randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+            swap(emptyIndex, randomMove);
+            emptyIndex = randomMove;
+        }
+    }
+
+    function getValidMoves(idx) {
+        let row = Math.floor(idx / size);
+        let col = idx % size;
+        let moves = [];
+        if (row > 0) moves.push(idx - size);
+        if (row < size - 1) moves.push(idx + size);
+        if (col > 0) moves.push(idx - 1);
+        if (col < size - 1) moves.push(idx + 1);
+        return moves;
+    }
+
+    function swap(i, j) {
+        let temp = tiles[i];
+        tiles[i] = tiles[j];
+        tiles[j] = temp;
+    }
+
+    function renderBoard() {
+        board.innerHTML = '';
+        tiles.forEach((tileVal, idx) => {
+            let tile = document.createElement('div');
+            tile.className = 'tile';
+            if (tileVal === 8) {
+                tile.classList.add('empty');
+            } else {
+                let x = (tileVal % size) * 100;
+                let y = Math.floor(tileVal / size) * 100;
+                tile.style.backgroundImage = `url(${imageUrl})`;
+                tile.style.backgroundPosition = `-${x}px -${y}px`;
+            }
+
+            tile.onclick = () => {
+                let validMoves = getValidMoves(emptyIndex);
+                if (validMoves.includes(idx)) {
+                    swap(idx, emptyIndex);
+                    emptyIndex = idx;
+                    renderBoard();
+                    checkWin();
+                }
+            };
+            board.appendChild(tile);
+        });
+    }
+
+    function checkWin() {
+        let win = tiles.every((val, i) => val === i);
+        if (win) {
+            renderFullImage();
+            winBtn.style.display = 'inline-block';
+        }
+    }
+
+    function renderFullImage() {
+        board.innerHTML = '';
+        tiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        tiles.forEach((tileVal) => {
+            let tile = document.createElement('div');
+            tile.className = 'tile';
+            let x = (tileVal % size) * 100;
+            let y = Math.floor(tileVal / size) * 100;
+            tile.style.backgroundImage = `url(${imageUrl})`;
+            tile.style.backgroundPosition = `-${x}px -${y}px`;
+            board.appendChild(tile);
+        });
+    }
+
+    function restoreEnergy() {
+        fetch('/api/restore_energy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('🎉 გილოცავ! ენერგია წარმატებით აღდგა (250 კლიკი)!');
+                window.location.href = '/dashboard';
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
