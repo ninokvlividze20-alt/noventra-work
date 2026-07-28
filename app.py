@@ -121,14 +121,14 @@ class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
     id = db.Column(db.Integer, primary_key=True)
     sponsor_name = db.Column(db.String(100), nullable=False) # სპონსორი კომპანია
-    sponsor_image = db.Column(db.String(255), default="") # სპონსორის ფოტო/ლოგო
-    package_type = db.Column(db.String(20), default="Bronze") # Gold, Silver, Bronze (პაკეტები)
+    sponsor_image = db.Column(db.String(255), default="") # სპონსორის სარეკლამო ფოტო
+    package_type = db.Column(db.String(20), default="Bronze") # Gold, Silver, Bronze
     question_text = db.Column(db.Text, nullable=False)
     option_1 = db.Column(db.String(150), nullable=False)
     option_2 = db.Column(db.String(150), nullable=False)
     option_3 = db.Column(db.String(150), nullable=False)
     option_4 = db.Column(db.String(150), nullable=False)
-    correct_option = db.Column(db.Integer, nullable=False) # 1, 2, 3 ან 4
+    correct_option = db.Column(db.Integer, nullable=False)
 
 class MiniGameItem(db.Model):
     __tablename__ = 'mini_game_items'
@@ -864,9 +864,21 @@ def admin_add_quiz_question():
     option_4 = request.form.get('option_4')
     correct_option = int(request.form.get('correct_option', 1))
     
+    # ფოტოს ატვირთვის ლოგიკა
+    image_url = ""
+    file = request.files.get('sponsor_image')
+    if file and file.filename != '':
+        filename = f"quiz_{datetime.datetime.now().timestamp()}.jpg"
+        ads_folder = os.path.join(app.root_path, 'static', 'quiz_ads')
+        os.makedirs(ads_folder, exist_ok=True)
+        filepath = os.path.join(ads_folder, filename)
+        file.save(filepath)
+        image_url = url_for('static', filename=f'quiz_ads/{filename}')
+
     if sponsor_name and question_text:
         new_q = QuizQuestion(
             sponsor_name=sponsor_name,
+            sponsor_image=image_url,
             package_type=package_type,
             question_text=question_text,
             option_1=option_1,
@@ -877,7 +889,7 @@ def admin_add_quiz_question():
         )
         db.session.add(new_q)
         db.session.commit()
-        flash("სპონსორის ვიქტორინის კითხვა წარმატებით დაემატა!", "success")
+        flash("სპონსორის ვიქტორინის კითხვა და ბანერი წარმატებით დაემატა!", "success")
         
     return redirect(url_for('admin_dashboard'))
 

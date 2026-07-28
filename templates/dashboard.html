@@ -365,20 +365,37 @@ function boostRegion(event) {
     }, 1000);
 }
 
-// 🧠 ვიქტორინის ჩატვირთვა API-დან
+// 🧠 ვიქტორინის ჩატვირთვა API-დან (ბანერით და კითხვით)
 function loadQuiz() {
     let container = document.getElementById('quizContainer');
-    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება... ⏳</h3>';
+    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება სარეკლამო ვიქტორინა... ⏳</h3>';
 
     fetch('/api/get_random_quiz')
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            let bannerHtml = '';
+            // თუ სპონსორს ატვირთული აქვს სარეკლამო ფოტო/ბანერი
+            if (data.sponsor_image && data.sponsor_image.trim() !== "") {
+                bannerHtml = `
+                    <div style="margin-bottom: 15px; border: 2px solid #ffcc00; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 4px 15px rgba(255,204,0,0.2);">
+                        <div style="background: #ffcc00; color: #000; font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 3px 8px; text-align: left;">
+                            📢 გენერალური სპონსორი: ${data.sponsor_name}
+                        </div>
+                        <img src="${data.sponsor_image}" alt="Sponsor Banner" style="width: 100%; height: 180px; object-fit: cover; display: block;">
+                    </div>
+                `;
+            } else {
+                bannerHtml = `
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; font-weight: bold;">გენერალური სპონსორი: ${data.sponsor_name}</span>
+                    </div>
+                `;
+            }
+
             let html = `
-                <div style="margin-bottom: 15px;">
-                    <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; font-weight: bold;">გენერალური სპონსორი: ${data.sponsor_name}</span>
-                </div>
-                <h4 style="color: #fff; margin-bottom: 20px; font-size: 15px;">${data.question_text}</h4>
+                ${bannerHtml}
+                <h4 style="color: #fff; margin-bottom: 15px; font-size: 15px; line-height: 1.4;">${data.question_text}</h4>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
             `;
             data.options.forEach((opt, index) => {
