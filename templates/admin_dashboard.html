@@ -83,7 +83,7 @@
                             <td><strong>{{ tu.username }}</strong></td>
                             <td style="color: #00ffcc;">{{ tu.phone if tu.phone else 'არ არის მითითებული ⚠️' }}</td>
                             <td style="color: #ffcc00; font-family: monospace;">{{ tu.bank_account if tu.bank_account else 'არ არის მითითებული ⚠️' }}</td>
-                            <td>{{ 250 - tu.clicks_left }} კლიკი</td>
+                            <td style="color: #00ffcc; font-weight: bold;">{{ tu.total_clicks }} კლიკი</td>
                         </tr>
                         {% endfor %}
                     </tbody>
