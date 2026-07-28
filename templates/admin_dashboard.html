@@ -101,12 +101,14 @@
         </div>
     </div>
 
-    <!-- 🧠 ადმინის პანელი: სპონსორების ვიქტორინის კითხვებისა და პაკეტების მართვა -->
+    <!-- 🧠 ადმინის პანელი: სპონსორის ვიქტორინისა და სარეკლამო ბანერის მართვა -->
     <div class="admin-section" style="border-color: #ffcc00;">
-        <h3>🧠 სპონსორების ვიქტორინის კითხვების დამატება (სარეკლამო პაკეტები)</h3>
-        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">Gold პაკეტის რეკლამები მომხმარებელს უფრო ხშირად ამოვარდება ვიქტორინაში!</p>
+        <h3>🧠 სპონსორის ვიქტორინისა და სარეკლამო ბანერის დამატება</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">
+            📐 მითითება კომპანიებისთვის: სარეკლამო ფოტოს ზომა უნდა იყოს მკაცრად **800 x 450 px** (პროპორცია 16:9, ფორმატი: JPG/PNG). Gold პაკეტის რეკლამები მომხმარებელს უფრო ხშირად ამოვარდება!
+        </p>
 
-        <form action="{{ url_for('admin_add_quiz_question') }}" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <form action="{{ url_for('admin_add_quiz_question') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
             <div>
                 <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სპონსორი კომპანიის სახელი:</label>
                 <input type="text" name="sponsor_name" placeholder="მაგ: კომპანია სელფი" required class="input-field">
@@ -119,6 +121,20 @@
                     <option value="Bronze">🥉 Bronze პაკეტი (სტანდარტული)</option>
                 </select>
             </div>
+
+            <!-- 🖼️ ფოტოს ატვირთვის ჩარჩოიანი ველი ლაივ პრევიუთი -->
+            <div style="grid-column: 1 / -1; background: #161622; border: 2px dashed #33334d; padding: 15px; border-radius: 12px; text-align: center;">
+                <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 8px; font-weight: bold;">
+                    📸 ატვირთე კომპანიის სარეკლამო ბანერი (რეკომენდებული: 800x450 px)
+                </label>
+                <input type="file" name="sponsor_image" accept="image/*" id="quizImageInput" onchange="previewQuizImage(event)" style="display: none;" required>
+                
+                <div onclick="document.getElementById('quizImageInput').click()" style="cursor: pointer; border: 1px solid #444; border-radius: 8px; overflow: hidden; max-width: 400px; margin: 0 auto; background: #111; height: 180px; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <img id="quizImagePreview" src="" alt="ბანერის ჩარჩო (აირჩიე ფოტო)" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <span id="quizImagePlaceholder" style="color: #888; font-size: 13px;">📁 დააკლიკე ფოტოს ასარჩევად (ჩარჩო 800x450)</span>
+                </div>
+            </div>
+
             <div style="grid-column: 1 / -1;">
                 <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">კითხვის ტექსტი:</label>
                 <textarea name="question_text" rows="2" placeholder="დასმული კითხვა..." required class="input-field"></textarea>
@@ -144,16 +160,23 @@
                 <input type="number" name="correct_option" min="1" max="4" required class="input-field" style="max-width: 200px;">
             </div>
             <div style="grid-column: 1 / -1; margin-top: 5px;">
-                <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">💾 ვიქტორინის კითხვის დამატება</button>
+                <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">💾 ვიქტორინისა და ბანერის შენახვა</button>
             </div>
         </form>
     </div>
 
-<div style="grid-column: 1 / -1; margin-top: 5px;">
-                <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">💾 ვიქტორინის კითხვის დამატება</button>
-            </div>
-        </form>
-    </div>
+<script>
+function previewQuizImage(event) {
+    let reader = new FileReader();
+    reader.onload = function(){
+        let output = document.getElementById('quizImagePreview');
+        output.src = reader.result;
+        output.style.display = 'block';
+        document.getElementById('quizImagePlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>
 
     <!-- 🎮 ადმინის პანელი: მინი-თამაშების დამატება ბაზაში -->
     <div class="admin-section" style="border-color: #00ffcc; margin-top: 25px;">
@@ -182,13 +205,9 @@
     <div class="grid-2">
         <!-- 📍 რეგიონების სპონსორების ფოტოები და ზომები -->
         <div class="admin-section">
-
-    <div class="grid-2">
-        <!-- 📍 რეგიონების სპონსორების ფოტოები და ზომები -->
-        <div class="admin-section">
             <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
             <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: <strong>600x400 px</strong> (.jpg)</p>
-            
+           
             <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                 <select name="region_id" class="input-field">
                     {% for reg in regions %}
@@ -237,87 +256,87 @@
                 </table>
             </div>
         </div>
+    </div>
 
-        <!-- 👥 მომხმარებლების 100%-იანი მართვა რეგიონების მიხედვით -->
-        <div class="admin-section" style="grid-column: 1 / -1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-                <h3 style="margin: 0; border: none;">👥 მომხმარებლების სრული კონტროლი (ბალანსი, კლიკები, ბანი, რეგიონი)</h3>
-                
-                <div style="width: 100%; max-width: 300px;">
-                    <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="🔍 მოძებნე იუზერი სახელით..." class="input-field">
-                </div>
+    <!-- 👥 მომხმარებლების 100%-იანი მართვა რეგიონების მიხედვით -->
+    <div class="admin-section" style="grid-column: 1 / -1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; border: none;">👥 მომხმარებლების სრული კონტროლი (ბალანსი, კლიკები, ბანი, რეგიონი)</h3>
+           
+            <div style="width: 100%; max-width: 300px;">
+                <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="🔍 მოძებნე იუზერი სახელით..." class="input-field">
             </div>
-            
-            {% for reg_id, data in users_by_region.items() %}
-                <div class="region-user-block" style="margin-bottom: 25px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
-                    <h4 style="color: #ffcc00; margin-top: 0; border-bottom: 1px solid #222233; padding-bottom: 8px; font-size: 15px;">
-                        📍 {{ data.name }} (იუზერები: {{ data.users|length }})
-                    </h4>
-
-                    {% if data.users %}
-                    <div style="overflow-x: auto;">
-                        <table class="admin-table" style="margin-top: 5px;">
-                            <thead>
-                                <tr>
-                                    <th>იუზერი</th>
-                                    <th>ბალანსი (₾)</th>
-                                    <th>რეპუტაცია</th>
-                                    <th>კლიკები</th>
-                                    <th>რეგიონი</th>
-                                    <th>სტატუსები</th>
-                                    <th>მოქმედება</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for u in data.users %}
-                                <tr>
-                                    <td><strong>{{ u.username }}</strong><br><small style="color: #888;">{{ u.email }}</small></td>
-                                    <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST">
-                                        <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 70px;"></td>
-                                        <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 60px;"></td>
-                                        <td><input type="number" name="clicks_left" value="{{ u.clicks_left }}" class="input-field" style="width: 60px;"></td>
-                                        <td>
-                                            <select name="region" class="input-field" style="width: 110px; font-size: 11px;">
-                                                <option value="tbilisi" {% if u.region == 'tbilisi' %}selected{% endif %}>თბილისი</option>
-                                                <option value="imereti" {% if u.region == 'imereti' %}selected{% endif %}>იმერეთი</option>
-                                                <option value="adjara" {% if u.region == 'adjara' %}selected{% endif %}>აჭარა</option>
-                                                <option value="kakheti" {% if u.region == 'kakheti' %}selected{% endif %}>კახეთი</option>
-                                                <option value="samegrelo" {% if u.region == 'samegrelo' %}selected{% endif %}>სამეგრელო</option>
-                                                <option value="guria" {% if u.region == 'guria' %}selected{% endif %}>გურია</option>
-                                                <option value="racha_lechkhumi" {% if u.region == 'racha_lechkhumi' %}selected{% endif %}>რაჭა-ლეჩხუმი</option>
-                                                <option value="samtskhe_javakheti" {% if u.region == 'samtskhe_javakheti' %}selected{% endif %}>სამცხე-ჯავახ.</option>
-                                                <option value="shida_kartli" {% if u.region == 'shida_kartli' %}selected{% endif %}>შიდა ქართლი</option>
-                                                <option value="kvemo_kartli" {% if u.region == 'kvemo_kartli' %}selected{% endif %}>ქვემო ქართლი</option>
-                                                <option value="mtskheta_mtianeti" {% if u.region == 'mtskheta_mtianeti' %}selected{% endif %}>მცხეთა-მთიან.</option>
-                                                <option value="abkhazia" {% if u.region == 'abkhazia' %}selected{% endif %}>აფხაზეთი</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <div style="display: flex; gap: 10px; font-size: 11px; align-items: center;">
-                                                <label style="cursor: pointer;"><input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %}> ადმინი</label>
-                                                <label style="cursor: pointer; color: #ff4757;"><input type="checkbox" name="is_banned" {% if u.is_banned %}checked{% endif %}> ბანი</label>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div style="display: flex; gap: 5px;">
-                                                <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
-                                    </form>
-                                                <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('წავშალო მომხმარებელი?');">
-                                                    <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p style="color: #777; font-size: 12px; margin: 5px 0 0 0;">ამ რეგიონში მომხმარებლები არ არიან.</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
         </div>
+       
+        {% for reg_id, data in users_by_region.items() %}
+            <div class="region-user-block" style="margin-bottom: 25px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
+                <h4 style="color: #ffcc00; margin-top: 0; border-bottom: 1px solid #222233; padding-bottom: 8px; font-size: 15px;">
+                    📍 {{ data.name }} (იუზერები: {{ data.users|length }})
+                </h4>
+
+                {% if data.users %}
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" style="margin-top: 5px;">
+                        <thead>
+                            <tr>
+                                <th>იუზერი</th>
+                                <th>ბალანსი (₾)</th>
+                                <th>რეპუტაცია</th>
+                                <th>კლიკები</th>
+                                <th>რეგიონი</th>
+                                <th>სტატუსები</th>
+                                <th>მოქმედება</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in data.users %}
+                            <tr>
+                                <td><strong>{{ u.username }}</strong><br><small style="color: #888;">{{ u.email }}</small></td>
+                                <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST">
+                                    <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 70px;"></td>
+                                    <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 60px;"></td>
+                                    <td><input type="number" name="clicks_left" value="{{ u.clicks_left }}" class="input-field" style="width: 60px;"></td>
+                                    <td>
+                                        <select name="region" class="input-field" style="width: 110px; font-size: 11px;">
+                                            <option value="tbilisi" {% if u.region == 'tbilisi' %}selected{% endif %}>თბილისი</option>
+                                            <option value="imereti" {% if u.region == 'imereti' %}selected{% endif %}>იმერეთი</option>
+                                            <option value="adjara" {% if u.region == 'adjara' %}selected{% endif %}>აჭარა</option>
+                                            <option value="kakheti" {% if u.region == 'kakheti' %}selected{% endif %}>კახეთი</option>
+                                            <option value="samegrelo" {% if u.region == 'samegrelo' %}selected{% endif %}>სამეგრელო</option>
+                                            <option value="guria" {% if u.region == 'guria' %}selected{% endif %}>გურია</option>
+                                            <option value="racha_lechkhumi" {% if u.region == 'racha_lechkhumi' %}selected{% endif %}>რაჭა-ლეჩხუმი</option>
+                                            <option value="samtskhe_javakheti" {% if u.region == 'samtskhe_javakheti' %}selected{% endif %}>სამცხე-ჯავახ.</option>
+                                            <option value="shida_kartli" {% if u.region == 'shida_kartli' %}selected{% endif %}>შიდა ქართლი</option>
+                                            <option value="kvemo_kartli" {% if u.region == 'kvemo_kartli' %}selected{% endif %}>ქვემო ქართლი</option>
+                                            <option value="mtskheta_mtianeti" {% if u.region == 'mtskheta_mtianeti' %}selected{% endif %}>მცხეთა-მთიან.</option>
+                                            <option value="abkhazia" {% if u.region == 'abkhazia' %}selected{% endif %}>აფხაზეთი</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 10px; font-size: 11px; align-items: center;">
+                                            <label style="cursor: pointer;"><input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %}> ადმინი</label>
+                                            <label style="cursor: pointer; color: #ff4757;"><input type="checkbox" name="is_banned" {% if u.is_banned %}checked{% endif %}> ბანი</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 5px;">
+                                            <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
+                                </form>
+                                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('წავშალო მომხმარებელი?');">
+                                                <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p style="color: #777; font-size: 12px; margin: 5px 0 0 0;">ამ რეგიონში მომხმარებლები არ არიან.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -326,11 +345,11 @@ function filterUsers() {
     let input = document.getElementById('userSearchInput');
     let filter = input.value.toLowerCase();
     let regionBlocks = document.querySelectorAll('.region-user-block');
-    
+   
     regionBlocks.forEach(block => {
         let rows = block.querySelectorAll('tbody tr');
         let hasVisibleRow = false;
-        
+       
         rows.forEach(row => {
             let usernameTd = row.querySelector('td strong');
             if (usernameTd) {
@@ -343,7 +362,7 @@ function filterUsers() {
                 }
             }
         });
-        
+       
         if (filter === "" || hasVisibleRow) {
             block.style.display = "";
         } else {
@@ -356,8 +375,7 @@ function calculateDistribution() {
     let amount = parseFloat(document.getElementById('calcAmount').value) || 0;
     let regionName = document.getElementById('calcRegion').selectedOptions[0].text;
     let resultDiv = document.getElementById('calcResult');
-    
-    // ვანაწილებთ პროცენტულად: ტოპ 1 მოთამაშე - 50%, მე-2 ადგილი - 30%, დანარჩენები - 20%
+   
     let top1 = (amount * 0.50).toFixed(2);
     let top2 = (amount * 0.30).toFixed(2);
     let rest = (amount * 0.20).toFixed(2);

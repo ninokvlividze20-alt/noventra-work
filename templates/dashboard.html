@@ -375,7 +375,6 @@ function loadQuiz() {
     .then(data => {
         if (data.success) {
             let bannerHtml = '';
-            // თუ სპონსორს ატვირთული აქვს სარეკლამო ფოტო/ბანერი
             if (data.sponsor_image && data.sponsor_image.trim() !== "") {
                 bannerHtml = `
                     <div style="margin-bottom: 15px; border: 2px solid #ffcc00; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 4px 15px rgba(255,204,0,0.2);">
@@ -404,7 +403,6 @@ function loadQuiz() {
             html += `</div>`;
             container.innerHTML = html;
         } else {
-            // თუ კითხვები არ არის ბაზაში, ავტომატურად აღვუდგინოთ ენერგია
             completeMiniGame();
         }
     })
@@ -422,16 +420,15 @@ function submitQuiz(q_id, chosen_opt) {
     .then(data => {
         if (data.success && data.is_correct) {
             alert("🎉 სწორია! ენერგია აღდგენილია, შეგიძლია განაგრძო თამაში!");
-            completeMiniGame(); // იძახებს ქვედა ფუნქციას და აბრუნებს 250 კლიკს
+            completeMiniGame(); 
             
-            // ვარესეტებთ მოდალს თავის საწყის ორმაგ არჩევანზე შემდეგი ამოწურვისთვის
             setTimeout(() => {
                 document.getElementById('quizContainer').innerHTML = `
                     <h3 style="color: #ffcc00; margin-top: 0;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
                     <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">ენერგიის სრულად აღსადგენად აირჩიე ერთ-ერთი გზა:</p>
                     <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px;">
                         <button onclick="loadQuiz()" class="btn btn-warning" style="width: 100%; padding: 12px; color: #000; font-weight: bold; cursor: pointer;">🎁 სპონსორის ვიქტორინა (პასუხი და ენერგია)</button>
-                        <button onclick="completeMiniGame(event)" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: bold; cursor: pointer;">🎮 სწრაფი მინი-თამაში 🚀</button>
+                        <button onclick="loadRandomGameModal()" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: bold; cursor: pointer;">🎮 სწრაფი მინი-თამაში 🚀</button>
                     </div>
                 `;
             }, 1000);
@@ -443,27 +440,7 @@ function submitQuiz(q_id, chosen_opt) {
     });
 }
 
-// 🎮 მინი-თამაშის გავლით ენერგიის სრული აღდგენა (250 კლიკი)
-function completeMiniGame(event) {
-    if (event) event.preventDefault();
-    
-    fetch('/api/restore_energy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            clickLimit = data.new_clicks;
-            document.getElementById('clicksLeft').innerText = clickLimit;
-            document.getElementById('adModal').style.display = 'none';
-            document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (250 კლიკი)!";
-        }
-    })
-    .catch(err => console.error(err));
-}
-
-// 🎮 მინი-თამაშის გავლით ენერგიის სრული აღდგენა (250 კლიკი)
+// 🎮 მინი-თამაშის გავლით ენერგიის სრული აღდგენა (250 კლიკი) - ერთადერთი და სწორი ვერსია
 function completeMiniGame(event) {
     if (event) event.preventDefault();
     
