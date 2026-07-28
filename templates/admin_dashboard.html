@@ -48,7 +48,7 @@
                         ⚡ თამაშის რეჟიმის გადართვა (ჩართ./გამორთ.)
                     </button>
                 </form>
-                
+               
                 <!-- სეზონის დასრულება / ქულების განულება -->
                 <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
                     <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
@@ -91,7 +91,7 @@
             </div>
 
             <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" style="margin-top: 20px;" onsubmit="return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');">
-                <button type="submit" class="btn-sm btn-success" style="padding: 12px 25spx; font-size: 14px; width: 100%;">
+                <button type="submit" class="btn-sm btn-success" style="padding: 12px 25px; font-size: 14px; width: 100%;">
                     🚀 თანხების ავტომატურად ჩარიცხვა გამარჯვებულების საფულეებში
                 </button>
             </form>
@@ -101,9 +101,76 @@
         </div>
     </div>
 
-        <div id="calcResult" style="margin-top: 15px; background: #161622; padding: 15px; border-radius: 10px; border: 1px solid #33334d; display: none; font-size: 13px; color: #fff;">
-            <!-- აქ გამოჩნდება ავტომატური გათვლა -->
-        </div>
+    <!-- 🧠 ადმინის პანელი: სპონსორების ვიქტორინის კითხვებისა და პაკეტების მართვა -->
+    <div class="admin-section" style="border-color: #ffcc00;">
+        <h3>🧠 სპონსორების ვიქტორინის კითხვების დამატება (სარეკლამო პაკეტები)</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">Gold პაკეტის რეკლამები მომხმარებელს უფრო ხშირად ამოვარდება ვიქტორინაში!</p>
+
+        <form action="{{ url_for('admin_add_quiz_question') }}" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+            <div>
+                <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სპონსორი კომპანიის სახელი:</label>
+                <input type="text" name="sponsor_name" placeholder="მაგ: კომპანია სელფი" required class="input-field">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სარეკლამო პაკეტი:</label>
+                <select name="package_type" class="input-field">
+                    <option value="Gold">🥇 Gold პაკეტი (მაღალი პრიორიტეტი / ხშირი ჩვენება)</option>
+                    <option value="Silver">🥈 Silver პაკეტი (საშუალო პრიორიტეტი)</option>
+                    <option value="Bronze">🥉 Bronze პაკეტი (სტანდარტული)</option>
+                </select>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">კითხვის ტექსტი:</label>
+                <textarea name="question_text" rows="2" placeholder="დასმული კითხვა..." required class="input-field"></textarea>
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #fff; display: block; margin-bottom: 4px;">პასუხი 1:</label>
+                <input type="text" name="option_1" required class="input-field">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #fff; display: block; margin-bottom: 4px;">პასუხი 2:</label>
+                <input type="text" name="option_2" required class="input-field">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #fff; display: block; margin-bottom: 4px;">პასუხი 3:</label>
+                <input type="text" name="option_3" required class="input-field">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #fff; display: block; margin-bottom: 4px;">პასუხი 4:</label>
+                <input type="text" name="option_4" required class="input-field">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">სწორი პასუხის ნომერი (1, 2, 3 ან 4):</label>
+                <input type="number" name="correct_option" min="1" max="4" required class="input-field" style="max-width: 200px;">
+            </div>
+            <div style="grid-column: 1 / -1; margin-top: 5px;">
+                <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">💾 ვიქტორინის კითხვის დამატება</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 🎮 ადმინის პანელი: მინი-თამაშების დამატება ბაზაში -->
+    <div class="admin-section" style="border-color: #00ffcc; margin-top: 25px;">
+        <h3>🎮 ახალი მინი-თამაშის დამატება</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">აქედან შეგიძლია დაამატო თამაშები, რომლებიც მომხმარებელს ენერგიის ამოწურვისას დახვდება.</p>
+
+        <form action="{{ url_for('admin_add_mini_game') }}" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">თამაშის სათაური:</label>
+                <input type="text" name="title" placeholder="მაგ: სწრაფი ტაპერი (Fast Tap)" required class="input-field">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 11px; color: #fff; display: block; margin-bottom: 4px;">თამაშის აღწერა:</label>
+                <textarea name="description" rows="2" placeholder="მოკლე აღწერა, წესები..." required class="input-field"></textarea>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">თამაშის ბმული (URL ან ფოლდერი):</label>
+                <input type="text" name="game_url" placeholder="/static/games/... ან # " required class="input-field">
+            </div>
+            <div style="grid-column: 1 / -1; margin-top: 5px;">
+                <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">💾 მინი-თამაშის დამატება</button>
+            </div>
+        </form>
     </div>
 
     <div class="grid-2">

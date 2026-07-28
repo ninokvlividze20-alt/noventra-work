@@ -360,6 +360,67 @@ function boostRegion(event) {
     }, 1000);
 }
 
+// 🧠 ვიქტორინის ჩატვირთვა API-დან
+function loadQuiz() {
+    let container = document.getElementById('quizContainer');
+    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება... ⏳</h3>';
+
+    fetch('/api/get_random_quiz')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            let html = `
+                <div style="margin-bottom: 15px;">
+                    <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; font-weight: bold;">გენერალური სპონსორი: ${data.sponsor_name}</span>
+                </div>
+                <h4 style="color: #fff; margin-bottom: 20px; font-size: 15px;">${data.question_text}</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+            `;
+            data.options.forEach((opt, index) => {
+                html += `<button onclick="submitQuiz(${data.id}, ${index + 1})" class="btn" style="background: #161622; border: 1px solid #00ffcc; color: #00ffcc; padding: 10px; text-align: left; cursor: pointer;">${index + 1}. ${opt}</button>`;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        } else {
+            // თუ კითხვები არ არის ბაზაში, ავტომატურად აღვუდგინოთ ენერგია
+            completeMiniGame();
+        }
+    })
+    .catch(err => { console.error(err); completeMiniGame(); });
+}
+
+// 🧠 პასუხის გაგზავნა და შემოწმება
+function submitQuiz(q_id, chosen_opt) {
+    fetch('/api/check_quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question_id: q_id, chosen_option: chosen_opt })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.is_correct) {
+            alert("🎉 სწორია! ენერგია აღდგენილია, შეგიძლია განაგრძო თამაში!");
+            completeMiniGame(); // იძახებს ქვედა ფუნქციას და აბრუნებს 250 კლიკს
+            
+            // ვარესეტებთ მოდალს თავის საწყის ორმაგ არჩევანზე შემდეგი ამოწურვისთვის
+            setTimeout(() => {
+                document.getElementById('quizContainer').innerHTML = `
+                    <h3 style="color: #ffcc00; margin-top: 0;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
+                    <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">ენერგიის სრულად აღსადგენად აირჩიე ერთ-ერთი გზა:</p>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px;">
+                        <button onclick="loadQuiz()" class="btn btn-warning" style="width: 100%; padding: 12px; color: #000; font-weight: bold; cursor: pointer;">🎁 სპონსორის ვიქტორინა (პასუხი და ენერგია)</button>
+                        <button onclick="completeMiniGame(event)" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: bold; cursor: pointer;">🎮 სწრაფი მინი-თამაში 🚀</button>
+                    </div>
+                `;
+            }, 1000);
+            
+        } else {
+            alert("❌ არასწორი პასუხი! სცადე სხვა კითხვა.");
+            loadQuiz(); 
+        }
+    });
+}
+
 // 🎮 მინი-თამაშის გავლით ენერგიის სრული აღდგენა (250 კლიკი)
 function completeMiniGame(event) {
     if (event) event.preventDefault();

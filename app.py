@@ -115,6 +115,109 @@ class MiniGame(db.Model):
     folder_name = db.Column(db.String(100), unique=True, nullable=False) # static/games/folder_name
     is_active = db.Column(db.Boolean, default=True)
 
+# ----------------- ახალი მოდელები ბაზისთვის -----------------
+
+class QuizQuestion(db.Model):
+    __tablename__ = 'quiz_questions'
+    id = db.Column(db.Integer, primary_key=True)
+    sponsor_name = db.Column(db.String(100), nullable=False) # სპონსორი კომპანია
+    sponsor_image = db.Column(db.String(255), default="") # სპონსორის ფოტო/ლოგო
+    package_type = db.Column(db.String(20), default="Bronze") # Gold, Silver, Bronze (პაკეტები)
+    question_text = db.Column(db.Text, nullable=False)
+    option_1 = db.Column(db.String(150), nullable=False)
+    option_2 = db.Column(db.String(150), nullable=False)
+    option_3 = db.Column(db.String(150), nullable=False)
+    option_4 = db.Column(db.String(150), nullable=False)
+    correct_option = db.Column(db.Integer, nullable=False) # 1, 2, 3 ან 4
+
+class MiniGameItem(db.Model):
+    __tablename__ = 'mini_game_items'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    game_url = db.Column(db.String(255), nullable=False) # თამაშის ბმული ან ფოლდერი
+    is_active = db.Column(db.Boolean, default=True)
+
+# ----------------- ახალი API-ები ვიქტორინისა და თამაშებისთვის -----------------
+
+@app.route('/api/get_random_quiz')
+@login_required
+def get_random_quiz():
+    import random
+    questions = QuizQuestion.query.all()
+    if not questions:
+        return jsonify({"success": False, "message": "კითხვები არ არის ბაზაში"})
+    
+    # სარეკლამო პაკეტების წონები (Gold პაკეტის კითხვები უფრო ხშირად ამოვარდება)
+    weighted_pool = []
+    for q in questions:
+        weight = 1
+        if q.package_type == 'Gold':
+            weight = 3  # Gold პაკეტი 3-ჯერ უფრო პრიორიტეტულია
+        elif q.package_type == 'Silver':
+            weight = 2  # Silver პაკეტი 2-ჯერ
+        else:
+            weight = 1  # Bronze პაკეტი სტანდარტული
+            
+        for _ in range(weight):
+            weighted_pool.append(q)
+            
+    selected_q = random.choice(weighted_pool)
+    
+    return jsonify({
+        "success": True,
+        "id": selected_q.id,
+        "sponsor_name": selected_q.sponsor_name,
+        "sponsor_image": selected_q.sponsor_image,
+        "package_type": selected_q.package_type,
+        "question_text": selected_q.question_text,
+        "options": [selected_q.option_1, selected_q.option_2, selected_q.option_3, selected_q.option_4],
+        "correct_option": selected_q.correct_option
+    })
+
+@app.route('/api/check_quiz', methods=['POST'])
+@login_required
+def check_quiz():
+    data = request.get_json() or {}
+    q_id = data.get('question_id')
+    chosen_opt = int(data.get('chosen_option', 0))
+    
+    q = QuizQuestion.query.get(q_id)
+    if not q:
+        return jsonify({"success": False, "message": "კითხვა ვერ მოიძებნა"})
+        
+    is_correct = (chosen_opt == q.correct_option)
+    return jsonify({
+        "success": True,
+        "is_correct": is_correct,
+        "correct_option": q.correct_option
+    })
+
+@app.route('/api/get_random_game')
+@login_required
+def get_random_game():
+    import random
+    games = MiniGameItem.query.filter_by(is_active=True).all()
+    if not games:
+        # საბაზისო მინი-თამაში თუ არ არის შექმნილი
+        return jsonify({
+            "success": True,
+            "title": "სწრაფი ტაპერი (Fast Tap)",
+            "description": "დააკლიკე მფრინავ ვარსკვლავს დროის ამოწურვამდე!",
+            "game_url": "#"
+        })
+    selected_game = random.choice(games)
+    return jsonify({
+        "success": True,
+        "title": selected_game.title,
+        "description": selected_game.description,
+        "game_url": selected_game.game_url
+    })
+
+# აპლიკაციის კონტექსტში ცხრილების ავტომატური შექმნა:
+with app.app_context():
+    db.create_all()
+
 def init_regions():
     regions = [
         ("tbilisi", "თბილისი"),
@@ -746,6 +849,38 @@ def admin_distribute_prizes():
     flash(f"საპრიზო თანხები წარმატებით ჩაერიცხა გამარჯვებულებს!", "success")
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/quiz/add', methods=['POST'])
+@login_required
+def admin_add_quiz_question():
+    if not current_user.is_admin:
+        abort(403)
+    
+    sponsor_name = request.form.get('sponsor_name')
+    package_type = request.form.get('package_type', 'Bronze')
+    question_text = request.form.get('question_text')
+    option_1 = request.form.get('option_1')
+    option_2 = request.form.get('option_2')
+    option_3 = request.form.get('option_3')
+    option_4 = request.form.get('option_4')
+    correct_option = int(request.form.get('correct_option', 1))
+    
+    if sponsor_name and question_text:
+        new_q = QuizQuestion(
+            sponsor_name=sponsor_name,
+            package_type=package_type,
+            question_text=question_text,
+            option_1=option_1,
+            option_2=option_2,
+            option_3=option_3,
+            option_4=option_4,
+            correct_option=correct_option
+        )
+        db.session.add(new_q)
+        db.session.commit()
+        flash("სპონსორის ვიქტორინის კითხვა წარმატებით დაემატა!", "success")
+        
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -759,6 +894,11 @@ with app.app_context():
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS total_clicks INTEGER DEFAULT 0;"))
         db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
+        
+        # 🔽 ახალი ცხრილების უსაფრთხო შექმნა ბაზაში
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS mini_game_items (id SERIAL PRIMARY KEY, title VARCHAR(100) NOT NULL, description TEXT NOT NULL, game_url VARCHAR(255) NOT NULL, is_active BOOLEAN DEFAULT TRUE);"))
+        
         db.session.commit()
     except Exception as e:
         db.session.rollback()
