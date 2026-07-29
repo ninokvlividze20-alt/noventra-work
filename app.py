@@ -39,7 +39,7 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String(20), default="")
     bank_account = db.Column(db.String(50), default="")
     clicks_left = db.Column(db.Integer, default=250)
-    total_clicks = db.Column(db.Integer, default=0) # 👈 რეალური ჯამური კლიკების სათვლელი
+    total_clicks = db.Column(db.Integer, default=0)
     region = db.Column(db.String(50), default="tbilisi")
     is_banned = db.Column(db.Boolean, default=False)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
@@ -78,14 +78,14 @@ class Question(db.Model):
     text = db.Column(db.Text, nullable=False)
     username = db.Column(db.String(50))
     user_phone = db.Column(db.String(20))
-    region_id = db.Column(db.String(50), default="tbilisi") # 👈 ეს დავუმატეთ რეგიონებისთვის
+    region_id = db.Column(db.String(50), default="tbilisi")
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class Advertisement(db.Model):
     __tablename__ = 'advertisements'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    video_url = db.Column(db.String(255), nullable=False)  # YouTube embed ან ვიდეო ლინკი
+    video_url = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class UserAdView(db.Model):
@@ -107,7 +107,7 @@ class Settings(db.Model):
     key = db.Column(db.String(50), unique=True, nullable=False)
     value = db.Column(db.String(255), nullable=False)
 
-# ----------------- ვიქტორინის მოდელი ----------------
+# ----------------- ვიქტორინის მოდელები -----------------
 
 class UserQuizAnswer(db.Model):
     __tablename__ = 'user_quiz_answers'
@@ -118,9 +118,9 @@ class UserQuizAnswer(db.Model):
 class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
     id = db.Column(db.Integer, primary_key=True)
-    sponsor_name = db.Column(db.String(100), nullable=False) # სპონსორი კომპანია
-    sponsor_image = db.Column(db.String(255), default="") # სპონსორის სარეკლამო ფოტო
-    package_type = db.Column(db.String(20), default="Bronze") # Gold, Silver, Bronze
+    sponsor_name = db.Column(db.String(100), nullable=False)
+    sponsor_image = db.Column(db.String(255), default="")
+    package_type = db.Column(db.String(20), default="Bronze")
     question_text = db.Column(db.Text, nullable=False)
     option_1 = db.Column(db.String(150), nullable=False)
     option_2 = db.Column(db.String(150), nullable=False)
@@ -135,14 +135,11 @@ class QuizQuestion(db.Model):
 def get_random_quiz():
     import random
     
-    # ვიგებთ იმ კითხვების აიდებს, რომლებზეც ამ მომხმარებელს უკვე უპასუხია
     answered_ids = db.session.query(UserQuizAnswer.quiz_id).filter_by(user_id=current_user.id).all()
     answered_ids = [ans[0] for ans in answered_ids]
     
-    # ვეძებთ მხოლოდ იმ კითხვებს, რომლებზეც ჯერ არ უპასუხია
     questions = QuizQuestion.query.filter(~QuizQuestion.id.in_(answered_ids)).all() if answered_ids else QuizQuestion.query.all()
     
-    # თუ ყველა კითხვაზე უპასუხია, ვასუფთავებთ ისტორიას, რომ ციკლმა თავიდან ათვლა დაიწყოს
     if not questions:
         UserQuizAnswer.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
@@ -183,7 +180,6 @@ def check_quiz():
          
     is_correct = (chosen_opt == q.correct_option)
     
-    # ვინახავთ რომ ამ მომხმარებელმა ამ კითხვაზე უკვე გასცა პასუხი
     existing_answer = UserQuizAnswer.query.filter_by(user_id=current_user.id, quiz_id=q_id).first()
     if not existing_answer:
         new_ans = UserQuizAnswer(user_id=current_user.id, quiz_id=q_id)
@@ -195,10 +191,6 @@ def check_quiz():
         "is_correct": is_correct,
         "correct_option": q.correct_option
     })
-
-# აპლიკაციის კონტექსტში ცხრილების ავტომატური შექმნა:
-with app.app_context():
-    db.create_all()
 
 def init_regions():
     regions = [
@@ -439,7 +431,7 @@ def task_detail(task_id):
         if task.is_completed:
             flash("ეს დავალება უკვე შესრულებულია!", "warning")
             return redirect(url_for('dashboard') + '#tasks-section')
-        
+         
         user_answer = request.form.get('user_answer')
         if not user_answer:
             flash("გთხოვთ, შეიყვანოთ პასუხი!", "danger")
@@ -448,11 +440,11 @@ def task_detail(task_id):
         task.is_completed = True
         task.user_id = current_user.id
         current_user.balance += task.reward
-        
+         
         new_trans = Transaction(user_id=current_user.id, task_title=task.title, amount=task.reward)
         db.session.add(new_trans)
         db.session.commit()
-        
+         
         flash(f"დავალება წარმატებით შესრულდა! დაირიცხა {task.reward} ₾", "success")
         return redirect(url_for('dashboard') + '#tasks-section')
 
@@ -645,7 +637,7 @@ def admin_manage_ads():
         title = request.form.get('title')
         video_url = request.form.get('video_url')
         video_file = request.files.get('video_file')
-        
+         
         final_url = ""
         if video_file and video_file.filename != '':
             filename = f"ad_{datetime.datetime.now().timestamp()}.mp4"
@@ -859,7 +851,7 @@ def admin_add_quiz_question():
         db.session.add(new_q)
         db.session.commit()
         flash("სპონსორის ვიქტორინის კითხვა და ბანერი წარმატებით დაემატა!", "success")
-        
+         
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/quiz/delete/<int:quiz_id>', methods=['POST'])
@@ -885,6 +877,13 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route('/api/restore_energy', methods=['POST'])
+@login_required
+def restore_energy():
+    current_user.clicks_left = 250
+    db.session.commit()
+    return jsonify({"success": True, "new_clicks": 250})
+
 with app.app_context():
     db.create_all()
     init_regions()
@@ -896,7 +895,6 @@ with app.app_context():
         
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
         
-        # 👈 აქ დავამატეთ user_quiz_answers ცხრილის შექმნა სწორი ინდენტაციით
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS user_quiz_answers (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), quiz_id INTEGER REFERENCES quiz_questions(id));"))
         
         db.session.commit()
@@ -913,11 +911,5 @@ with app.app_context():
         db.session.add(Settings(key='game_status', value='active'))
     db.session.commit()
 
-@app.route('/api/restore_energy', methods=['POST'])
-@login_required
-def restore_energy():
-    current_user.clicks_left = 250
-    db.session.commit()
-    return jsonify({"success": True, "new_clicks": 250})
-
 if __name__ == '__main__':
+    app.run(debug=True)
