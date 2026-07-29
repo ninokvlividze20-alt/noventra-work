@@ -107,7 +107,13 @@ class Settings(db.Model):
     key = db.Column(db.String(50), unique=True, nullable=False)
     value = db.Column(db.String(255), nullable=False)
 
-# ----------------- ვიქტორინის მოდელი -----------------
+# ----------------- ვიქტორინის მოდელი ----------------
+
+class UserQuizAnswer(db.Model):
+    __tablename__ = 'user_quiz_answers'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'), nullable=False)
 
 class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
@@ -128,20 +134,26 @@ class QuizQuestion(db.Model):
 @login_required
 def get_random_quiz():
     import random
-    questions = QuizQuestion.query.all()
+    
+    # ვიგებთ იმ კითხვების აიდებს, რომლებზეც ამ მომხმარებელს უკვე უპასუხია
+    answered_ids = db.session.query(UserQuizAnswer.quiz_id).filter_by(user_id=current_user.id).all()
+    answered_ids = [ans[0] for ans in answered_ids]
+    
+    # ვეძებთ მხოლოდ იმ კითხვებს, რომლებზეც ჯერ არ უპასუხია
+    questions = QuizQuestion.query.filter(~QuizQuestion.id.in_(answered_ids)).all() if answered_ids else QuizQuestion.query.all()
+    
+    # თუ ყველა კითხვაზე უპასუხია, ვასუფთავებთ ისტორიას, რომ ციკლმა თავიდან ათვლა დაიწყოს
+    if not questions:
+        UserQuizAnswer.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+        questions = QuizQuestion.query.all()
+        
     if not questions:
         return jsonify({"success": False, "message": "კითხვები არ არის ბაზაში"})
     
     weighted_pool = []
     for q in questions:
-        weight = 1
-        if q.package_type == 'Gold':
-            weight = 3 
-        elif q.package_type == 'Silver':
-            weight = 2 
-        else:
-            weight = 1 
-            
+        weight = 3 if q.package_type == 'Gold' else (2 if q.package_type == 'Silver' else 1)
         for _ in range(weight):
             weighted_pool.append(q)
             
@@ -168,8 +180,16 @@ def check_quiz():
     q = QuizQuestion.query.get(q_id)
     if not q:
         return jsonify({"success": False, "message": "კითხვა ვერ მოიძებნა"})
-        
+         
     is_correct = (chosen_opt == q.correct_option)
+    
+    # ვინახავთ რომ ამ მომხმარებელმა ამ კითხვაზე უკვე გასცა პასუხი
+    existing_answer = UserQuizAnswer.query.filter_by(user_id=current_user.id, quiz_id=q_id).first()
+    if not existing_answer:
+        new_ans = UserQuizAnswer(user_id=current_user.id, quiz_id=q_id)
+        db.session.add(new_ans)
+        db.session.commit()
+
     return jsonify({
         "success": True,
         "is_correct": is_correct,
@@ -876,6 +896,9 @@ with app.app_context():
         
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
         
+        # 👈 აქ დავამატეთ user_quiz_answers ცხრილის შექმნა სწორი ინდენტაციით
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS user_quiz_answers (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), quiz_id INTEGER REFERENCES quiz_questions(id));"))
+        
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -898,4 +921,3 @@ def restore_energy():
     return jsonify({"success": True, "new_clicks": 250})
 
 if __name__ == '__main__':
-    app.run(debug=True)
