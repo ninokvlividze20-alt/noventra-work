@@ -107,15 +107,7 @@ class Settings(db.Model):
     key = db.Column(db.String(50), unique=True, nullable=False)
     value = db.Column(db.String(255), nullable=False)
 
-class MiniGame(db.Model):
-    __tablename__ = 'mini_games'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    folder_name = db.Column(db.String(100), unique=True, nullable=False) # static/games/folder_name
-    is_active = db.Column(db.Boolean, default=True)
-
-# ----------------- ახალი მოდელები ბაზისთვის -----------------
+# ----------------- ვიქტორინის მოდელი -----------------
 
 class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
@@ -130,17 +122,7 @@ class QuizQuestion(db.Model):
     option_4 = db.Column(db.String(150), nullable=False)
     correct_option = db.Column(db.Integer, nullable=False)
 
-class MiniGameItem(db.Model):
-    __tablename__ = 'mini_game_items'
-    id = db.Column(db.Integer, primary_key=True)
-    sponsor_name = db.Column(db.String(100), default="სპონსორი")
-    sponsor_image = db.Column(db.String(255), default="")
-    package_type = db.Column(db.String(20), default="Bronze")
-    game_type = db.Column(db.String(50), default="puzzle") # puzzle, basket, fix_text, spot_diff
-    description = db.Column(db.Text, nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
-
-# ----------------- ახალი API-ები ვიქტორინისა და თამაშებისთვის -----------------
+# ----------------- ვიქტორინის API-ები -----------------
 
 @app.route('/api/get_random_quiz')
 @login_required
@@ -192,28 +174,6 @@ def check_quiz():
         "success": True,
         "is_correct": is_correct,
         "correct_option": q.correct_option
-    })
-
-@app.route('/api/get_random_game')
-@login_required
-def get_random_game():
-    import random
-    games = MiniGameItem.query.filter_by(is_active=True).all()
-    if not games:
-        return jsonify({
-            "success": True,
-            "sponsor_name": "Noventra",
-            "sponsor_image": "",
-            "game_type": "puzzle",
-            "description": "აწყობილად ითამაშე პაზლი!",
-        })
-    selected_game = random.choice(games)
-    return jsonify({
-        "success": True,
-        "sponsor_name": selected_game.sponsor_name,
-        "sponsor_image": selected_game.sponsor_image,
-        "game_type": selected_game.game_type,
-        "description": selected_game.description
     })
 
 # აპლიკაციის კონტექსტში ცხრილების ავტომატური შექმნა:
@@ -544,7 +504,6 @@ def admin_dashboard():
             region_sponsors[reg.region_id] = None
 
     quiz_questions = QuizQuestion.query.all()
-    mini_games = MiniGameItem.query.all()
 
     return render_template('admin_dashboard.html', 
                          users=users_sorted, 
@@ -555,8 +514,7 @@ def admin_dashboard():
                          current_week_prize_pool=current_week_prize_pool,
                          top_region=top_region,
                          top_region_users=top_region_users,
-                         quiz_questions=quiz_questions,
-                         mini_games=mini_games)
+                         quiz_questions=quiz_questions)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -902,61 +860,6 @@ def admin_delete_quiz(quiz_id):
     flash("ვიქტორინის კითხვა წარმატებით წაიშალა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# 🎮 მინი-თამაშის დამატება (განახლებული 4 თამაშის ლოგიკით)
-@app.route('/admin/mini_game/add', methods=['POST'])
-@login_required
-def admin_add_mini_game():
-    if not current_user.is_admin:
-        abort(403)
-    
-    sponsor_name = request.form.get('sponsor_name')
-    package_type = request.form.get('package_type', 'Bronze')
-    game_type = request.form.get('game_type', 'puzzle')
-    description = request.form.get('description', '')
-    
-    image_url = ""
-    file = request.files.get('sponsor_image')
-    if file and file.filename != '':
-        filename = f"minigame_{datetime.datetime.now().timestamp()}.jpg"
-        ads_folder = os.path.join(app.root_path, 'static', 'minigame_ads')
-        os.makedirs(ads_folder, exist_ok=True)
-        filepath = os.path.join(ads_folder, filename)
-        file.save(filepath)
-        image_url = url_for('static', filename=f'minigame_ads/{filename}')
-
-    if sponsor_name:
-        new_game = MiniGameItem(
-            sponsor_name=sponsor_name,
-            sponsor_image=image_url,
-            package_type=package_type,
-            game_type=game_type,
-            description=description,
-            is_active=True
-        )
-        db.session.add(new_game)
-        db.session.commit()
-        flash("მინი-თამაში წარმატებით დაემატა და მიება ბაზას!", "success")
-        
-    return redirect(url_for('admin_dashboard'))
-
-@app.route('/admin/mini_game/delete/<int:game_id>', methods=['POST'])
-@login_required
-def admin_delete_mini_game(game_id):
-    if not current_user.is_admin:
-        abort(403)
-    game = MiniGameItem.query.get_or_404(game_id)
-    if game.sponsor_image:
-        try:
-            img_path = os.path.join(app.root_path, game.sponsor_image.lstrip('/'))
-            if os.path.exists(img_path):
-                os.remove(img_path)
-        except:
-            pass
-    db.session.delete(game)
-    db.session.commit()
-    flash("მინი-თამაში წარმატებით წაიშალა!", "success")
-    return redirect(url_for('admin_dashboard'))
-
 @app.route('/logout')
 def logout():
     logout_user()
@@ -972,7 +875,6 @@ with app.app_context():
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
         
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
-        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS mini_game_items (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) DEFAULT 'სპონსორი', sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', game_type VARCHAR(50) DEFAULT 'puzzle', description TEXT NOT NULL, is_active BOOLEAN DEFAULT TRUE);"))
         
         db.session.commit()
     except Exception as e:

@@ -128,7 +128,7 @@
                     📸 ატვირთე კომპანიის სარეკლამო ბანერი (რეკომენდებული: 800x450 px)
                 </label>
                 <input type="file" name="sponsor_image" accept="image/*" id="quizImageInput" onchange="previewQuizImage(event)" style="display: none;" required>
-                
+               
                 <div onclick="document.getElementById('quizImageInput').click()" style="cursor: pointer; border: 1px solid #444; border-radius: 8px; overflow: hidden; max-width: 400px; margin: 0 auto; background: #111; height: 180px; display: flex; align-items: center; justify-content: center; position: relative;">
                     <img id="quizImagePreview" src="" alt="ბანერის ჩარჩო (აირჩიე ფოტო)" style="width: 100%; height: 100%; object-fit: cover; display: none;">
                     <span id="quizImagePlaceholder" style="color: #888; font-size: 13px;">📁 დააკლიკე ფოტოს ასარჩევად (ჩარჩო 800x450)</span>
@@ -163,116 +163,6 @@
                 <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">💾 ვიქტორინისა და ბანერის შენახვა</button>
             </div>
         </form>
-    </div>
-
-    <!-- 🎮 მინი-თამაშებისა და სარეკლამო კამპანიების მართვა (4 თემატური თამაში) -->
-    <div class="admin-section" style="border-color: #00ffcc; margin-top: 25px;">
-        <h3>🎮 მინი-თამაშებისა და სარეკლამო კამპანიების მართვა</h3>
-        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">
-            ატვირთე სპონსორის ბანერი/ლოგო, აირჩიე პაკეტი და მიაბა 4 თემატური მინი-თამაშდიდან ერთ-ერთს!
-        </p>
-
-        <form action="{{ url_for('admin_add_mini_game') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; background: #161622; padding: 20px; border-radius: 12px; border: 1px solid #33334d;">
-            <div>
-                <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სპონსორი კომპანიის სახელი:</label>
-                <input type="text" name="sponsor_name" placeholder="მაგ: ბორჯომი, სელფი..." required class="input-field">
-            </div>
-
-            <div>
-                <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სარეკლამო პაკეტი (სიხშირე):</label>
-                <select name="package_type" class="input-field">
-                    <option value="Gold">🥇 Gold (მაღალი პრიორიტეტი)</option>
-                    <option value="Silver">🥈 Silver (საშუალო)</option>
-                    <option value="Bronze">🥉 Bronze (სტანდარტული)</option>
-                </select>
-            </div>
-
-            <div style="grid-column: 1 / -1;">
-                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">აირჩიე მინი-თამაშის ტიპი:</label>
-                <select name="game_type" class="input-field" required>
-                    <option value="puzzle">🧩 1. 8 ნაწილიანი პაზლი (Sliding Puzzle)</option>
-                    <option value="basket">🧺 2. კალათა - მხოლოდ კომპანიის ლოგოების დაჭერა</option>
-                    <option value="fix_text">✍️ 3. ტექსტის შესწორება / სარეკლამო შეცდომის პოვნა</option>
-                    <option value="spot_diff">🔍 4. იპოვე განსხვავება (2 სარეკლამო ფოტო)</option>
-                </select>
-            </div>
-
-            <div style="grid-column: 1 / -1; background: #111; border: 2px dashed #444; padding: 15px; border-radius: 12px; text-align: center;">
-                <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 8px; font-weight: bold;">📸 ატვირთე სარეკლამო ფოტო / ბანერი (ან ლოგო)</label>
-                <input type="file" name="sponsor_image" accept="image/*" id="miniGameImgInput" onchange="previewMiniGameImg(event)" style="display: none;" required>
-                <div onclick="document.getElementById('miniGameImgInput').click()" style="cursor: pointer; border: 1px solid #333; border-radius: 8px; overflow: hidden; max-width: 350px; margin: 0 auto; background: #0b0b10; height: 150px; display: flex; align-items: center; justify-content: center; position: relative;">
-                    <img id="miniGameImgPreview" src="" alt="პრევიუ" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                    <span id="miniGameImgPlaceholder" style="color: #888; font-size: 12px;">📁 დააკლიკე ფოტოს ასარჩევად</span>
-                </div>
-            </div>
-
-            <div style="grid-column: 1 / -1;">
-                <label style="font-size: 11px; color: #fff; display: block; margin-bottom: 4px;">დამატებითი აღწერა / ტექსტი (მაგ: ტექსტის შესწორების თამაშისთვის):</label>
-                <textarea name="description" rows="2" placeholder="სარეკლამო სლოგანი ან წესები..." class="input-field"></textarea>
-            </div>
-
-            <div style="grid-column: 1 / -1;">
-                <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">💾 მინი-თამაშის შენახვა და ბაზაში მიმაგრება</button>
-            </div>
-        </form>
-
-        <!-- ატვირთული მინი-თამაშების არქივი (ჩამოსაშლელი სია) -->
-        <div style="margin-top: 20px;">
-            <details style="background: #161622; border: 1px solid #33334d; border-radius: 12px; padding: 12px;">
-                <summary style="color: #00ffcc; cursor: pointer; font-size: 15px; font-weight: bold;">
-                    📂 ატვირთული მინი-თამაშების არქივი და მართვა (სულ: {{ mini_games|length }})
-                </summary>
-                
-                <div style="margin-top: 15px; overflow-x: auto;">
-                    {% if mini_games %}
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>სპონსორი</th>
-                                <th>პაკეტი</th>
-                                <th>თამაშის ტიპი</th>
-                                <th>ბანერი</th>
-                                <th>აღწერა / სლოგანი</th>
-                                <th>მოქმედება</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for game in mini_games %}
-                            <tr>
-                                <td><strong>{{ game.sponsor_name | default('უცნობი') }}</strong></td>
-                                <td><span style="color: {% if game.package_type == 'Gold' %}#ffcc00{% else %}#00ffcc{% endif %};">{{ game.package_type | default('Bronze') }}</span></td>
-                                <td style="color: #ffcc00;">
-                                    {% if game.game_type == 'puzzle' %}🧩 პაზლი
-                                    {% elif game.game_type == 'basket' %}🧺 კალათა (ლოგოები)
-                                    {% elif game.game_type == 'fix_text' %}✍️ ტექსტის შესწორება
-                                    {% elif game.game_type == 'spot_diff' %}🔍 იპოვე განსხვავება
-                                    {% else %}სტანდარტული{% endif %}
-                                </td>
-                                <td>
-                                    {% if game.sponsor_image %}
-                                    <img src="{{ game.sponsor_image }}" class="sponsor-preview" alt="Banner">
-                                    {% else %}
-                                    <span style="color: #888; font-size: 11px;">არ აქვს</span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ game.description[:40] if game.description else '-' }}...</td>
-                                <td>
-                                    <div style="display: flex; gap: 5px;">
-                                        <form action="{{ url_for('admin_delete_mini_game', game_id=game.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ მინი-თამაშის წაშლა?');">
-                                            <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p style="color: #a1a1aa; font-size: 13px; margin: 10px 0 0 0;">ბაზაში მინი-თამაშები ჯერ არ არის ატვირთული.</p>
-                    {% endif %}
-                </div>
-            </details>
-        </div>
     </div>
 
     <!-- 📚 ატვირთული ვიქტორინების სრული სია და მართვა -->
@@ -325,7 +215,7 @@
         <div class="admin-section">
             <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
             <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: <strong>600x400 px</strong> (.jpg)</p>
-            
+           
             <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                 <select name="region_id" class="input-field">
                     {% for reg in regions %}
@@ -380,12 +270,12 @@
     <div class="admin-section" style="grid-column: 1 / -1;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
             <h3 style="margin: 0; border: none;">👥 მომხმარებლების სრული კონტროლი (ბალანსი, კლიკები, ბანი, რეგიონი)</h3>
-            
+           
             <div style="width: 100%; max-width: 300px;">
                 <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="🔍 მოძებნე იუზერი სახელით..." class="input-field">
             </div>
         </div>
-        
+       
         {% for reg_id, data in users_by_region.items() %}
         <details class="region-user-block" style="margin-bottom: 15px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
             <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px;">
@@ -471,17 +361,6 @@ function previewQuizImage(event) {
     reader.readAsDataURL(event.target.files[0]);
 }
 
-function previewMiniGameImg(event) {
-    let reader = new FileReader();
-    reader.onload = function(){
-        let output = document.getElementById('miniGameImgPreview');
-        output.src = reader.result;
-        output.style.display = 'block';
-        document.getElementById('miniGameImgPlaceholder').style.display = 'none';
-    };
-    reader.readAsDataURL(event.target.files[0]);
-}
-
 function filterUsers() {
     let input = document.getElementById('userSearchInput');
     let filter = input.value.toLowerCase();
@@ -510,24 +389,6 @@ function filterUsers() {
             block.style.display = "none";
         }
     });
-}
-
-function calculateDistribution() {
-    let amount = parseFloat(document.getElementById('calcAmount').value) || 0;
-    let regionName = document.getElementById('calcRegion').selectedOptions[0].text;
-    let resultDiv = document.getElementById('calcResult');
-    
-    let top1 = (amount * 0.50).toFixed(2);
-    let top2 = (amount * 0.30).toFixed(2);
-    let rest = (amount * 0.20).toFixed(2);
-
-    resultDiv.style.display = 'block';
-    resultDiv.innerHTML = `
-        <strong style="color: #ffcc00;">📍 რეგიონი: ${regionName} | ჯამური საპრიზო ფონდი: ${amount} ₾</strong><br><br>
-        • 🥇 <strong>1-ელ ადგილზე გასულ აქტიურ მოთამაშეს (50%):</strong> <span style="color:#00ffcc;">${top1} ₾</span><br>
-        • 🥈 <strong>მე-2 ადგილზე გასულ მოთამაშეს (30%):</strong> <span style="color:#00ffcc;">${top2} ₾</span><br>
-        • 🥉 <strong>დანარჩენ აქტიურ მოთამაშეებზე (20%):</strong> <span style="color:#00ffcc;">${rest} ₾</span>
-    `;
 }
 </script>
 {% endblock %}

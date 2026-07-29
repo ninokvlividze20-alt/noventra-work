@@ -94,7 +94,7 @@
         100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
     }
 
-    /* 🪟 დიზაინერული მოდალური ფანჯარა ენერგიის ამოწურვისთვის */
+    /* 🪟 დიზაინერული მოდალური ფანჯარა ენერგიის ამოწურვისთვის (მხოლოდ ვიქტორინა) */
     .ad-modal {
         display: none;
         position: fixed;
@@ -108,10 +108,12 @@
     .ad-modal-content {
         background: #111118;
         border: 1px solid #00ffcc;
-        padding: 25px;
+        padding: 20px;
         border-radius: 16px;
         width: 90%;
-        max-width: 500px;
+        max-width: 450px;
+        max-height: 90vh;
+        overflow-y: auto;
         text-align: center;
         box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
     }
@@ -154,20 +156,13 @@
 <!-- ⏱️ რეალური დროის ცოცხალი ტაიმერის სკრიპტი -->
 <script>
 function updateCountdown() {
-    // ვთვლით მომდევნო კვირის კვირა დღის 22:00-ს
     const now = new Date();
     const target = new Date();
-    // ვპოულობთ მიმდინარე კვირის კვირას (Sunday = 0, ან გადათვლა)
     let day = now.getDay();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    let seconds = now.getSeconds();
 
-    // მიახლოებითი დასასრული: კვირა დღის 22:00
     target.setDate(now.getDate() + (7 - day) % 7);
     target.setHours(22, 0, 0, 0);
 
-    // თუ უკვე კვირაა და 22:00 გადაცილებულია, ვუმიზნებთ შემდეგ კვირას
     if (now > target) {
         target.setDate(target.getDate() + 7);
     }
@@ -200,15 +195,15 @@ updateCountdown();
             <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: bold;">📍 შენი რეგიონის გენერალური სპონსორი</span>
             <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
             <p style="font-size: 12px; color: #d1d1d6; margin: 0; line-height: 1.5;">
-                ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას ჩაირთვება სახალისო მინი-თამაში! ითამაშე, გაიმარჯვე და მიაშველე ენერგია შენს რეგიონს! 🎮🔥
+                ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას ჩაირთვება სპონსორის ვიქტორინა! უპასუხე სწორად და აღადგინე ენერგია! 🧠🔥
             </p>
         </div>
 
-        <!-- რეგიონის აიდი (სუფთად, ერთადერთი ცალი) -->
+        <!-- რეგიონის აიდი -->
         <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
 
         {% if game_status == 'paused' %}
-            <!-- 🔴 სეზონი შეჩერებულია (მხოლოდ მაშინ ჩანს, როცა ადმინი გათიშავს) -->
+            <!-- 🔴 სეზონი შეჩერებულია -->
             <div style="background: rgba(255, 71, 87, 0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);">
                 <h3 style="color: #ff4757; margin-top: 0; font-size: 20px;">🔴 სეზონი შეჩერებულია!</h3>
                 <p style="color: #fff; font-size: 14px; line-height: 1.6; margin: 0;">
@@ -226,22 +221,15 @@ updateCountdown();
             <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
         {% endif %}
 
-       <!-- 🪟 მოდალური ფანჯარა ვიქტორინისა და თამაშების სიით -->
+        <!-- 🪟 მოდალური ფანჯარა მხოლოდ ვიქტორინისთვის (მობილურზე ოპტიმიზებული) -->
         <div id="adModal" class="ad-modal">
             <div class="ad-modal-content">
-                <h3 style="color: #ffcc00; margin-top: 0;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
-                <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">
-                    ენერგიის სრულად აღსადგენად აირჩიე ერთ-ერთი გზა:
+                <h3 style="color: #ffcc00; margin-top: 0; font-size: 16px;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
+                <p style="font-size: 12px; color: #a1a1aa; margin-bottom: 12px;">
+                    ენერგიის აღსადგენად უპასუხე სპონსორის ვიქტორინას:
                 </p>
-                <div id="quizContainer" style="margin-bottom: 20px;">
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <button onclick="loadQuiz()" class="btn btn-warning" style="width: 100%; padding: 12px; color: #000; font-weight: bold; cursor: pointer;">
-                            🎁 სპონსორის ვიქტორინა (პასუხი და ენერგია)
-                        </button>
-                        <button onclick="loadRandomGameModal()" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: bold; cursor: pointer;">
-                            🎮 სწრაფი მინი-თამაში 🚀
-                        </button>
-                    </div>
+                <div id="quizContainer" style="margin-bottom: 10px;">
+                    <!-- დინამიური ვიქტორინა ჩაიტვირთება აქ -->
                 </div>
             </div>
         </div>
@@ -268,7 +256,7 @@ updateCountdown();
         </div>
     </div>
 
-    <!-- ციფრული საფულე (თანხის მოთხოვნის გრაფის გარეშე, ავტომატური დარიცხვით) -->
+    <!-- ციფრული საფულე -->
     <div class="card">
         <h3>💰 ციფრული საფულე</h3>
         <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
@@ -314,6 +302,7 @@ function boostRegion(event) {
     
     if (clickLimit <= 0) {
         document.getElementById('adModal').style.display = 'flex';
+        loadQuiz(); // ავტომატურად ტვირთავს ვიქტორინას მინი-თამაშების გარეშე
         return;
     }
 
@@ -364,52 +353,58 @@ function boostRegion(event) {
     }, 1000);
 }
 
-// 🧠 ვიქტორინის ჩატვირთვა API-დან
+// 🧠 ვიქტორინის ჩატვირთვა API-დან (მობილურისთვის ოპტიმიზებული ზომებით)
 function loadQuiz() {
     let container = document.getElementById('quizContainer');
-    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება სარეკლამო ვიქტორინა... ⏳</h3>';
+    container.innerHTML = '<h3 style="color:#00ffcc; font-size:14px;">იტვირთება ვიქტორინა... ⏳</h3>';
 
     fetch('/api/get_random_quiz')
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            window.currentQuizData = data; // ვინახავთ სწორი პასუხის შესამოწმებლად
+
             let bannerHtml = '';
             if (data.sponsor_image && data.sponsor_image.trim() !== "") {
                 bannerHtml = `
-                    <div style="margin-bottom: 15px; border: 2px solid #ffcc00; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 4px 15px rgba(255,204,0,0.2);">
-                        <div style="background: #ffcc00; color: #000; font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 3px 8px; text-align: left;">
-                            📢 გენერალური სპონსორი: ${data.sponsor_name}
+                    <div style="margin-bottom: 10px; border: 1px solid #ffcc00; border-radius: 8px; overflow: hidden; background: #000;">
+                        <div style="background: #ffcc00; color: #000; font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; text-align: left;">
+                            📢 სპონსორი: ${data.sponsor_name}
                         </div>
-                        <img src="${data.sponsor_image}" alt="Sponsor Banner" style="width: 100%; height: 180px; object-fit: cover; display: block;">
+                        <img src="${data.sponsor_image}" alt="Sponsor Banner" style="width: 100%; height: 110px; object-fit: cover; display: block;">
                     </div>
                 `;
             } else {
-                bannerHtml = `
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; font-weight: bold;">გენერალური სპონსორი: ${data.sponsor_name}</span>
-                    </div>
-                `;
+                bannerHtml = `<div style="margin-bottom: 8px; font-size: 11px; color: #ffcc00; font-weight: bold;">სპონსორი: ${data.sponsor_name}</div>`;
             }
 
             let html = `
                 ${bannerHtml}
-                <h4 style="color: #fff; margin-bottom: 15px; font-size: 15px; line-height: 1.4;">${data.question_text}</h4>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
+                <h4 style="color: #fff; margin: 0 0 10px 0; font-size: 13px; line-height: 1.3;">${data.question_text}</h4>
+                <div style="display: flex; flex-direction: column; gap: 8px;" id="optionsList">
             `;
             data.options.forEach((opt, index) => {
-                html += `<button onclick="submitQuiz(${data.id}, ${index + 1})" class="btn" style="background: #161622; border: 1px solid #00ffcc; color: #00ffcc; padding: 10px; text-align: left; cursor: pointer;">${index + 1}. ${opt}</button>`;
+                let optNum = index + 1;
+                html += `<button onclick="submitQuiz(${data.id}, ${optNum})" class="quiz-btn btn" style="background: #161622; border: 1px solid #00ffcc; color: #00ffcc; padding: 8px 10px; font-size: 12px; text-align: left; cursor: pointer; border-radius: 8px;">${optNum}. ${opt}</button>`;
             });
-            html += `</div>`;
+            html += `</div><div id="quizFeedback" style="margin-top: 10px; font-size: 12px; font-weight: bold;"></div>`;
+            
             container.innerHTML = html;
         } else {
-            completeMiniGame();
+            container.innerHTML = '<p style="color: #ff4757; font-size: 12px;">კითხვები დროებით არ არის.</p>';
         }
     })
-    .catch(err => { console.error(err); completeMiniGame(); });
+    .catch(err => { console.error(err); });
 }
 
-// 🧠 პასუხის გაგზავნა და შემოწმება
+// 🧠 პასუხის შემოწმება და სწორი პასუხის ჩვენება დამახსოვრებისთვის
 function submitQuiz(q_id, chosen_opt) {
+    let dataObj = window.currentQuizData;
+    let feedbackEl = document.getElementById('quizFeedback');
+    let optionButtons = document.querySelectorAll('.quiz-btn');
+
+    optionButtons.forEach(btn => btn.style.pointerEvents = 'none');
+
     fetch('/api/check_quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -418,23 +413,21 @@ function submitQuiz(q_id, chosen_opt) {
     .then(res => res.json())
     .then(data => {
         if (data.success && data.is_correct) {
-            alert("🎉 სწორია! ენერგია აღდგენილია, შეგიძლია განაგრძო თამაში!");
-            completeMiniGame(); 
+            feedbackEl.style.color = '#00ffcc';
+            feedbackEl.innerHTML = "🎉 სწორია! ენერგია აღდგენილია!";
+            setTimeout(() => {
+                completeMiniGame(); 
+            }, 1200);
+        } else {
+            let correctOptNum = data.correct_option;
+            let correctText = dataObj.options[correctOptNum - 1];
+
+            feedbackEl.style.color = '#ff4757';
+            feedbackEl.innerHTML = `❌ არასწორია!<br><span style="color: #ffcc00; font-weight: normal; font-size: 11px; display: block; margin-top: 4px;">💡 სწორი პასუხია: <strong>${correctOptNum}. ${correctText}</strong> (დაიმახსოვრე!)</span>`;
             
             setTimeout(() => {
-                document.getElementById('quizContainer').innerHTML = `
-                    <h3 style="color: #ffcc00; margin-top: 0;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
-                    <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">ენერგიის სრულად აღსადგენად აირჩიე ერთ-ერთი გზა:</p>
-                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px;">
-                        <button onclick="loadQuiz()" class="btn btn-warning" style="width: 100%; padding: 12px; color: #000; font-weight: bold; cursor: pointer;">🎁 სპონსორის ვიქტორინა (პასუხი და ენერგია)</button>
-                        <button onclick="loadRandomGameModal()" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: bold; cursor: pointer;">🎮 სწრაფი მინი-თამაში 🚀</button>
-                    </div>
-                `;
-            }, 1000);
-            
-        } else {
-            alert("❌ არასწორი პასუხი! სცადე სხვა კითხვა.");
-            loadQuiz(); 
+                loadQuiz();
+            }, 3000);
         }
     });
 }
@@ -442,9 +435,6 @@ function submitQuiz(q_id, chosen_opt) {
 // 🎮 ენერგიის სრული აღდგენა (250 კლიკი)
 function completeMiniGame(event) {
     if (event) event.preventDefault();
-    
-    // ვასუფთავებთ ინტერვალს თუ თამაშისას იყო ჩართული
-    if (window.moveInterval) clearInterval(window.moveInterval);
 
     fetch('/api/restore_energy', {
         method: 'POST',
@@ -460,134 +450,6 @@ function completeMiniGame(event) {
         }
     })
     .catch(err => console.error(err));
-}
-
-// 🎮 მთავარი მინი-თამაშების ძრავა (4 თამაშის ავტომატური რენდერი ტიპის მიხედვით)
-function loadRandomGameModal() {
-    let container = document.getElementById('quizContainer');
-    container.innerHTML = '<h3 style="color:#00ffcc;">იტვირთება მინი-თამაში... ⏳</h3>';
-    
-    fetch('/api/get_random_game')
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            renderMiniGame(data, container);
-        } else {
-            container.innerHTML = '<p style="color: #ff4757;">აქტიური თამაშები ვერ მოიძებნა.</p>';
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        container.innerHTML = '<p style="color: #ff4757;">შეცდომა ჩატვირთვისას.</p>';
-    });
-}
-
-// 🎨 4-ვე თამაშის ინტერაქტიული ლოგიკა
-function renderMiniGame(data, container) {
-    let imgTag = data.sponsor_image ? `<img src="${data.sponsor_image}" style="width:100%; height:130px; object-fit:cover; border-radius:8px; margin-bottom:8px; border:1px solid #333;">` : '';
-    
-    if (data.game_type === 'puzzle') {
-        container.innerHTML = `
-            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">🧩 პაზლი: ${data.sponsor_name}</h4>
-            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
-            ${imgTag}
-            <p style="font-size:12px; color:#ffcc00; margin-bottom:8px;">ააწყვე უჯრები თანმიმდევრობით (1-დან 4-მდე):</p>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
-                <button onclick="checkPuzzleStep(1)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 1</button>
-                <button onclick="checkPuzzleStep(2)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 2</button>
-                <button onclick="checkPuzzleStep(3)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 3</button>
-                <button onclick="checkPuzzleStep(4)" class="btn" style="background:#161622; color:#00ffcc; padding:12px; border:1px solid #00ffcc; font-size:13px;">ნაწილი 4</button>
-            </div>
-            <div id="puzzleMsg" style="font-size:12px; color:#00ffcc; font-weight:bold; text-align:center;"></div>
-        `;
-        window.puzzleStep = 1;
-
-    } else if (data.game_type === 'basket') {
-        container.innerHTML = `
-            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">🧺 დაიჭირე ლოგო: ${data.sponsor_name}</h4>
-            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
-            ${imgTag}
-            <div style="background:#0a0a0f; height:130px; position:relative; border-radius:8px; overflow:hidden; border:1px solid #333; margin-bottom:10px;" id="basketField">
-                <div id="targetItem" onclick="catchItem()" style="position:absolute; top:20px; left:50px; cursor:pointer; font-size:24px; user-select:none;">⭐</div>
-            </div>
-            <p style="margin:0 0 10px 0; font-size:12px; text-align:center;">ქულა: <span id="catchScore" style="color:#00ffcc; font-weight:bold;">0</span> / 5</p>
-        `;
-        window.scoreCount = 0;
-        if (window.moveInterval) clearInterval(window.moveInterval);
-        window.moveInterval = setInterval(() => {
-            let item = document.getElementById('targetItem');
-            if(item) {
-                item.style.top = Math.floor(Math.random() * 80) + 'px';
-                item.style.left = Math.floor(Math.random() * 200) + 'px';
-            }
-        }, 900);
-
-    } else if (data.game_type === 'fix_text') {
-        container.innerHTML = `
-            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">✍️ ტექსტის შესწორება: ${data.sponsor_name}</h4>
-            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
-            ${imgTag}
-            <input type="text" id="fixInput" placeholder="ჩაწერე სწორი სიტყვა / პასუხი" style="width:100%; padding:10px; background:#000; color:#fff; border:1px solid #00ffcc; border-radius:6px; margin:8px 0; box-sizing:border-box;">
-            <button onclick="checkTextFix()" class="btn btn-warning" style="width:100%; padding:10px; font-weight:bold;">შემოწმება</button>
-            <div id="textMsg" style="font-size:12px; margin-top:8px; text-align:center;"></div>
-        `;
-
-    } else if (data.game_type === 'spot_diff') {
-        container.innerHTML = `
-            <h4 style="color:#00ffcc; margin-top:0; font-size:15px;">🔍 იპოვე განსხვავება: ${data.sponsor_name}</h4>
-            <p style="font-size:12px; color:#d1d1d6; margin-bottom:8px;">${data.description}</p>
-            <div style="position:relative; display:inline-block; width:100%; text-align:center;" onclick="checkDiff(event)">
-                ${imgTag}
-                <div style="position:absolute; top:20px; right:20px; width:40px; height:40px; border:2px dashed #ff4757; cursor:pointer;" title="დააკლიკე აქ"></div>
-            </div>
-            <div id="diffMsg" style="font-size:12px; color:#ffcc00; margin-top:5px; text-align:center;">დააკლიკე ბანერის მონიშნულ წერტილს!</div>
-        `;
-    }
-}
-
-// თამაშების შიდა შემოწმების ფუნქციები:
-function checkPuzzleStep(step) {
-    if (step === window.puzzleStep) {
-        window.puzzleStep++;
-        if (window.puzzleStep > 4) {
-            document.getElementById('puzzleMsg').innerText = "🎉 პაზლი წარმატებით აწყობილია!";
-            setTimeout(completeMiniGame, 1000);
-        } else {
-            document.getElementById('puzzleMsg').innerText = `სწორია! გადადით შემდეგზე (${window.puzzleStep}/4)`;
-        }
-    } else {
-        document.getElementById('puzzleMsg').innerText = "❌ არასწორი თანმიმდევრობაა, თავიდან სცადე!";
-        window.puzzleStep = 1;
-    }
-}
-
-function catchItem() {
-    window.scoreCount++;
-    let scoreEl = document.getElementById('catchScore');
-    if (scoreEl) scoreEl.innerText = window.scoreCount;
-    if (window.scoreCount >= 5) {
-        if (window.moveInterval) clearInterval(window.moveInterval);
-        alert("🎉 გილოცავ! ენერგია წარმატებით აღდგა!");
-        completeMiniGame();
-    }
-}
-
-function checkTextFix() {
-    let val = document.getElementById('fixInput').value.trim();
-    if (val.length > 0) {
-        document.getElementById('textMsg').style.color = '#00ffcc';
-        document.getElementById('textMsg').innerText = "🎉 სწორი პასუხია!";
-        setTimeout(completeMiniGame, 1000);
-    } else {
-        document.getElementById('textMsg').style.color = '#ff4757';
-        document.getElementById('textMsg').innerText = "❌ გთხოვთ ჩაწეროთ პასუხი.";
-    }
-}
-
-function checkDiff(e) {
-    document.getElementById('diffMsg').style.color = '#00ffcc';
-    document.getElementById('diffMsg').innerText = "🎉 განსხვავება ნაპოვნია! ენერგია აღდგა.";
-    setTimeout(completeMiniGame, 1000);
 }
 </script>
 {% endblock %}
