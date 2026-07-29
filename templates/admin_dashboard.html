@@ -33,7 +33,7 @@
     <div class="admin-section" style="border-color: #ffcc00;">
         <h3>🏆 სეზონისა და საპრიზო ფონდის მართვა</h3>
         <div class="grid-2" style="align-items: center;">
-            <form action="{{ url_for('admin_update_prize') }}" method="POST" style="display: flex; gap: 10px; align-items: center;">
+            <form action="{{ url_for('admin_update_prize') }}" method="POST" style="display: flex; gap: 10px; align-items: center;" onsubmit="saveScrollPosition()">
                 <div style="flex-grow: 1;">
                     <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">კვირის საპრიზო ფონდი (₾):</label>
                     <input type="text" name="prize_pool" value="{{ current_week_prize_pool | default('1200') }}" required class="input-field">
@@ -42,15 +42,13 @@
             </form>
 
             <div style="display: flex; flex-direction: column; gap: 10px; border-left: 1px solid #222233; padding-left: 20px;">
-                <!-- თამაშის ჩართვა/გამორთვა (სეზონის შეჩერება) -->
-                <form action="{{ url_for('admin_toggle_game') }}" method="POST">
+                <form action="{{ url_for('admin_toggle_game') }}" method="POST" onsubmit="saveScrollPosition()">
                     <button type="submit" class="btn-sm btn-warning" style="width: 100%; padding: 10px;">
                         ⚡ თამაშის რეჟიმის გადართვა (ჩართ./გამორთ.)
                     </button>
                 </form>
                
-                <!-- სეზონის დასრულება / ქულების განულება -->
-                <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
+                <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
                     <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
                 </form>
             </div>
@@ -90,7 +88,7 @@
                 </table>
             </div>
 
-            <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" style="margin-top: 20px;" onsubmit="return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');">
+            <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" style="margin-top: 20px;" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');">
                 <button type="submit" class="btn-sm btn-success" style="padding: 12px 25px; font-size: 14px; width: 100%;">
                     🚀 თანხების ავტომატურად ჩარიცხვა გამარჯვებულების საფულეებში
                 </button>
@@ -108,7 +106,7 @@
             📐 მითითება კომპანიებისთვის: სარეკლამო ფოტოს ზომა უნდა იყოს მკაცრად **800 x 450 px** (პროპორცია 16:9, ფორმატი: JPG/PNG). Gold პაკეტის რეკლამები მომხმარებელს უფრო ხშირად ამოვარდება!
         </p>
 
-        <form action="{{ url_for('admin_add_quiz_question') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <form action="{{ url_for('admin_add_quiz_question') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;" onsubmit="saveScrollPosition()">
             <div>
                 <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სპონსორი კომპანიის სახელი:</label>
                 <input type="text" name="sponsor_name" placeholder="მაგ: კომპანია სელფი" required class="input-field">
@@ -195,7 +193,8 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <form action="{{ url_for('admin_delete_quiz', quiz_id=q.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ კითხვის წაშლა?');">
+                                <!-- 🛠️ გასწორდა: მითითებულია method="POST" და შენარჩუნდება სქროლის პოზიცია -->
+                                <form action="{{ url_for('admin_delete_quiz', quiz_id=q.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ კითხვის წაშლა?');">
                                     <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
                                 </form>
                             </td>
@@ -216,7 +215,7 @@
             <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
             <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: <strong>600x400 px</strong> (.jpg)</p>
            
-            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;" onsubmit="saveScrollPosition()">
                 <select name="region_id" class="input-field">
                     {% for reg in regions %}
                     <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
@@ -249,11 +248,11 @@
                             <td>
                                 <div style="display: flex; gap: 5px;">
                                     {% if region_sponsors[reg.region_id] %}
-                                    <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST">
+                                    <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
                                         <button type="submit" class="btn-sm btn-danger" style="padding: 3px 6px; font-size: 10px;">წაშლა</button>
                                     </form>
                                     {% endif %}
-                                    <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST">
+                                    <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
                                         <button type="submit" class="btn-sm btn-warning" style="padding: 3px 6px; font-size: 10px; color:#000;">ქულ. განულება</button>
                                     </form>
                                 </div>
@@ -300,7 +299,7 @@
                             {% for u in data.users %}
                             <tr>
                                 <td><strong>{{ u.username }}</strong><br><small style="color: #888;">{{ u.email }}</small></td>
-                                <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST">
+                                <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition()">
                                     <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 70px;"></td>
                                     <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 60px;"></td>
                                     <td><input type="number" name="clicks_left" value="{{ u.clicks_left }}" class="input-field" style="width: 60px;"></td>
@@ -330,7 +329,7 @@
                                         <div style="display: flex; gap: 5px;">
                                             <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
                                 </form>
-                                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('წავშალო მომხმარებელი?');">
+                                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('წავშალო მომხმარებელი?');">
                                                 <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
                                             </form>
                                         </div>
@@ -350,6 +349,19 @@
 </div>
 
 <script>
+// 📜 სქროლის დამმახსოვრებელი ფუნქციები
+function saveScrollPosition() {
+    localStorage.setItem('adminScrollPos', window.scrollY);
+}
+
+window.addEventListener('load', function() {
+    let scrollPos = localStorage.getItem('adminScrollPos');
+    if (scrollPos) {
+        window.scrollTo(0, parseInt(scrollPos));
+        localStorage.removeItem('adminScrollPos');
+    }
+});
+
 function previewQuizImage(event) {
     let reader = new FileReader();
     reader.onload = function(){
