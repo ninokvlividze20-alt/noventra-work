@@ -234,12 +234,12 @@ updateCountdown();
     </div>
 </div>
 
-<!-- ❌ არასწორი პასუხის ლამაზი ჩარჩოიანი ფანჯარა (ეკრანის შუაში) -->
+<!-- 💡 სწორი პასუხის საინფორმაციო ფანჯარა (ეკრანის შუაში, პროფესიონალური დიზაინით) -->
 <div id="wrongModal" class="ad-modal">
-    <div class="ad-modal-content" style="border-color: #ff4757; box-shadow: 0 0 30px rgba(255, 71, 87, 0.4);">
-        <h3 style="color: #ff4757; margin-top: 0; font-size: 18px;">❌ არასწორი პასუხია!</h3>
-        <p id="correctAnswerText" style="font-size: 14px; color: #ffcc00; margin: 15px 0; font-weight: bold; line-height: 1.5;"></p>
-        <p style="font-size: 12px; color: #a1a1aa; margin: 0;">⏳ 3 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...</p>
+    <div class="ad-modal-content" style="border-color: #ffcc00; background: linear-gradient(135deg, #161622, #111118); box-shadow: 0 0 35px rgba(255, 204, 0, 0.2); padding: 25px;">
+        <h3 style="color: #ffcc00; margin-top: 0; font-size: 18px; letter-spacing: 0.5px;">💡 სწორი პასუხი</h3>
+        <p id="correctAnswerText" style="font-size: 16px; color: #ffffff; margin: 20px 0; font-weight: bold; line-height: 1.6;"></p>
+        <p style="font-size: 12px; color: #00ffcc; margin: 0; font-weight: bold;">⏳ 5 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...</p>
     </div>
 </div>
 
@@ -433,16 +433,16 @@ function submitQuiz(q_id, chosen_opt) {
             let correctOptNum = data.correct_option;
             let correctText = dataObj.options[correctOptNum - 1];
 
-            // ვმალავთ ვიქტორინის მოდალს და ვრთავთ შუა ეკრანის არასწორი პასუხის ფანჯარას
+            // ვმალავთ ვიქტორინის მოდალს და ვრთავთ შუა ეკრანის პროფესიონალურ ფანჯარას
             document.getElementById('adModal').style.display = 'none';
-            document.getElementById('correctAnswerTextinnerHTML', `💡 სწორი პასუხი იყო:<br><strong style="font-size: 16px; color: #00ffcc;">${correctOptNum}. ${correctText}</strong>`);
+            document.getElementById('correctAnswerText').innerHTML = `<span style="color: #ffcc00; font-size: 13px; display: block; margin-bottom: 6px;">არასწორია. სწორი პასუხია:</span><span style="font-size: 18px; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.3);">${correctOptNum}. ${correctText}</span>`;
             document.getElementById('wrongModal').style.display = 'flex';
 
-            // ზუსტად 3 წამის შემდეგ ვურეზეთებთ კლიკებს და ვბრუნდებით დაშბორდზე
+            // ზუსტად 5 წამის შემდეგ ვურეზეთებთ კლიკებს და ვბრუნდებით დაშბორდზე
             setTimeout(() => {
                 document.getElementById('wrongModal').style.display = 'none';
                 completeMiniGame();
-            }, 3000);
+            }, 5000);
         }
     });
 }
