@@ -224,6 +224,23 @@ def is_safe(text):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/api/check_new_messages')
+@login_required
+def api_check_new_messages():
+    # ვამოწმებთ არის თუ არა მესიჯები მომხმარებლის რეგიონში, რომლებიც მის ბოლო ნახვის დროზე გვიანია
+    last_seen = current_user.last_seen_board or datetime.datetime.utcnow()
+    new_msg_count = Question.query.filter(
+        Question.region_id == current_user.region,
+        Question.created_at > last_seen,
+        Question.username != current_user.username # საკუთარ მესიჯებზე რომ არ აინთოს
+    ).count()
+
+    return jsonify({
+        "success": True,
+        "has_new": new_msg_count > 0,
+        "count": new_msg_count
+    })
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -265,8 +282,9 @@ def region_chat(region_id):
             else:
                 flash("მესიჯი არღვევს წესებს!", "danger")
         return redirect(url_for('region_chat', region_id=region_id))
-            
-    current_user.last_seen_board = db.func.current_timestamp()
+         
+    # 🛠️ აქ ვანახლებთ ბოლო ნახვის დროს, რომ ახალი მესიჯების ინდიკატორი გაქრეს
+    current_user.last_seen_board = datetime.datetime.utcnow()
     db.session.commit()
     
     messages = Question.query.filter_by(region_id=region_id).order_by(Question.id.asc()).all()
@@ -716,10 +734,11 @@ def admin_reset_season():
             db.session.add(Settings(key='last_winner', value=winner_name))
 
     RegionScore.query.update({RegionScore.score: 0})
-    User.query.update({User.clicks_left: 250})
+    # 🛠️ ვანულებთ არა მარტო კლიკებს, არამედ total_clicks-საც, რომ ახალ სეზონზე ძველი არ მიჰყვეს!
+    User.query.update({User.clicks_left: 250, User.total_clicks: 0})
     db.session.commit()
     
-    flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები განულდა.", "success")
+    flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები/კლიკები განულდა.", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/user/<int:user_id>/full_update', methods=['POST'])
@@ -759,6 +778,18 @@ def admin_chats_send():
         new_q = Question(text=text.strip(), username=f"👑 ადმინი ({current_user.username})", user_phone="", region_id=region_id)
         db.session.add(new_q)
         db.session.commit()
+    return redirect(url_for('admin_chats', region=region_id))
+
+@app.route('/admin/chats/delete/<int:msg_id>', methods=['POST'])
+@login_required
+def admin_chats_delete_msg(msg_id):
+    if not current_user.is_admin:
+        abort(403)
+    msg = Question.query.get_or_404(msg_id)
+    region_id = msg.region_id
+    db.session.delete(msg)
+    db.session.commit()
+    flash("შეტყობინება წაშლილია ჩატიდან.", "success")
     return redirect(url_for('admin_chats', region=region_id))
 
 @app.route('/admin/distribute_prizes', methods=['POST'])
@@ -860,6 +891,10 @@ def admin_delete_quiz(quiz_id):
     if not current_user.is_admin:
         abort(403)
     quiz = QuizQuestion.query.get_or_404(quiz_id)
+    
+    # 🛠️ ჯერ ვშლით მიბმულ პასუხებს UserQuizAnswer ცხრილიდან, რომ ForeignKey შეზღუდვამ ხელი არ შეუშალოს წაშლას
+    UserQuizAnswer.query.filter_by(quiz_id=quiz_id).delete()
+
     if quiz.sponsor_image:
         try:
             img_path = os.path.join(app.root_path, quiz.sponsor_image.lstrip('/'))
@@ -872,11 +907,6 @@ def admin_delete_quiz(quiz_id):
     flash("ვიქტორინის კითხვა წარმატებით წაიშალა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
-
 @app.route('/api/restore_energy', methods=['POST'])
 @login_required
 def restore_energy():
@@ -884,6 +914,7 @@ def restore_energy():
     db.session.commit()
     return jsonify({"success": True, "new_clicks": 250})
 
+# 🛠️ აპლიკაციის ინიციალიზაცია და ბაზის ცხრილების შექმნა სწორ ადგილას
 with app.app_context():
     db.create_all()
     init_regions()
@@ -910,6 +941,24 @@ with app.app_context():
     if not game_status_st:
         db.session.add(Settings(key='game_status', value='active'))
     db.session.commit()
+
+@app.route('/api/user_status')
+@login_required
+def api_user_status():
+    game_status_setting = Settings.query.filter_by(key='game_status').first()
+    game_status = game_status_setting.value if game_status_setting else "active"
+    
+    regions = RegionScore.query.all()
+    regions_data = {r.region_id: r.score for r in regions}
+    
+    return jsonify({
+        "success": True,
+        "balance": current_user.balance,
+        "clicks_left": current_user.clicks_left,
+        "reputation": current_user.reputation,
+        "game_status": game_status,
+        "regions": regions_data
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)

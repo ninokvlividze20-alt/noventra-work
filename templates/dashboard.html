@@ -117,62 +117,21 @@
         text-align: center;
         box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
     }
-
-    /* ✨ ახალი მილოცვის / შედეგის დიდი ფოპ-აპ ფანჯარა (ჩარჩოს გარეშე, სუფთა დიზაინით) */
-    .quiz-result-modal {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.85);
-        z-index: 9999;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(5px);
-    }
-    .quiz-result-content {
-        background: #161622;
-        border: none;
-        border-radius: 24px;
-        padding: 40px 30px;
-        text-align: center;
-        max-width: 420px;
-        width: 90%;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        animation: popupScale 0.3s ease-in-out;
-    }
-    @keyframes popupScale {
-        0% { transform: scale(0.7); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    .quiz-emoji {
-        font-size: 75px;
-        margin-bottom: 15px;
-        display: block;
-    }
-    .quiz-result-title {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-    .quiz-correct-answer-box {
-        background: #1f1f2e;
-        padding: 15px;
-        border-radius: 12px;
-        margin-top: 15px;
-        color: #00ffcc;
-        font-size: 15px;
-    }
 </style>
 
-<!-- 🏆 გასული კვირის ისტორია და მოტივაცია -->
+<!-- 🏆 გასული კვირის ისტორია და გამჭვირვალობის პრინციპი (დეტალური სია) -->
 <div style="background: #161622; border: 1px solid #33334d; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 13px;">
     <details style="cursor: pointer;">
         <summary style="color: #ffcc00; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-            <span>🎉 გასული კვირის გამარჯვებული: <strong style="color: #00ffcc;">{{ last_winner_region | default('იმერეთი') }}</strong> (იხილე დეტალები ▼)</span>
+            <span>🎉 გასული კვირის გამარჯვებული: <strong style="color: #00ffcc;">{{ last_winner_region | default('იმერეთი') }}</strong> (იხილე დეტალები და გამჭვირვალე სია ▼)</span>
         </summary>
         <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px; color: #d1d1d6; font-size: 12px;">
-            <p style="margin: 0 0 5px 0;">💰 განაწილდა შრომის პრინციპით. აქტიურმა მოთამაშეებმა მიიღეს სოლიდური პრემიები თავიანთ ვირტუალურ საფულეებში.</p>
-            <p style="margin: 0; color: #00ffcc; font-weight: bold;">🔥 გახსოვდეს: კვირის ბოლოს მხოლოდ ერთი რეგიონი ხდება გამარჯვებული! იაქტიურე და მიაშველე ქულები შენს რეგიონს!</p>
+            <p style="margin: 0 0 8px 0;">💰 საპრიზო თანხები განაწილდა შრომის პრინციპით (აქტიური კლიკების მიხედვით). იხილეთ გამარჯვებული რეგიონის მონაწილეთა დარიცხული პრემიები:</p>
+            <div style="background: #111118; padding: 10px; border-radius: 8px; border: 1px solid #222233; margin-top: 5px;">
+                <p style="margin: 4px 0; color: #00ffcc;">🏅 <strong>მონაწილეების სია და განაწილება:</strong></p>
+                <p style="margin: 3px 0; color: #fff;">• საპრიზო ფონდი სრულად აისახა რეგიონის აქტიურ მოთამაშეთა ვირტუალურ საფულეებში.</p>
+            </div>
+            <p style="margin: 8px 0 0 0; color: #ffcc00; font-weight: bold;">🔥 გახსოვდეს: კვირის ბოლოს მხოლოდ ერთი რეგიონი ხდება გამარჯვებული! იაქტიურე და მიაშველე ქულები შენს რეგიონს!</p>
         </div>
     </details>
 </div>
@@ -247,24 +206,26 @@ updateCountdown();
         <!-- რეგიონის აიდი -->
         <input type="hidden" id="userRegionSelect" value="{{ current_user.region }}">
 
-        {% if game_status == 'paused' %}
-            <!-- 🔴 სეზონი შეჩერებულია -->
-            <div style="background: rgba(255, 71, 87, 0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);">
-                <h3 style="color: #ff4757; margin-top: 0; font-size: 20px;">🔴 სეზონი შეჩერებულია!</h3>
-                <p style="color: #fff; font-size: 14px; line-height: 1.6; margin: 0;">
-                    მიმდინარეობს გამარჯვებული რეგიონის თანხების დაანგარიშება და გადანაწილება. <br>
-                    <strong>თამაში განახლდება ორშაბათს, დილის 09:00 საათიდან! ⏳🔥</strong>
-                </p>
-            </div>
-        {% else %}
-            <!-- 🟢 ჩვეულებრივი აქტიური რეჟიმი (დაკლიკების ღილაკი) -->
-            <div style="position: relative; display: inline-block; width: 100%; margin-top: 20px;">
-                <button onclick="boostRegion(event)" class="btn btn-warning" id="boostBtn">
-                    ⚡ დააკლიკე და მიაშველე ქულა! (<span id="clicksLeft">250</span>)
-                </button>
-            </div>
-            <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
-        {% endif %}
+        <div id="gameStatusContainer">
+            {% if game_status == 'paused' %}
+                <!-- 🔴 სეზონი შეჩერებულია -->
+                <div style="background: rgba(255, 71, 87, 0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);">
+                    <h3 style="color: #ff4757; margin-top: 0; font-size: 20px;">🔴 სეზონი შეჩერებულია!</h3>
+                    <p style="color: #fff; font-size: 14px; line-height: 1.6; margin: 0;">
+                        მიმდინარეობს გამარჯვებული რეგიონის თანხების დაანგარიშება და გადანაწილება. <br>
+                        <strong>თამაში განახლდება ორშაბათს, დილის 09:00 საათიდან! ⏳🔥</strong>
+                    </p>
+                </div>
+            {% else %}
+                <!-- 🟢 ჩვეულებრივი აქტიური რეჟიმი (დაკლიკების ღილაკი) -->
+                <div style="position: relative; display: inline-block; width: 100%; margin-top: 20px;">
+                    <button onclick="boostRegion(event)" class="btn btn-warning" id="boostBtn">
+                        ⚡ დააკლიკე და მიაშველე ქულა! (<span id="clicksLeft">{{ current_user.clicks_left }}</span>)
+                    </button>
+                </div>
+                <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
+            {% endif %}
+        </div>
 
         <!-- 🪟 მოდალური ფანჯარა მხოლოდ ვიქტორინისთვის (მობილურზე ოპტიმიზებული) -->
 <div id="adModal" class="ad-modal">
@@ -279,18 +240,12 @@ updateCountdown();
     </div>
 </div>
 
-<!-- ✨ ვიქტორინის შედეგების დიდი მილოცვის / შეცდომის ეკრანი (სმაილებით, ჩარჩოს გარეშე) -->
-<div id="quizResultModal" class="quiz-result-modal">
-    <div class="quiz-result-content">
-        <span id="resultEmoji" class="quiz-emoji">🎉</span>
-        <h2 id="resultTitle" class="quiz-result-title">მილოცვა!</h2>
-        <p id="resultText" style="color: #a1a1aa; font-size: 15px; margin: 0;"></p>
-        
-        <div id="correctAnswerContainer" class="quiz-correct-answer-box" style="display: none;">
-            სწორი პასუხი იყო: <strong id="correctAnswerTextDisplay" style="color: #fff; font-size: 18px; display: block; margin-top: 8px;"></strong>
-        </div>
-
-        <button onclick="closeQuizResultModal()" class="btn-sm btn-success" style="margin-top: 25px; padding: 12px 30px; font-size: 15px; width: 100%; background: #00ffcc; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">გაგრძელება 🚀</button>
+<!-- 💡 სწორი პასუხის საინფორმაციო ფანჯარა (ეკრანის შუაში, პროფესიონალური დიზაინით) -->
+<div id="wrongModal" class="ad-modal">
+    <div class="ad-modal-content" style="border-color: #ffcc00; background: linear-gradient(135deg, #161622, #111118); box-shadow: 0 0 35px rgba(255, 204, 0, 0.2); padding: 25px;">
+        <h3 style="color: #ffcc00; margin-top: 0; font-size: 18px; letter-spacing: 0.5px;">💡 სწორი პასუხი</h3>
+        <p id="correctAnswerText" style="font-size: 16px; color: #ffffff; margin: 20px 0; font-weight: bold; line-height: 1.6;"></p>
+        <p style="font-size: 12px; color: #00ffcc; margin: 0; font-weight: bold;">⏳ 5 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...</p>
     </div>
 </div>
 
@@ -320,8 +275,8 @@ updateCountdown();
     <div class="card">
         <h3>💰 ციფრული საფულე</h3>
         <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
-        <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;">{{ current_user.balance }} ₾</div>
-        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: {{ current_user.reputation }}</p>
+        <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;"><span id="userBalance">{{ current_user.balance }}</span> ₾</div>
+        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: <span id="userReputation">{{ current_user.reputation }}</span></p>
         <p style="font-size: 11px; color: #00ffcc; margin: 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
     </div>
 
@@ -354,21 +309,77 @@ let clickLimit = {{ current_user.clicks_left }};
 let pendingPoints = 0; 
 
 document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById('clicksLeft').innerText = clickLimit;
+    let el = document.getElementById('clicksLeft');
+    if(el) el.innerText = clickLimit;
+    
+    // 🔄 F5-ის გარეშე რეალურ დროში განახლების სკრიპტი (Polling ყოველ 3 წამში)
+    setInterval(pollUserData, 3000);
 });
+
+function pollUserData() {
+    fetch('/api/user_status')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // ბალანსის განახლება
+            let balEl = document.getElementById('userBalance');
+            if(balEl) balEl.innerText = data.balance;
+
+            // ენერგიის / დარჩენილი კლიკების განახლება (თუ მომხმარებელი არ აკლიკებს ამ წამს)
+            if (pendingPoints === 0) {
+                clickLimit = data.clicks_left;
+                let cLeftEl = document.getElementById('clicksLeft');
+                if(cLeftEl) cLeftEl.innerText = clickLimit;
+            }
+
+            // რეგიონების ქულების ცხრილის განახლება
+            if (data.regions) {
+                for (const [regId, score] of Object.entries(data.regions)) {
+                    let row = document.querySelector(`#regionsTableBody tr[data-region-id="${regId}"]`);
+                    if (row) {
+                        let scoreCell = row.querySelector('.region-score-cell');
+                        if (scoreCell) {
+                            scoreCell.innerText = score + " ⚡";
+                        }
+                    }
+                }
+            }
+
+            // თამაშის რეჟიმის (active / paused) მომენტალური ასახვა
+            let container = document.getElementById('gameStatusContainer');
+            if (container) {
+                if (data.game_status === 'paused' && !container.innerHTML.includes('🔴 სეზონი შეჩერებულია!')) {
+                    container.innerHTML = `
+                        <div style="background: rgba(255, 71, 87, 0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);">
+                            <h3 style="color: #ff4757; margin-top: 0; font-size: 20px;">🔴 სეზონი შეჩერებულია!</h3>
+                            <p style="color: #fff; font-size: 14px; line-height: 1.6; margin: 0;">
+                                მიმდინარეობს გამარჯვებული რეგიონის თანხების დაანგარიშება და გადანაწილება. <br>
+                                <strong>თამაში განახლდება ორშაბათს, დილის 09:00 საათიდან! ⏳🔥</strong>
+                            </p>
+                        </div>
+                    `;
+                } else if (data.game_status === 'active' && container.innerHTML.includes('🔴 სეზონი შეჩერებულია!')) {
+                    location.reload(); // თუ ჩაირთო, გადაიტვირთოს რომ დაკლიკების ღილაკი დაბრუნდეს
+                }
+            }
+        }
+    })
+    .catch(err => console.error("Poll error:", err));
+}
 
 function boostRegion(event) {
     let regionId = document.getElementById('userRegionSelect').value;
     
     if (clickLimit <= 0) {
         document.getElementById('adModal').style.display = 'flex';
-        loadQuiz(); // ავტომატურად ტვირთავს ვიქტორინას
+        loadQuiz(); 
         return;
     }
 
     clickLimit--;
     pendingPoints++;
-    document.getElementById('clicksLeft').innerText = clickLimit;
+    let cEl = document.getElementById('clicksLeft');
+    if(cEl) cEl.innerText = clickLimit;
 
     let btn = document.getElementById('boostBtn');
     let fx = document.createElement('div');
@@ -398,6 +409,9 @@ function boostRegion(event) {
             .then(data => {
                 if(data.success) {
                     document.getElementById('clickResponse').innerText = "🔥 ქულა შენს რეგიონს მიემატა! (სულ: " + data.new_score + ")";
+                    clickLimit = data.clicks_left;
+                    let cEl2 = document.getElementById('clicksLeft');
+                    if(cEl2) cEl2.innerText = clickLimit;
                     
                     let row = document.querySelector(`#regionsTableBody tr[data-region-id="${regionId}"]`);
                     if (row) {
@@ -422,7 +436,7 @@ function loadQuiz() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            window.currentQuizData = data;
+            window.currentQuizData = data; 
 
             let bannerHtml = '';
             if (data.sponsor_image && data.sponsor_image.trim() !== "") {
@@ -457,7 +471,7 @@ function loadQuiz() {
     .catch(err => { console.error(err); });
 }
 
-// 🧠 პასუხის შემოწმება და დიდი ანიმაციური მილოცვის / შეცდომის ფანჯრის გამოჩენა
+// 🧠 პასუხის შემოწმება და არასწორი პასუხის შემთხვევაში 5-წამიანი ფანჯრის გამოჩენა
 function submitQuiz(q_id, chosen_opt) {
     let dataObj = window.currentQuizData;
     let optionButtons = document.querySelectorAll('.quiz-btn');
@@ -471,46 +485,29 @@ function submitQuiz(q_id, chosen_opt) {
     })
     .then(res => res.json())
     .then(data => {
-        // ვხურავთ ვიქტორინის პატარა ფანჯარას
-        document.getElementById('adModal').style.display = 'none';
-
         if (data.success && data.is_correct) {
-            // 🎉 სწორი პასუხი -> მხიარული სმაილი და მილოცვა
-            document.getElementById('resultEmoji').textContent = "🥳";
-            document.getElementById('resultTitle').textContent = "ყოჩაღ, სწორია!";
-            document.getElementById('resultTitle').style.color = "#00ffcc";
-            document.getElementById('resultText').textContent = "შენ წარმატებით გასცე პასუხი სპონსორის კითხვას!";
-            document.getElementById('correctAnswerContainer').style.display = 'none';
-            
-            // ვინახავთ მდგომარეობას, რომ დაკლიკების მერე აღდგეს ენერგია
-            window.quizPassedSuccessfully = true;
+            let feedbackEl = document.getElementById('quizFeedback');
+            if(feedbackEl) {
+                feedbackEl.style.color = '#00ffcc';
+                feedbackEl.innerHTML = "🎉 სწორია! ენერგია აღდგენილია!";
+            }
+            setTimeout(() => {
+                completeMiniGame(); 
+            }, 1200);
         } else {
-            // 😢 არასწორი პასუხი -> მოწყენილი სმაილი და სწორი პასუხის ჩვენება დიდი ასოებით
             let correctOptNum = data.correct_option;
             let correctText = dataObj.options[correctOptNum - 1];
 
-            document.getElementById('resultEmoji').textContent = "😢";
-            document.getElementById('resultTitle').textContent = "სამწუხაროდ, არასწორია...";
-            document.getElementById('resultTitle').style.color = "#ff4757";
-            document.getElementById('resultText').textContent = "თავი არ ჩამოუშვა, შემდეგ ჯერზე აუცილებლად გამოგივა!";
-            
-            document.getElementById('correctAnswerTextDisplay').innerHTML = `${correctOptNum}. ${correctText}`;
-            document.getElementById('correctAnswerContainer').style.display = 'block';
+            document.getElementById('adModal').style.display = 'none';
+            document.getElementById('correctAnswerText').innerHTML = `<span style="color: #ffcc00; font-size: 13px; display: block; margin-bottom: 6px;">არასწორია. სწორი პასუხია:</span><span style="font-size: 18px; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.3);">${correctOptNum}. ${correctText}</span>`;
+            document.getElementById('wrongModal').style.display = 'flex';
 
-            window.quizPassedSuccessfully = true;
+            setTimeout(() => {
+                document.getElementById('wrongModal').style.display = 'none';
+                completeMiniGame();
+            }, 5000);
         }
-
-        // ვრთავთ ახალ დიდ ანიმაციურ მოდელს
-        document.getElementById('quizResultModal').style.display = 'flex';
     });
-}
-
-// 🚀 შედეგის ფანჯრის დახურვა და ენერგიის ავტომატური აღდგენა
-function closeQuizResultModal() {
-    document.getElementById('quizResultModal').style.display = 'none';
-    if (window.quizPassedSuccessfully) {
-        completeMiniGame();
-    }
 }
 
 // 🎮 ენერგიის სრული აღდგენა (250 კლიკი)
@@ -525,7 +522,9 @@ function completeMiniGame(event) {
     .then(data => {
         if(data.success) {
             clickLimit = data.new_clicks;
-            document.getElementById('clicksLeft').innerText = clickLimit;
+            let cEl = document.getElementById('clicksLeft');
+            if(cEl) cEl.innerText = clickLimit;
+            document.getElementById('adModal').style.display = 'none';
             document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (250 კლიკი)!";
         }
     })

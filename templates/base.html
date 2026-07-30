@@ -6,15 +6,63 @@
     <title>Noventra | Cyber Arena</title>
     <style>
         body { background-color: #07070c; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 480px; }
-        nav { background: #111118; margin-bottom: 25px; padding: 12px 15px; border-bottom: 2px solid #00ffcc; border-radius: 12px; display: flex; justify-content: space-between; font-size: 13px; box-shadow: 0 4px 20px rgba(0, 255, 204, 0.15); }
-        nav a { color: #00ffcc; text-decoration: none; font-weight: bold; transition: 0.2s; }
+        .container { width: 100%; max-width: 480px; position: relative; }
+        nav { background: #111118; margin-bottom: 25px; padding: 12px 15px; border-bottom: 2px solid #00ffcc; border-radius: 12px; display: flex; justify-content: space-between; font-size: 13px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        nav a { color: #00ffcc; text-decoration: none; font-weight: bold; transition: 0.2s; position: relative; }
         nav a:hover { color: #fff; text-shadow: 0 0 8px #00ffcc; }
-        input, select, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #222233; background: #0f0f17; color: #fff; box-sizing: border-box; font-size: 14px; }
+        input, select, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #222233; background: #0f0f17; color: #fff; box-sizing: border-box; font-size: 13px; }
         input:focus, select:focus, textarea:focus { border-color: #00ffcc; outline: none; box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
         button { background: linear-gradient(135deg, #00ffcc, #00b386); color: #000; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; }
         button:hover { opacity: 0.9; box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
         .flash { background: #151520; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; border-left: 4px solid #00ffcc; font-size: 13px; }
+
+        /* 💬 ახალი მესიჯის ანიმირებული ინდიკატორი (Badge & Toast) */
+        .chat-badge {
+            position: absolute;
+            top: -6px;
+            right: -10px;
+            background: #ff4757;
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 50%;
+            font-weight: bold;
+            box-shadow: 0 0 8px #ff4757;
+            animation: pulseBadge 1.5s infinite;
+            display: none;
+        }
+        @keyframes pulseBadge {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ლამაზი ამოხტომადი ტოასტი ეკრანის კუთხეში */
+        #chatToast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(17, 17, 24, 0.95);
+            border: 1px solid #00ffcc;
+            border-left: 4px solid #ffcc00;
+            padding: 12px 18px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            backdrop-filter: blur(5px);
+            animation: slideInUp 0.4s ease-out;
+            cursor: pointer;
+            text-decoration: none;
+            color: #fff;
+        }
+        @keyframes slideInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -22,11 +70,15 @@
         {% if current_user.is_authenticated %}
         <nav>
             <a href="{{ url_for('dashboard') }}">⚡ არენა</a>
-            <a href="{{ url_for('board') }}">💬 დაფა</a>
+            <a href="{{ url_for('board') }}" style="position: relative;">
+                💬 დაფა 
+                <span id="navChatBadge" class="chat-badge">!</span>
+            </a>
             <a href="{{ url_for('profile') }}">👤 პროფილი</a>
             <a href="{{ url_for('about') }}" style="color: #aaa;">About</a>
         </nav>
         {% endif %}
+
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             {% for message in messages %}
@@ -34,7 +86,61 @@
             {% endfor %}
           {% endif %}
         {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
+
+    <!-- 💬 ამოხტომადი შეტყობინების ფანჯარა ნებისმიერ გვერდზე -->
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('board') }}" id="chatToast">
+        <div style="font-size: 20px;">💬</div>
+        <div>
+            <div style="color: #ffcc00; font-weight: bold; font-size: 11px; text-transform: uppercase;">რეგიონული ჩატი</div>
+            <div style="color: #fff; font-size: 13px;">ახალი შეტყობინება შენს რეგიონში! 🚀</div>
+        </div>
+    </a>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // შემოწმება ყოველ 4 წამში ერთხელ ფონურ რეჟიმში
+        setInterval(checkNewChatMessages, 4000);
+    });
+
+    function checkNewChatMessages() {
+        // თუ მომხმარებელი უკვე ჩატის გვერდზეა, აღარ გვჭირდება ტოასტის ჩვენება
+        if (window.location.pathname.includes('/region_chat') || window.location.pathname.includes('/board')) {
+            return;
+        }
+
+        fetch('/api/check_new_messages')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.has_new) {
+                // ვაჩვენებთ ბეჯს ნავიგაციაში
+                let badge = document.getElementById('navChatBadge');
+                if (badge) badge.style.display = 'inline-block';
+
+                // ვაჩვენებთ ლამაზ ამოხტომად ტოასტს კუთხეში
+                let toast = document.getElementById('chatToast');
+                if (toast && toast.style.display !== 'flex') {
+                    toast.style.display = 'flex';
+                    
+                    // ავტომატურად ჩაქრეს 7 წამის შემდეგ, თუ არ დააკლიკა
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 7000);
+                }
+            } else {
+                let badge = document.getElementById('navChatBadge');
+                if (badge) badge.style.display = 'none';
+                
+                let toast = document.getElementById('chatToast');
+                if (toast) toast.style.display = 'none';
+            }
+        })
+        .catch(err => console.error("Chat check error:", err));
+    }
+    </script>
+    {% endif %}
 </body>
 </html>
