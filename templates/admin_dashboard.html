@@ -53,6 +53,11 @@
                 <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
                     <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
                 </form>
+
+                <!-- 💥 მთელი პლატფორმის სრული განულება (კლიკები + ბალანსი) -->
+                <form action="{{ url_for('admin_reset_all_global') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('⚠️ ყურადღება! ეს წაშლის და განულებს მთელი პლატფორმის ყველა იუზერის კლიკებს და ბალანსს. დარწმუნებული ხარ?');">
+                    <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 8px; background: #b30000; font-size: 11px;">💥 მთელი პლატფორმის სრული განულება</button>
+                </form>
             </div>
         </div>
     </div>
@@ -288,9 +293,20 @@
        
         {% for reg_id, data in users_by_region.items() %}
         <details class="region-user-block" style="margin-bottom: 15px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
-            <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px;">
-                📍 {{ data.name }} (იუზერები: {{ data.users|length }})
+            <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span>📍 {{ data.name }} (იუზერები: {{ data.users|length }})</span>
+                
+                <!-- რეგიონის მასობრივი განულების ღილაკები -->
+                <div style="display: flex; gap: 6px;" onclick="event.stopPropagation();">
+                    <form action="{{ url_for('admin_reset_region_users', region_id=reg_id, action_type='clicks') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ რეგიონის ყველა მოთამაშის კლიკების განულება?');">
+                        <button type="submit" class="btn-sm btn-warning" style="padding: 3px 8px; font-size: 10px; color: #000;">⚡ რეგიონის კლიკ. განულება</button>
+                    </form>
+                    <form action="{{ url_for('admin_reset_region_users', region_id=reg_id, action_type='balance') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ რეგიონის ყველა მოთამაშის ბალანსის განულება?');">
+                        <button type="submit" class="btn-sm btn-danger" style="padding: 3px 8px; font-size: 10px;">💰 რეგიონის ბალანს. განულება</button>
+                    </form>
+                </div>
             </summary>
+            
             <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px;">
                 {% if data.users %}
                 <div style="overflow-x: auto;">

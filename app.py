@@ -646,6 +646,57 @@ def admin_reset_region_score(region_id):
     flash(f"რეგიონის ({region.region_name}) კლიკები განულდა!", "success")
     return redirect(url_for('admin_dashboard'))
 
+# 🛠️ ახალი: რეგიონის ყველა მომხმარებლის კლიკებისა და ბალანსის მასობრივი განულება
+@app.route('/admin/region/<region_id>/reset_users_data/<action_type>', methods=['POST'])
+@login_required
+def admin_reset_region_users(region_id, action_type):
+    if not current_user.is_admin:
+        abort(403)
+    
+    users_in_region = User.query.filter_by(region=region_id).all()
+    for u in users_in_region:
+        if action_type == 'clicks':
+            u.total_clicks = 0
+            u.clicks_left = 250
+        elif action_type == 'balance':
+            u.balance = 0.0
+            
+    db.session.commit()
+    flash(f"რეგიონის მომხმარებლების {action_type} წარმატებით განულდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# 🛠️ ახალი: მთელი პლატფორმის მასშტაბით სრული განულება
+@app.route('/admin/reset_all_global', methods=['POST'])
+@login_required
+def admin_reset_all_global():
+    if not current_user.is_admin:
+        abort(403)
+    
+    User.query.update({User.total_clicks: 0, User.clicks_left: 250, User.balance: 0.0})
+    RegionScore.query.update({RegionScore.score: 0})
+    db.session.commit()
+    
+    flash("მთელი პლატფორმის მასშტაბით ყველა იუზერის კლიკები და ბალანსი განულდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# 🛠️ ახალი: API მომხმარებლის რეგიონის წევრების ლაივ სიისთვის (დაშბორდისთვის)
+@app.route('/api/region_team_stats')
+@login_required
+def api_region_team_stats():
+    team_users = User.query.filter_by(region=current_user.region).order_by(User.total_clicks.desc()).all()
+    
+    users_data = [{
+        "username": u.username,
+        "total_clicks": u.total_clicks,
+        "is_current": u.id == current_user.id
+    } for u in team_users]
+    
+    return jsonify({
+        "success": True,
+        "region_id": current_user.region,
+        "users": users_data
+    })
+
 @app.route('/admin/ads', methods=['GET', 'POST'])
 @login_required
 def admin_manage_ads():

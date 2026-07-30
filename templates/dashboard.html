@@ -199,7 +199,7 @@ updateCountdown();
             <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: bold;">📍 შენი რეგიონის გენერალური სპონსორი</span>
             <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
             <p style="font-size: 12px; color: #d1d1d6; margin: 0; line-height: 1.5;">
-                ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას ჩაირთვება სპონსორის ვიქტორინა! უპასუხე სწორად და აღადგინე ენერგია! 🧠🔥
+                ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას ჩაირთვება სპონსორის ვიქტორინა! უპასუხე და აღადგინე ენერგია! 🧠🔥
             </p>
         </div>
 
@@ -271,6 +271,41 @@ updateCountdown();
         </div>
     </div>
 
+    <!-- 👥 რეგიონის გუნდის წევრების ცოცხალი რეიტინგი (Live Team Stats) -->
+    <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
+        <details style="cursor: pointer; background: #161622; padding: 12px 15px; border-radius: 12px; border: 1px solid #33334d;">
+            <summary style="color: #00ffcc; font-size: 14px; font-weight: bold; outline: none; display: flex; justify-content: space-between; align-items: center;">
+                <span>👥 შენი რეგიონის გუნდი და აქტიური მოთამაშეები (Live)</span>
+                <span style="font-size: 11px; color: #ffcc00;" id="myRegionNameBadge">({{ current_user.region | upper }})</span>
+            </summary>
+            
+            <div style="margin-top: 12px; border-top: 1px solid #222233; padding-top: 10px;">
+                <!-- 🎯 შენი პირადი კლიკების გამოყოფილი ბლოკი -->
+                <div style="background: rgba(0, 255, 204, 0.08); border: 1px solid #00ffcc; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #fff;">🎯 შენი პირადი წვლილი:</span>
+                    <strong style="font-size: 15px; color: #00ffcc;" id="myPersonalClicksBadge">{{ current_user.total_clicks }} კლიკი</strong>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="leaderboard-table" style="margin-top: 0;">
+                        <thead>
+                            <tr>
+                                <th>მომხმარებელი</th>
+                                <th style="text-align: right;">აქტიურობა (კლიკები)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="regionTeamTableBody">
+                            <!-- JavaScript-ით დინამიკურად ჩაიტვირთება ლაივში -->
+                            <tr>
+                                <td colspan="2" style="text-align: center; color: #888;">იტვირთება გუნდის მონაცემები...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+    </div>
+
     <!-- ციფრული საფულე -->
     <div class="card">
         <h3>💰 ციფრული საფულე</h3>
@@ -314,6 +349,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // 🔄 F5-ის გარეშე რეალურ დროში განახლების სკრიპტი (Polling ყოველ 3 წამში)
     setInterval(pollUserData, 3000);
+    setInterval(updateRegionTeamStats, 3000);
+    
+    updateRegionTeamStats();
 });
 
 function pollUserData() {
@@ -365,6 +403,39 @@ function pollUserData() {
         }
     })
     .catch(err => console.error("Poll error:", err));
+}
+
+// 🔄 რეგიონის გუნდის წევრების ლაივ სიის განახლება
+function updateRegionTeamStats() {
+    fetch('/api/region_team_stats')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.users) {
+            let tbody = document.getElementById('regionTeamTableBody');
+            let html = '';
+            
+            data.users.forEach(u => {
+                let isCurrentStyle = u.is_current ? 'background: rgba(0, 255, 204, 0.12); color: #00ffcc; font-weight: bold;' : '';
+                let nameSuffix = u.is_current ? ' (შენ ⚡)' : '';
+                
+                html += `
+                    <tr style="${isCurrentStyle}">
+                        <td>${u.username}${nameSuffix}</td>
+                        <td style="text-align: right; font-weight: bold;">${u.total_clicks} კლიკი</td>
+                    </tr>
+                `;
+                
+                // თუ ეს მიმდინარე მომხმარებელია, ზედა ბეჯსაც ვუახლებთ
+                if (u.is_current) {
+                    let personalBadge = document.getElementById('myPersonalClicksBadge');
+                    if (personalBadge) personalBadge.innerText = u.total_clicks + " კლიკი";
+                }
+            });
+            
+            tbody.innerHTML = html;
+        }
+    })
+    .catch(err => console.error("Team stats error:", err));
 }
 
 function boostRegion(event) {
