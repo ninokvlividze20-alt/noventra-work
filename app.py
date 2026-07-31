@@ -12,6 +12,7 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='None',
     SESSION_COOKIE_SECURE=True,
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30) # იუზერი სისტემაში დარჩება 30 დღე
 )
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300 
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
@@ -31,12 +32,11 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    phone = db.Column(db.String(20), unique=True, nullable=False) # იმეილის ნაცვლად ტელეფონი
     password = db.Column(db.String(255), nullable=False)
     balance = db.Column(db.Float, default=0.0)
     reputation = db.Column(db.Integer, default=100)
     is_admin = db.Column(db.Boolean, default=False)
-    phone = db.Column(db.String(20), default="")
     bank_account = db.Column(db.String(50), default="")
     clicks_left = db.Column(db.Integer, default=250)
     total_clicks = db.Column(db.Integer, default=0)
@@ -299,20 +299,28 @@ def board():
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
-        email = request.form.get('email')
+        phone = request.form.get('phone')
         password = request.form.get('password')
-        region = request.form.get('region', 'tbilisi')
+        region = request.form.get('region')
         
+        if not region or region == "":
+            flash("გთხოვთ, აირჩიოთ რეგიონი!", "danger")
+            return redirect(url_for('register'))
+         
         if User.query.filter_by(username=username).first():
             flash("მომხმარებელი ამ სახელით უკვე არსებობს!", "danger")
             return redirect(url_for('register'))
             
+        if User.query.filter_by(phone=phone).first():
+            flash("მომხმარებელი ამ მობილურის ნომრით უკვე არსებობს!", "danger")
+            return redirect(url_for('register'))
+            
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, email=email, password=hashed_password, region=region)
+        new_user = User(username=username, phone=phone, password=hashed_password, region=region)
         try:
             db.session.add(new_user)
             db.session.commit()
-            login_user(new_user)
+            login_user(new_user, remember=True)
             return redirect(url_for('dashboard'))
         except Exception as e:
             db.session.rollback()
@@ -326,10 +334,16 @@ def login():
         password = request.form.get('password')
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
-            login_user(user)
+            login_user(user, remember=True) # მუდმივი სესია
             return redirect(url_for('dashboard'))
         flash("მომხმარებლის სახელი ან პაროლი არასწორია!", "danger")
     return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 @app.route('/dashboard')
 @login_required

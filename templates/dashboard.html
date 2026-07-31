@@ -30,7 +30,23 @@
     .btn { display: inline-block; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; transition: 0.3s; position: relative; cursor: pointer; text-align: center; }
     .btn-primary { background: #00ffcc; color: #000; border: none; width: 100%; }
     .btn-danger { background: #ff4757; color: #fff; border: none; width: 100%; }
-    .btn-warning { background: linear-gradient(135deg, #ffcc00, #ff9900); color: #000; border: none; width: 100%; font-weight: bold; }
+    
+    /* ⚡ კლიკების სუპერ-სახალისო და ნეონური ღილაკის დიზაინი (პუნქტი 8) */
+    .btn-warning { 
+        background: linear-gradient(135deg, #ffcc00, #ff9900); 
+        color: #000; 
+        border: none; 
+        width: 100%; 
+        font-weight: bold; 
+        font-size: 16px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+        transition: transform 0.1s ease, box-shadow 0.2s ease;
+    }
+    .btn-warning:active {
+        transform: scale(0.96);
+        box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+    }
     
     .board-card { border: 1px solid #00ffcc; background: #111118; padding: 20px; border-radius: 16px; text-align: center; margin-top: 20px; }
     
@@ -84,14 +100,15 @@
         position: absolute;
         color: #00ffcc;
         font-weight: bold;
-        font-size: 16px;
+        font-size: 18px;
         pointer-events: none;
         animation: floatUp 0.6s ease-out forwards;
         z-index: 10;
+        text-shadow: 0 0 8px rgba(0, 255, 204, 0.8);
     }
     @keyframes floatUp {
         0% { transform: translateY(0) scale(1); opacity: 1; }
-        100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        100% { transform: translateY(-50px) scale(1.3); opacity: 0; }
     }
 
     /* 🪟 დიზაინერული მოდალური ფანჯარა ენერგიის ამოწურვისთვის (მხოლოდ ვიქტორინა) */
@@ -142,11 +159,11 @@
 
 <div class="dashboard-grid">
     
-    <!-- 📅 კვირის სეზონის ტაიმერი და მკვეთრი საპრიზო ფონდი -->
+    <!-- 📅 კვირის სეზონის ტაიმერი და ცოცხლად განახლებადი საპრიზო ფონდი -->
 <div style="background: linear-gradient(135deg, #1b1b2f, #111118); border: 2px solid #00ffcc; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 0 25px rgba(0, 255, 204, 0.15); margin-bottom: 20px;">
     <div>
         <span style="font-size: 12px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: bold; letter-spacing: 0.5px;">🏆 მიმდინარე კვირის საპრიზო ფონდი</span>
-        <div style="font-size: 32px; color: #00ffcc; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,204,0.3);">{{ current_week_prize_pool | default(1200) }} ₾</div>
+        <div style="font-size: 32px; color: #00ffcc; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,204,0.3);"><span id="prizePoolDisplay">{{ current_week_prize_pool | default(1200) }}</span> ₾</div>
     </div>
     <div style="text-align: right;">
         <span style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 4px; font-weight: bold;">⏳ კვირის დასრულებამდე დარჩენილია:</span>
@@ -197,7 +214,7 @@ updateCountdown();
         <!-- 📢 შენი რეგიონის სპონსორის ბანერი -->
         <div style="background: #161622; border: 2px solid #ffcc00; border-radius: 14px; padding: 14px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(255, 204, 0, 0.15);">
             <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: bold;">📍 შენი რეგიონის გენერალური სპონსორი</span>
-            <img src="/static/ads/{{ current_user.region }}.jpg" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
+            <img src="/static/ads/{{ current_user.region }}.jpg?t=timestamp" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
             <p style="font-size: 12px; color: #d1d1d6; margin: 0; line-height: 1.5;">
                 ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას ჩაირთვება სპონსორის ვიქტორინა! უპასუხე და აღადგინე ენერგია! 🧠🔥
             </p>
@@ -220,7 +237,7 @@ updateCountdown();
                 <!-- 🟢 ჩვეულებრივი აქტიური რეჟიმი (დაკლიკების ღილაკი) -->
                 <div style="position: relative; display: inline-block; width: 100%; margin-top: 20px;">
                     <button onclick="boostRegion(event)" class="btn btn-warning" id="boostBtn">
-                        ⚡ დააკლიკე და მიაშველე ქულა! (<span id="clicksLeft">{{ current_user.clicks_left }}</span>)
+                        🔥 დააკლიკე და გაბაცხადე რეგიონი! ⚡ (<span id="clicksLeft">{{ current_user.clicks_left }}</span>)
                     </button>
                 </div>
                 <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
@@ -240,12 +257,13 @@ updateCountdown();
     </div>
 </div>
 
-<!-- 💡 სწორი პასუხის საინფორმაციო ფანჯარა (ეკრანის შუაში, პროფესიონალური დიზაინით) -->
+<!-- 💡 სწორი პასუხის საინფორმაციო ფანჯარა აიკონით -->
 <div id="wrongModal" class="ad-modal">
-    <div class="ad-modal-content" style="border-color: #ffcc00; background: linear-gradient(135deg, #161622, #111118); box-shadow: 0 0 35px rgba(255, 204, 0, 0.2); padding: 25px;">
-        <h3 style="color: #ffcc00; margin-top: 0; font-size: 18px; letter-spacing: 0.5px;">💡 სწორი პასუხი</h3>
-        <p id="correctAnswerText" style="font-size: 16px; color: #ffffff; margin: 20px 0; font-weight: bold; line-height: 1.6;"></p>
-        <p style="font-size: 12px; color: #00ffcc; margin: 0; font-weight: bold;">⏳ 5 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...</p>
+    <div class="ad-modal-content" style="border-color: #ffcc00; background: linear-gradient(135deg, #161622, #111118); box-shadow: 0 0 35px rgba(255, 204, 0, 0.3); padding: 25px;">
+        <div id="modalIconHeader" style="font-size: 45px; margin-bottom: 10px;">💡</div>
+        <h3 id="modalTitleText" style="color: #ffcc00; margin-top: 0; font-size: 18px; letter-spacing: 0.5px;">სწორი პასუხი</h3>
+        <p id="correctAnswerText" style="font-size: 16px; color: #ffffff; margin: 15px 0; font-weight: bold; line-height: 1.6;"></p>
+        <p id="modalSubText" style="font-size: 12px; color: #00ffcc; margin: 0; font-weight: bold;">⏳ 5 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...</p>
     </div>
 </div>
 
@@ -295,7 +313,6 @@ updateCountdown();
                             </tr>
                         </thead>
                         <tbody id="regionTeamTableBody">
-                            <!-- JavaScript-ით დინამიკურად ჩაიტვირთება ლაივში -->
                             <tr>
                                 <td colspan="2" style="text-align: center; color: #888;">იტვირთება გუნდის მონაცემები...</td>
                             </tr>
@@ -347,7 +364,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let el = document.getElementById('clicksLeft');
     if(el) el.innerText = clickLimit;
     
-    // 🔄 F5-ის გარეშე რეალურ დროში განახლების სკრიპტი (Polling ყოველ 3 წამში)
     setInterval(pollUserData, 3000);
     setInterval(updateRegionTeamStats, 3000);
     
@@ -359,18 +375,21 @@ function pollUserData() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            // ბალანსის განახლება
             let balEl = document.getElementById('userBalance');
             if(balEl) balEl.innerText = data.balance;
 
-            // ენერგიის / დარჩენილი კლიკების განახლება (თუ მომხმარებელი არ აკლიკებს ამ წამს)
+            // საპრიზო ფონდის ცოცხალი განახლება
+            let prizeEl = document.getElementById('prizePoolDisplay');
+            if(prizeEl && data.prize_pool) {
+                prizeEl.innerText = data.prize_pool;
+            }
+
             if (pendingPoints === 0) {
                 clickLimit = data.clicks_left;
                 let cLeftEl = document.getElementById('clicksLeft');
                 if(cLeftEl) cLeftEl.innerText = clickLimit;
             }
 
-            // რეგიონების ქულების ცხრილის განახლება
             if (data.regions) {
                 for (const [regId, score] of Object.entries(data.regions)) {
                     let row = document.querySelector(`#regionsTableBody tr[data-region-id="${regId}"]`);
@@ -383,7 +402,6 @@ function pollUserData() {
                 }
             }
 
-            // თამაშის რეჟიმის (active / paused) მომენტალური ასახვა
             let container = document.getElementById('gameStatusContainer');
             if (container) {
                 if (data.game_status === 'paused' && !container.innerHTML.includes('🔴 სეზონი შეჩერებულია!')) {
@@ -397,7 +415,7 @@ function pollUserData() {
                         </div>
                     `;
                 } else if (data.game_status === 'active' && container.innerHTML.includes('🔴 სეზონი შეჩერებულია!')) {
-                    location.reload(); // თუ ჩაირთო, გადაიტვირთოს რომ დაკლიკების ღილაკი დაბრუნდეს
+                    location.reload();
                 }
             }
         }
@@ -425,7 +443,6 @@ function updateRegionTeamStats() {
                     </tr>
                 `;
                 
-                // თუ ეს მიმდინარე მომხმარებელია, ზედა ბეჯსაც ვუახლებთ
                 if (u.is_current) {
                     let personalBadge = document.getElementById('myPersonalClicksBadge');
                     if (personalBadge) personalBadge.innerText = u.total_clicks + " კლიკი";
@@ -542,7 +559,7 @@ function loadQuiz() {
     .catch(err => { console.error(err); });
 }
 
-// 🧠 პასუხის შემოწმება და არასწორი პასუხის შემთხვევაში 5-წამიანი ფანჯრის გამოჩენა
+// 🧠 პასუხის შემოწმება და სადღესასწაულო აიკონით მილოცვა სწორი პასუხისას
 function submitQuiz(q_id, chosen_opt) {
     let dataObj = window.currentQuizData;
     let optionButtons = document.querySelectorAll('.quiz-btn');
@@ -557,20 +574,26 @@ function submitQuiz(q_id, chosen_opt) {
     .then(res => res.json())
     .then(data => {
         if (data.success && data.is_correct) {
-            let feedbackEl = document.getElementById('quizFeedback');
-            if(feedbackEl) {
-                feedbackEl.style.color = '#00ffcc';
-                feedbackEl.innerHTML = "🎉 სწორია! ენერგია აღდგენილია!";
-            }
+            document.getElementById('adModal').style.display = 'none';
+            document.getElementById('modalIconHeader').innerText = "🎉";
+            document.getElementById('modalTitleText').innerText = "ბრავო, სწორია!";
+            document.getElementById('correctAnswerText').innerHTML = `<span style="font-size: 16px; color: #00ffcc;">შენ წარმატებით გასცე პასუხი! ენერგია აღდგენილია! ⚡</span>`;
+            document.getElementById('modalSubText').innerText = "✨ აბა, განაგრძე რეგიონის ქაჩვა!";
+            document.getElementById('wrongModal').style.display = 'flex';
+
             setTimeout(() => {
-                completeMiniGame(); 
-            }, 1200);
+                document.getElementById('wrongModal').style.display = 'none';
+                completeMiniGame();
+            }, 2500);
         } else {
             let correctOptNum = data.correct_option;
             let correctText = dataObj.options[correctOptNum - 1];
 
             document.getElementById('adModal').style.display = 'none';
+            document.getElementById('modalIconHeader').innerText = "💡";
+            document.getElementById('modalTitleText').innerText = "სწორი პასუხი";
             document.getElementById('correctAnswerText').innerHTML = `<span style="color: #ffcc00; font-size: 13px; display: block; margin-bottom: 6px;">არასწორია. სწორი პასუხია:</span><span style="font-size: 18px; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.3);">${correctOptNum}. ${correctText}</span>`;
+            document.getElementById('modalSubText').innerText = "⏳ 5 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...";
             document.getElementById('wrongModal').style.display = 'flex';
 
             setTimeout(() => {
@@ -596,6 +619,7 @@ function completeMiniGame(event) {
             let cEl = document.getElementById('clicksLeft');
             if(cEl) cEl.innerText = clickLimit;
             document.getElementById('adModal').style.display = 'none';
+            document.getElementById('wrongModal').style.display = 'none';
             document.getElementById('clickResponse').innerText = "✅ ენერგია სრულად აღდგენილია (250 კლიკი)!";
         }
     })
