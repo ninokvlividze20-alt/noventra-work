@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <div style="background: #111118; border: 1px solid #00ffcc; padding: 25px; border-radius: 16px;">
+        <h2 style="color: #00ffcc; margin-top: 0;">✏️ ვიქტორინის კითხვის რედაქტირება</h2>
+
+        <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label style="color: #ffcc00; font-size: 12px;">სპონსორის სახელი:</label>
+                <input type="text" name="sponsor_name" value="{{ quiz.sponsor_name }}" required style="width: 100%; padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">
+            </div>
+
+            <div>
+                <label style="color: #ffcc00; font-size: 12px;">პაკეტი:</label>
+                <select name="package_type" style="width: 100%; padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">
+                    <option value="Gold" {% if quiz.package_type == 'Gold' %}selected{% endif %}>Gold</option>
+                    <option value="Silver" {% if quiz.package_type == 'Silver' %}selected{% endif %}>Silver</option>
+                    <option value="Bronze" {% if quiz.package_type == 'Bronze' %}selected{% endif %}>Bronze</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="color: #00ffcc; font-size: 12px;">კითხვის ტექსტი:</label>
+                <textarea name="question_text" rows="3" required style="width: 100%; padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">{{ quiz.question_text }}</textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" name="option_1" value="{{ quiz.option_1 }}" placeholder="პასუხი 1" required style="padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">
+                <input type="text" name="option_2" value="{{ quiz.option_2 }}" placeholder="პასუხი 2" required style="padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">
+                <input type="text" name="option_3" value="{{ quiz.option_3 }}" placeholder="პასუხი 3" required style="padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">
+                <input type="text" name="option_4" value="{{ quiz.option_4 }}" placeholder="პასუხი 4" required style="padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">
+            </div>
+
+            <div>
+                <label style="color: #ffcc00; font-size: 12px;">სწორი პასუხის ნომერი (1-4):</label>
+                <input type="number" name="correct_option" value="{{ quiz.correct_option }}" min="1" max="4" required style="width: 100px; padding: 10px; background: #161622; border: 1px solid #333; color: #fff; border-radius: 8px;">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="submit" style="background: #00ffcc; color: #000; border: none; padding: 12px 20px; font-weight: bold; border-radius: 8px; cursor: pointer;">💾 ცვლილებების შენახვა</button>
+                <a href="{{ url_for('admin_dashboard') }}" style="background: #333; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; display: inline-block; text-align: center;">← უკან დაბრუნება</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -972,6 +972,47 @@ def admin_delete_quiz(quiz_id):
     flash("ვიქტორინის კითხვა წარმატებით წაიშალა!", "success")
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/quiz/edit/<int:quiz_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_quiz(quiz_id):
+    if not current_user.is_admin:
+        abort(403)
+    quiz = QuizQuestion.query.get_or_404(quiz_id)
+    if request.method == 'POST':
+        quiz.sponsor_name = request.form.get('sponsor_name')
+        quiz.package_type = request.form.get('package_type', 'Bronze')
+        quiz.question_text = request.form.get('question_text')
+        quiz.option_1 = request.form.get('option_1')
+        quiz.option_2 = request.form.get('option_2')
+        quiz.option_3 = request.form.get('option_3')
+        quiz.option_4 = request.form.get('option_4')
+        quiz.correct_option = int(request.form.get('correct_option', 1))
+        
+        file = request.files.get('sponsor_image')
+        if file and file.filename != '':
+            filename = f"quiz_{datetime.datetime.now().timestamp()}.jpg"
+            ads_folder = os.path.join(app.root_path, 'static', 'quiz_ads')
+            os.makedirs(ads_folder, exist_ok=True)
+            filepath = os.path.join(ads_folder, filename)
+            file.save(filepath)
+            quiz.sponsor_image = url_for('static', filename=f'quiz_ads/{filename}')
+            
+        db.session.commit()
+        flash("ვიქტორინის კითხვა წარმატებით განახლდა!", "success")
+        return redirect(url_for('admin_dashboard'))
+    return render_template('admin_edit_quiz.html', quiz=quiz)
+
+@app.route('/admin/quiz/delete_all', methods=['POST'])
+@login_required
+def admin_delete_all_quizzes():
+    if not current_user.is_admin:
+        abort(403)
+    UserQuizAnswer.query.delete()
+    QuizQuestion.query.delete()
+    db.session.commit()
+    flash("ყველა ვიქტორინის კითხვა წარმატებით წაიშალა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/api/restore_energy', methods=['POST'])
 @login_required
 def restore_energy():
@@ -1013,6 +1054,9 @@ def api_user_status():
     game_status_setting = Settings.query.filter_by(key='game_status').first()
     game_status = game_status_setting.value if game_status_setting else "active"
     
+    prize_setting = Settings.query.filter_by(key='prize_pool').first()
+    prize_pool = prize_setting.value if prize_setting else "1200"
+    
     regions = RegionScore.query.all()
     regions_data = {r.region_id: r.score for r in regions}
     
@@ -1022,6 +1066,7 @@ def api_user_status():
         "clicks_left": current_user.clicks_left,
         "reputation": current_user.reputation,
         "game_status": game_status,
+        "prize_pool": prize_pool,
         "regions": regions_data
     })
 
