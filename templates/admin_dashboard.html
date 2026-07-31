@@ -33,7 +33,7 @@
     <div class="admin-section" style="border-color: #ffcc00;">
         <h3>🏆 სეზონისა და საპრიზო ფონდის მართვა</h3>
         <div class="grid-2" style="align-items: center;">
-            <form action="{{ url_for('admin_update_prize') }}" method="POST" onsubmit="saveScrollPosition()" style="display: flex; gap: 10px; align-items: center;">
+            <form action="{{ url_for('admin_update_prize') }}" method="POST" style="display: flex; gap: 10px; align-items: center;">
                 <div style="flex-grow: 1;">
                     <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">კვირის საპრიზო ფონდი (₾):</label>
                     <input type="text" name="prize_pool" value="{{ current_week_prize_pool | default('1200') }}" required class="input-field">
@@ -43,20 +43,15 @@
 
             <div style="display: flex; flex-direction: column; gap: 10px; border-left: 1px solid #222233; padding-left: 20px;">
                 <!-- თამაშის ჩართვა/გამორთვა -->
-                <form action="{{ url_for('admin_toggle_game') }}" method="POST" onsubmit="saveScrollPosition()">
+                <form action="{{ url_for('admin_toggle_game') }}" method="POST">
                     <button type="submit" class="btn-sm btn-warning" style="width: 100%; padding: 10px;">
                         ⚡ თამაშის რეჟიმის გადართვა (ჩართ./გამორთ.)
                     </button>
                 </form>
                
                 <!-- სეზონის დასრულება / ქულების განულება -->
-                <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
+                <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
                     <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
-                </form>
-
-                <!-- 💥 მთელი პლატფორმის სრული განულება (კლიკები + ბალანსი) -->
-                <form action="{{ url_for('admin_reset_all_global') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('⚠️ ყურადღება! ეს წაშლის და განულებს მთელი პლატფორმის ყველა იუზერის კლიკებს და ბალანსს. დარწმუნებული ხარ?');">
-                    <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 8px; background: #b30000; font-size: 11px;">💥 მთელი პლატფორმის სრული განულება</button>
                 </form>
             </div>
         </div>
@@ -95,7 +90,7 @@
                 </table>
             </div>
 
-            <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');" style="margin-top: 20px;">
+            <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');" style="margin-top: 20px;">
                 <button type="submit" class="btn-sm btn-success" style="padding: 12px 25px; font-size: 14px; width: 100%;">
                     🚀 თანხების ავტომატურად ჩარიცხვა გამარჯვებულების საფულეებში
                 </button>
@@ -113,7 +108,7 @@
             📐 ზუსტი გაბარიტული ზომა მობილურისა და დესკტოპისთვის: მკაცრად პროპორციული **800 x 450 px (16:9)** (ფორმატი: JPG/PNG).
         </p>
 
-        <form action="{{ url_for('admin_add_quiz_question') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <form action="{{ url_for('admin_add_quiz_question') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
             <div>
                 <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სპონსორი კომპანიის სახელი:</label>
                 <input type="text" name="sponsor_name" placeholder="მაგ: კომპანია სელფი" required class="input-field">
@@ -173,7 +168,14 @@
     <!-- 📚 ატვირთული ვიქტორინების სრული სია და მართვა -->
     <div class="admin-section" style="border-color: #ffcc00;">
         <details>
-            <summary style="color: #00ffcc; cursor: pointer; font-size: 16px; font-weight: bold;">📚 ატვირთული ვიქტორინების სია (სულ: {{ quiz_questions|length }})</summary>
+            <summary style="color: #00ffcc; cursor: pointer; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                <span>📚 ატვირთული ვიქტორინების სია (სულ: {{ quiz_questions|length }})</span>
+                {% if quiz_questions %}
+                <form action="{{ url_for('admin_delete_all_quizzes') }}" method="POST" onsubmit="return confirm('⚠️ ყურადღება! ნამდვილად გსურთ ყველა ვიქტორინის კითხვის ერთიანად წაშლა?');" style="display:inline;">
+                    <button type="submit" class="btn-sm btn-danger" style="padding: 4px 10px; font-size: 11px;">🗑️ ყველა ვიქტორინის წაშლა</button>
+                </form>
+                {% endif %}
+            </summary>
             <div style="margin-top: 15px; overflow-x: auto;">
                 {% if quiz_questions %}
                 <table class="admin-table">
@@ -200,9 +202,12 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <form action="{{ url_for('admin_delete_quiz', quiz_id=q.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ კითხვის წაშლა?');">
-                                    <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
-                                </form>
+                                <div style="display: flex; gap: 5px;">
+                                    <a href="{{ url_for('admin_edit_quiz', quiz_id=q.id) }}" class="btn-sm btn-success" style="padding: 4px 8px; text-decoration: none;">რედაქტირება</a>
+                                    <form action="{{ url_for('admin_delete_quiz', quiz_id=q.id) }}" method="POST" onsubmit="return confirm('ნამდვილად გსურთ ამ კითხვის წაშლა?');">
+                                        <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -221,17 +226,17 @@
             <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
             <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა კლიკების ზონის თავზე: მკაცრად პროპორციული **800 x 450 px (16:9)** (.jpg/.png)</p>
            
-            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                 <select name="region_id" class="input-field">
                     {% for reg in regions %}
                     <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
                     {% endfor %}
                 </select>
-                
+               
                 <div style="background: #161622; border: 1px dashed #33334d; padding: 10px; border-radius: 8px; text-align: center;">
                     <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 5px; font-weight: bold;">აირჩიე სპონსორის დიდი ბანერი (800x450 px):</label>
                     <input type="file" name="sponsor_image" accept="image/*" id="regionImageInput" onchange="previewRegionImage(event)" style="display: none;" required>
-                    
+                   
                     <div onclick="document.getElementById('regionImageInput').click()" style="cursor: pointer; border: 1px solid #444; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto; background: #111; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
                         <img id="regionImagePreview" src="" alt="პრევიუ" style="width: 100%; height: 100%; object-fit: contain; display: none; background: #000;">
                         <span id="regionImagePlaceholder" style="color: #888; font-size: 11px; padding: 5px;">📁 დააკლიკე ფოტოს ასარჩევად</span>
@@ -264,11 +269,11 @@
                             <td>
                                 <div style="display: flex; gap: 5px;">
                                     {% if region_sponsors[reg.region_id] %}
-                                    <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                    <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST">
                                         <button type="submit" class="btn-sm btn-danger" style="padding: 3px 6px; font-size: 10px;">წაშლა</button>
                                     </form>
                                     {% endif %}
-                                    <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                    <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST">
                                         <button type="submit" class="btn-sm btn-warning" style="padding: 3px 6px; font-size: 10px; color:#000;">ქულ. განულება</button>
                                     </form>
                                 </div>
@@ -293,20 +298,9 @@
        
         {% for reg_id, data in users_by_region.items() %}
         <details class="region-user-block" style="margin-bottom: 15px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
-            <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <span>📍 {{ data.name }} (იუზერები: {{ data.users|length }})</span>
-                
-                <!-- რეგიონის მასობრივი განულების ღილაკები -->
-                <div style="display: flex; gap: 6px;" onclick="event.stopPropagation();">
-                    <form action="{{ url_for('admin_reset_region_users', region_id=reg_id, action_type='clicks') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ რეგიონის ყველა მოთამაშის კლიკების განულება?');">
-                        <button type="submit" class="btn-sm btn-warning" style="padding: 3px 8px; font-size: 10px; color: #000;">⚡ რეგიონის კლიკ. განულება</button>
-                    </form>
-                    <form action="{{ url_for('admin_reset_region_users', region_id=reg_id, action_type='balance') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ რეგიონის ყველა მოთამაშის ბალანსის განულება?');">
-                        <button type="submit" class="btn-sm btn-danger" style="padding: 3px 8px; font-size: 10px;">💰 რეგიონის ბალანს. განულება</button>
-                    </form>
-                </div>
+            <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px;">
+                📍 {{ data.name }} (იუზერები: {{ data.users|length }})
             </summary>
-            
             <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px;">
                 {% if data.users %}
                 <div style="overflow-x: auto;">
@@ -326,7 +320,7 @@
                             {% for u in data.users %}
                             <tr>
                                 <td><strong>{{ u.username }}</strong><br><small style="color: #888;">{{ u.email }}</small></td>
-                                <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                <form action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST">
                                     <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" class="input-field" style="width: 70px;"></td>
                                     <td><input type="number" name="reputation" value="{{ u.reputation }}" class="input-field" style="width: 60px;"></td>
                                     <td><input type="number" name="clicks_left" value="{{ u.clicks_left }}" class="input-field" style="width: 60px;"></td>
@@ -356,7 +350,7 @@
                                         <div style="display: flex; gap: 5px;">
                                             <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
                                 </form>
-                                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('წავშალო მომხმარებელი?');">
+                                            <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('წავშალო მომხმარებელი?');">
                                                 <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
                                             </form>
                                         </div>
@@ -376,16 +370,20 @@
 </div>
 
 <script>
-function saveScrollPosition() {
-    localStorage.setItem('adminScrollPos', window.scrollY);
-}
-
-window.addEventListener('load', function() {
+// 🔄 სქროლის პოზიციის ავტომატური დამახსოვრება ადმინ-პანელის ყველა ფორმისთვის
+document.addEventListener("DOMContentLoaded", function() {
     let scrollPos = localStorage.getItem('adminScrollPos');
     if (scrollPos) {
         window.scrollTo(0, parseInt(scrollPos));
         localStorage.removeItem('adminScrollPos');
     }
+
+    // ავტომატურად ვამაგრებთ სქროლის დამახსოვრებას ყველა ფორმაზე
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            localStorage.setItem('adminScrollPos', window.scrollY);
+        });
+    });
 });
 
 function previewQuizImage(event) {
