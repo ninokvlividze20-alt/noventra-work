@@ -349,7 +349,8 @@ def register():
             return redirect(url_for('dashboard'))
         except Exception as e:
             db.session.rollback()
-            return f"ბაზის შეცდომა: {str(e)}"
+            import traceback
+            return f"<pre>{traceback.format_exc()}</pre>", 500
             
     return render_template('signup_new.html')
 
