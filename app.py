@@ -33,6 +33,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False) # საიტზე გამოსაჩენი ნიკნეიმი
     full_name = db.Column(db.String(100), default="") # სრული სახელი და გვარი (მხოლოდ ადმინისთვის/ვერიფიკაციისთვის)
+    email = db.Column(db.String(100), default="")     # 🛠️ აი ეს აკლდა ზუსტად მოდელს!
     phone = db.Column(db.String(20), unique=True, nullable=False) # ტელეფონი
     password = db.Column(db.String(255), nullable=False)
     balance = db.Column(db.Float, default=0.0)
