@@ -875,22 +875,6 @@ def admin_reset_season():
     flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები/კლიკები განულდა.", "success")
     return redirect(url_for('admin_dashboard'))
 
-@app.route('/admin/user/<int:user_id>/full_update', methods=['POST'])
-@login_required
-def admin_full_update_user(user_id):
-    if not current_user.is_admin:
-        abort(403)
-    user = User.query.get_or_404(user_id)
-    user.balance = float(request.form.get('balance', user.balance))
-    user.reputation = int(request.form.get('reputation', user.reputation))
-    user.clicks_left = int(request.form.get('clicks_left', user.clicks_left))
-    user.region = request.form.get('region', user.region)
-    user.is_admin = True if request.form.get('is_admin') == 'on' else False
-    user.is_banned = True if request.form.get('is_banned') == 'on' else False
-    db.session.commit()
-    flash(f"მომხმარებელი {user.username} განახლდა!", "success")
-    return redirect(url_for('admin_dashboard'))
-
 @app.route('/admin/chats')
 @login_required
 def admin_chats():
