@@ -1,17 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
-    <div class="form-container" style="background-color: #121212; padding: 25px; border-radius: 15px; border: 1px solid #00ffcc; width: 320px;">
-        <h2 style="color: #00ffcc; margin-bottom: 20px;">რეგისტრაცია</h2>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 85vh; padding: 20px 0;">
+    <div class="form-container" style="background-color: #121212; padding: 25px; border-radius: 15px; border: 1px solid #00ffcc; width: 360px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+        <h2 style="color: #00ffcc; margin-bottom: 20px; font-size: 20px; text-align: center;">რეგისტრაცია</h2>
+        
         <form method="POST" action="{{ url_for('register') }}">
-            <input type="text" name="username" placeholder="სახელი" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff;">
-            <input type="tel" name="phone" placeholder="მობილურის ნომერი (მაგ: 599123456)" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff;">
-            <input type="password" name="password" placeholder="პაროლი" required style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff;">
+            <!-- სრული სახელი და გვარი (ვერიფიკაციისთვის) -->
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 3px;">სრული სახელი და გვარი (პირადობის მიხედვით):</label>
+                <input type="text" name="full_name" placeholder="მაგ: გიორგი ბერიძე" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px;">
+            </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 5px;">შენი რეგიონი:</label>
-                <select name="region" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 14px;">
+            <!-- საიტზე გამოსაჩენი ნიკნეიმი -->
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 3px;">ნიკნეიმი (რა სახელითაც გამოჩნდები საიტზე):</label>
+                <input type="text" name="username" placeholder="მაგ: Giorgi_99" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px;">
+            </div>
+
+            <!-- ელ-ფოსტა -->
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 3px;">ელ-ფოსტა (Email):</label>
+                <input type="email" name="email" placeholder="example@gmail.com" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px;">
+            </div>
+
+            <!-- მობილურის ნომერი -->
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
+                <input type="tel" name="phone" placeholder="599123456" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 3px;">პაროლი:</label>
+                <input type="password" name="password" placeholder="••••••••" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 3px;">შენი რეგიონი:</label>
+                <select name="region" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px;">
                     <option value="" disabled selected>აირჩიე რეგიონი...</option>
                     <option value="tbilisi">🏙️ თბილისი</option>
                     <option value="imereti">🏛️ იმერეთი</option>
@@ -28,7 +54,19 @@
                 </select>
             </div>
 
-            <button type="submit" style="width: 100%; padding: 12px; background-color: #00ffcc; border: none; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer;">რეგისტრაცია</button>
+            <!-- ⚖️ იურიდიული შეთანხმებები და ასაკის ვერიფიკაცია -->
+            <div style="background: #161622; padding: 10px; border-radius: 8px; border: 1px solid #33334d; margin-bottom: 15px; font-size: 11px; color: #a1a1aa;">
+                <div style="margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px;">
+                    <input type="checkbox" name="is_adult" required style="margin-top: 2px; cursor: pointer;">
+                    <label style="cursor: pointer; color: #fff;">ვადასტურებ, რომ ვარ სრულწლოვანი (<strong>18 წლის ან მეტის</strong>) და ვეთანხმები პლატფორმის წესებს.</label>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    <input type="checkbox" name="terms_agreed" required style="margin-top: 2px; cursor: pointer;">
+                    <label style="cursor: pointer;">ვეთანხმები საქართველოს კანონმდებლობით გათვალისწინებულ პირობებს ფინანსური ტრანზაქციებისა და ვერიფიკაციის შესახებ.</label>
+                </div>
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 12px; background-color: #00ffcc; border: none; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer; font-size: 14px;">რეგისტრაცია</button>
         </form>
     </div>
 </div>

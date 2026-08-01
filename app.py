@@ -31,8 +31,9 @@ login_manager.login_view = 'login'
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    phone = db.Column(db.String(20), unique=True, nullable=False) # იმეილის ნაცვლად ტელეფონი
+    username = db.Column(db.String(50), unique=True, nullable=False) # საიტზე გამოსაჩენი ნიკნეიმი
+    full_name = db.Column(db.String(100), default="") # სრული სახელი და გვარი (მხოლოდ ადმინისთვის/ვერიფიკაციისთვის)
+    phone = db.Column(db.String(20), unique=True, nullable=False) # ტელეფონი
     password = db.Column(db.String(255), nullable=False)
     balance = db.Column(db.Float, default=0.0)
     reputation = db.Column(db.Integer, default=100)
@@ -298,10 +299,20 @@ def board():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
-        phone = request.form.get('phone')
+        username = request.form.get('username').strip()
+        full_name = request.form.get('full_name').strip()  # 🛠️ სრული სახელი და გვარი (ვერიფიკაციისთვის)
+        email = request.form.get('email').strip()         # 🛠️ მეილის ველი
+        phone = request.form.get('phone').strip()
         password = request.form.get('password')
         region = request.form.get('region')
+        
+        # ⚖️ ასაკისა და წესების ვერიფიკაციის შემოწმება
+        is_adult = request.form.get('is_adult')
+        terms_agreed = request.form.get('terms_agreed')
+        
+        if not is_adult or not terms_agreed:
+            flash("რეგისტრაციისთვის სავალდებულოა სრულწლოვანებისა და წესების მონიშვნა!", "danger")
+            return redirect(url_for('register'))
         
         if not region or region == "":
             flash("გთხოვთ, აირჩიოთ რეგიონი!", "danger")
@@ -311,12 +322,26 @@ def register():
             flash("მომხმარებელი ამ სახელით უკვე არსებობს!", "danger")
             return redirect(url_for('register'))
             
+        if User.query.filter_by(email=email).first():
+            flash("მომხმარებელი ამ მეილით უკვე რეგისტრირებულია!", "danger")
+            return redirect(url_for('register'))
+            
         if User.query.filter_by(phone=phone).first():
             flash("მომხმარებელი ამ მობილურის ნომრით უკვე არსებობს!", "danger")
             return redirect(url_for('register'))
-            
+             
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, phone=phone, password=hashed_password, region=region)
+        
+        # 🛠️ ვუმატებთ full_name-სა და email-ს ბაზაში შესანახად
+        new_user = User(
+            username=username, 
+            full_name=full_name, 
+            email=email,
+            phone=phone, 
+            password=hashed_password, 
+            region=region
+        )
+        
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -325,6 +350,7 @@ def register():
         except Exception as e:
             db.session.rollback()
             return f"ბაზის შეცდომა: {str(e)}"
+            
     return render_template('signup_new.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -344,6 +370,33 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+    
+    # შევამოწმოთ, სწორია თუ არა ძველი პაროლი
+    if not check_password_hash(current_user.password, current_password):
+        flash("მიმდინარე პაროლი არასწორია!", "danger")
+        return redirect(url_for('dashboard')) # ან იმ გვერდის ლინკი სადაც პაროლის შეცვლაა
+        
+    if new_password != confirm_password:
+        flash("ახალი პაროლები ერთმანეთს არ ემთხვევა!", "danger")
+        return redirect(url_for('dashboard'))
+        
+    if len(new_password) < 6:
+        flash("ახალი პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან!", "danger")
+        return redirect(url_for('dashboard'))
+        
+    # ვანახლებთ პაროლს უსაფრთხო ჰეშით
+    current_user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+    db.session.commit()
+    
+    flash("პაროლი წარმატებით შეიცვალა!", "success")
+    return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
 @login_required
@@ -562,13 +615,29 @@ def admin_dashboard():
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
-def admin_update_user(user_id):
+def admin_full_update_user(user_id):
     if not current_user.is_admin:
         abort(403)
     user = User.query.get_or_404(user_id)
     user.balance = float(request.form.get('balance', user.balance))
     user.reputation = int(request.form.get('reputation', user.reputation))
+    user.clicks_left = int(request.form.get('clicks_left', user.clicks_left))
+    
+    # 🛠️ ადმინს შეუძლია სრული სახელისა და მეილის განახლებაც
+    if request.form.get('full_name'):
+        user.full_name = request.form.get('full_name').strip()
+    if request.form.get('email'):
+        user.email = request.form.get('email').strip()
+        
+    # 🛠️ ახალი პაროლის შეცვლა ადმინ-პანელიდან (თუ ადმინმა ახალი ჩაწერა)
+    new_password = request.form.get('new_password')
+    if new_password and new_password.strip():
+        user.password = generate_password_hash(new_password.strip(), method='pbkdf2:sha256')
+
+    user.region = request.form.get('region', user.region)
     user.is_admin = True if request.form.get('is_admin') == 'on' else False
+    user.is_banned = True if request.form.get('is_banned') == 'on' else False
+    
     db.session.commit()
     flash(f"მომხმარებელი {user.username} წარმატებით განახლდა!", "success")
     return redirect(url_for('admin_dashboard'))
@@ -1029,6 +1098,10 @@ with app.app_context():
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS total_clicks INTEGER DEFAULT 0;"))
         db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
+        # 🛠️ სრული სახელისა და გვარის ველი
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(100) DEFAULT '';"))
+        # 🛠️ მეილის ველი (აქ ვამატებთ)
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(100) DEFAULT '';"))
         
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
         
@@ -1053,13 +1126,13 @@ with app.app_context():
 def api_user_status():
     game_status_setting = Settings.query.filter_by(key='game_status').first()
     game_status = game_status_setting.value if game_status_setting else "active"
-    
+
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     prize_pool = prize_setting.value if prize_setting else "1200"
-    
+
     regions = RegionScore.query.all()
     regions_data = {r.region_id: r.score for r in regions}
-    
+
     return jsonify({
         "success": True,
         "balance": current_user.balance,
