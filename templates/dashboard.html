@@ -237,7 +237,7 @@ updateCountdown();
                 <!-- 🟢 ჩვეულებრივი აქტიური რეჟიმი (დაკლიკების ღილაკი) -->
                 <div style="position: relative; display: inline-block; width: 100%; margin-top: 20px;">
                     <button onclick="boostRegion(event)" class="btn btn-warning" id="boostBtn">
-                        🔥 დააკლიკე და გაბაცხადე რეგიონი! ⚡ (<span id="clicksLeft">{{ current_user.clicks_left }}</span>)
+                        🔥 დააკლიკე და დაიწყე თამაში! ⚡ (<span id="clicksLeft">{{ current_user.clicks_left }}</span>)
                     </button>
                 </div>
                 <div id="clickResponse" style="font-size: 13px; color: #00ffcc; text-align: center; margin-top: 10px; font-weight: bold;"></div>
@@ -323,13 +323,35 @@ updateCountdown();
         </details>
     </div>
 
-    <!-- ციფრული საფულე -->
+    <!-- ციფრული საფულე და რეკვიზიტები -->
     <div class="card">
         <h3>💰 ციფრული საფულე</h3>
         <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
         <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;"><span id="userBalance">{{ current_user.balance }}</span> ₾</div>
         <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: <span id="userReputation">{{ current_user.reputation }}</span></p>
-        <p style="font-size: 11px; color: #00ffcc; margin: 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
+        <p style="font-size: 11px; color: #00ffcc; margin: 0 0 15px 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
+
+        <hr style="border: 0; border-top: 1px solid #222233; margin: 15px 0;">
+
+        <!-- საბანკო რეკვიზიტების შესავსები ფორმა -->
+        <form method="POST" action="{{ url_for('profile') }}">
+            <div style="margin-bottom: 12px; text-align: left;">
+                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
+                <input type="tel" name="phone" value="{{ current_user.phone }}" required class="input-field">
+            </div>
+
+            <div style="margin-bottom: 12px; text-align: left;">
+                <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">საბანკო ანგარიში (IBAN):</label>
+                <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000" required class="input-field">
+            </div>
+
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
+                <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი required class="input-field">
+            </div>
+
+            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 რეკვიზიტების შენახვა</button>
+        </form>
     </div>
 
     {% if current_user.is_admin %}

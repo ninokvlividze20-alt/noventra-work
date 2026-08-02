@@ -33,13 +33,14 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False) # საიტზე გამოსაჩენი ნიკნეიმი
     full_name = db.Column(db.String(100), default="") # სრული სახელი და გვარი (მხოლოდ ადმინისთვის/ვერიფიკაციისთვის)
-    email = db.Column(db.String(100), default="")     # 🛠️ აი ეს აკლდა ზუსტად მოდელს!
+    email = db.Column(db.String(100), default="")     # მეილის ველი
     phone = db.Column(db.String(20), unique=True, nullable=False) # ტელეფონი
     password = db.Column(db.String(255), nullable=False)
     balance = db.Column(db.Float, default=0.0)
     reputation = db.Column(db.Integer, default=100)
     is_admin = db.Column(db.Boolean, default=False)
     bank_account = db.Column(db.String(50), default="")
+    holder_name = db.Column(db.String(100), default="") # 🛠️ ახალი: მიმღების სახელი და გვარი საბანკო გადარიცხვისთვის
     clicks_left = db.Column(db.Integer, default=250)
     total_clicks = db.Column(db.Integer, default=0)
     region = db.Column(db.String(50), default="tbilisi")
@@ -257,8 +258,9 @@ def profile():
     if request.method == 'POST':
         current_user.phone = request.form.get('phone')
         current_user.bank_account = request.form.get('bank_account')
+        current_user.holder_name = request.form.get('holder_name')  # 🛠️ აი ეს ველი დავამატეთ
         db.session.commit()
-        flash("მონაცემები დამახსოვრებულია!")
+        flash("მონაცემები წარმატებით დამახსოვრებულია!", "success")
         return redirect(url_for('profile'))
     return render_template('profile.html')
 
@@ -869,9 +871,16 @@ def admin_reset_season():
         else:
             db.session.add(Settings(key='last_winner', value=winner_name))
 
+    # ვანულებთ რეგიონების ქულებს
     RegionScore.query.update({RegionScore.score: 0})
-    # 🛠️ ვანულებთ არა მარტო კლიკებს, არამედ total_clicks-საც, რომ ახალ სეზონზე ძველი არ მიჰყვეს!
-    User.query.update({User.clicks_left: 250, User.total_clicks: 0})
+    
+    # ვანულებთ იუზერების კლიკებს, უბრუნებთ ენერგიას და სურვილისამებრ ვანულებთ ბალანსსაც (სურვილისამებრ მიამატე balance: 0.0)
+    User.query.update({
+        User.clicks_left: 250, 
+        User.total_clicks: 0,
+        User.balance: 0.0  # <-- ჩაურთე ეს ხაზი, თუ ფულის ბალანსის განულებაც გინდა სეზონის თავიდან დასაწყებად
+    })
+    
     db.session.commit()
     
     flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები/კლიკები განულდა.", "success")
@@ -1086,8 +1095,10 @@ with app.app_context():
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
         # 🛠️ სრული სახელისა და გვარის ველი
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(100) DEFAULT '';"))
-        # 🛠️ მეილის ველი (აქ ვამატებთ)
+        # 🛠️ მეილის ველი
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(100) DEFAULT '';"))
+        # 🛠️ ანგარიშის მფლობელის სახელი და გვარი
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS holder_name VARCHAR(100) DEFAULT '';"))
         
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
         
