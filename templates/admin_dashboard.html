@@ -136,31 +136,7 @@
                 </select>
             </div>
 
-<!-- 🏢 საჯარო პარტნიორების / სპონსორების კატალოგის მართვა ადმინკაში -->
-<div class="admin-section" style="border-color: #00ffcc; margin-top: 20px;">
-    <h3>🏢 პარტნიორი სპონსორის დამატება კატალოგში</h3>
-    <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">ეს კომპანიები გამოჩნდება მომხმარებლებისთვის საიტის მთავარ "სპონსორების" გვერდზე მათი ლინკებით.</p>
-
-    <form action="{{ url_for('admin_add_partner_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-        <div>
-            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">კომპანიის სახელი:</label>
-            <input type="text" name="name" placeholder="მაგ: TechGeoriga" required class="input-field">
-        </div>
-        <div>
-            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ვებსაიტის ლინკი (URL):</label>
-            <input type="url" name="website_url" placeholder="https://example.ge" required class="input-field">
-        </div>
-        <div style="grid-column: 1 / -1;">
-            <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">კომპანიის ლოგო ან ბანერი:</label>
-            <input type="file" name="logo" accept="image/*" required class="input-field">
-        </div>
-        <div style="grid-column: 1 / -1;">
-            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 პარტნიორის კატალოგში დამატება</button>
-        </div>
-    </form>
-</div>
-
-            <!-- 🖼️ ფოტოს ატვირთვის ოპტიმიზებული ველი -->
+           <!-- 🖼️ ფოტოს ატვირთვის ოპტიმიზებული ველი -->
             <div style="grid-column: 1 / -1; background: #161622; border: 2px dashed #33334d; padding: 15px; border-radius: 12px; text-align: center;">
                 <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 8px; font-weight: bold;">
                     📸 ვიქტორინის სარეკლამო ბანერი (რეკომენდებული ზომა: 800 x 450 px)
@@ -202,6 +178,30 @@
             </div>
         </form>
     </div>
+
+<!-- 🏢 საჯარო პარტნიორების / სპონსორების კატალოგის მართვა ადმინკაში -->
+<div class="admin-section" style="border-color: #00ffcc; margin-top: 20px;">
+    <h3>🏢 პარტნიორი სპონსორის დამატება კატალოგში</h3>
+    <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">ეს კომპანიები გამოჩნდება მომხმარებლებისთვის საიტის მთავარ "სპონსორების" გვერდზე მათი ლინკებით.</p>
+
+    <form action="{{ url_for('admin_add_partner_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <div>
+            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">კომპანიის სახელი:</label>
+            <input type="text" name="name" placeholder="მაგ: TechGeoriga" required class="input-field">
+        </div>
+        <div>
+            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ვებსაიტის ლინკი (URL):</label>
+            <input type="url" name="website_url" placeholder="https://example.ge" required class="input-field">
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">კომპანიის ლოგო ან ბანერი:</label>
+            <input type="file" name="logo" accept="image/*" required class="input-field">
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 პარტნიორის კატალოგში დამატება</button>
+        </div>
+    </form>
+</div>
 
     <!-- 📚 ატვირთული ვიქტორინების სრული სია და მართვა -->
     <div class="admin-section" style="border-color: #ffcc00;">

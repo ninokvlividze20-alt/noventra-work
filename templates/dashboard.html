@@ -195,10 +195,17 @@
             <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">ადმინისტრატორი ამოწმებს ატვირთულ ფოტოსა და მონაცემებს. გთხოვთ მოიცადოთ.</p>
         </div>
     {% else %}
-        <p style="color: #a1a1aa; font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
-            საპრიზო თანხების გამოსატანად და არასრულწლოვნების ასაცილებლად, აუცილებელია ანგარიშის ვერიფიკაცია. 
-            გთხოვთ მიჰყვეთ ინსტრუქციას:
-        </p>
+        <div style="background: rgba(255, 71, 87, 0.05); border: 1px solid rgba(255, 71, 87, 0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+    <p style="color: #ff4757; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">
+        ⚠️ მკაცრი ასაკობრივი შეზღუდვა და ვერიფიკაცია
+    </p>
+    <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
+        საქართველოს კანონმდებლობის (მათ შორის საქართველოს შრომის კოდექსისა და მომგებიანი თამაშების მარეგულირებელი კანონმდებლობის) შესაბამისად, პლატფორმაზე, სადაც გათვალისწინებულია ფულადი პრიზები და საპრიზო ფონდები, არასრულწლოვნების მონაწილეობა მკაცრად აკრძალულია. მაქსიმალური სამართლებრივი დაცულობისა და გამჭვირვალობის მიზნით, ყველა მონაწილე ვალდებულია გაიაროს სავალდებულო ვერიფიკაცია (KYC). არასრულწლოვნის გამოვლენის შემთხვევაში ანგარიში დაიბლოკება და თანხა გაუქმდება.
+    </p>
+    <p style="color: #fff; font-size: 12px; margin: 0; font-weight: bold;">
+        გთხოვთ მიჰყვეთ ინსტრუქციას:
+    </p>
+</div>
 
         <div style="background: #161622; border: 1px dashed #00ffcc; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 12px; color: #fff;">
             <p style="margin: 0 0 5px 0; color: #ffcc00; font-weight: bold;">📝 ინსტრუქცია:</p>
@@ -396,7 +403,7 @@ updateCountdown();
 
             <div style="margin-bottom: 15px; text-align: left;">
                 <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
-                <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი required class="input-field">
+                <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი" required class="input-field">
             </div>
 
             <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 რეკვიზიტების შენახვა</button>
