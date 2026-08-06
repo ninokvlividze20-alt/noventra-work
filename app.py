@@ -388,6 +388,11 @@ def login():
         password = request.form.get('password')
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
+            # 👑 თუ ეს შენი ადმინ ექაუნთია, ავტომატურად ვუწერთ True-ს
+            if user.username == 'noventra_admin':
+                user.is_admin = True
+                db.session.commit()
+
             login_user(user, remember=True) # მუდმივი სესია
             return redirect(url_for('dashboard'))
         flash("მომხმარებლის სახელი ან პაროლი არასწორია!", "danger")
