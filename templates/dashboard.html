@@ -180,9 +180,9 @@
     </div>
 </div>
 
-<!-- 🪪 მომხმარებლის ვერიფიკაციის (KYC) ბლოკი -->
+<!-- 🪪 მომხმარებლის ვერიფიკაციისა და საბანკო რეკვიზიტების ერთიანი ბლოკი -->
 <div class="card" style="border-color: #00ffcc; margin-bottom: 20px;">
-    <h3 style="color: #00ffcc;">🪪 ანგარიშის ვერიფიკაცია (KYC & ასაკის შემოწმება)</h3>
+    <h3 style="color: #00ffcc;">🪪 ანგარიშის ვერიფიკაცია და რეკვიზიტები</h3>
     
     {% if current_user.verification_status == 'approved' %}
         <div style="background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; text-align: center;">
@@ -196,16 +196,16 @@
         </div>
     {% else %}
         <div style="background: rgba(255, 71, 87, 0.05); border: 1px solid rgba(255, 71, 87, 0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-    <p style="color: #ff4757; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">
-        ⚠️ მკაცრი ასაკობრივი შეზღუდვა და ვერიფიკაცია
-    </p>
-    <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
-        საქართველოს კანონმდებლობის (მათ შორის საქართველოს შრომის კოდექსისა და მომგებიანი თამაშების მარეგულირებელი კანონმდებლობის) შესაბამისად, პლატფორმაზე, სადაც გათვალისწინებულია ფულადი პრიზები და საპრიზო ფონდები, არასრულწლოვნების მონაწილეობა მკაცრად აკრძალულია. მაქსიმალური სამართლებრივი დაცულობისა და გამჭვირვალობის მიზნით, ყველა მონაწილე ვალდებულია გაიაროს სავალდებულო ვერიფიკაცია (KYC). არასრულწლოვნის გამოვლენის შემთხვევაში ანგარიში დაიბლოკება და თანხა გაუქმდება.
-    </p>
-    <p style="color: #fff; font-size: 12px; margin: 0; font-weight: bold;">
-        გთხოვთ მიჰყვეთ ინსტრუქციას:
-    </p>
-</div>
+            <p style="color: #ff4757; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">
+                ⚠️ მკაცრი ასაკობრივი შეზღუდვა და ვერიფიკაცია
+            </p>
+            <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
+                საქართველოს კანონმდებლობის შესაბამისად, პლატფორმაზე, სადაც გათვალისწინებულია ფულადი პრიზები და საპრიზო ფონდები, არასრულწლოვნების მონაწილეობა მკაცრად აკრძალულია. მაქსიმალური სამართლებრივი დაცულობისა და გამჭვირვალობის მიזნით, ყველა მონაწილე ვალდებულია გაიაროს სავალდებულო ვერიფიკაცია (KYC). არასრულწლოვნის გამოვლენის შემთხვევაში ანგარიში დაიბლოკება და თანხა გაუქმდება.
+            </p>
+            <p style="color: #fff; font-size: 12px; margin: 0; font-weight: bold;">
+                გთხოვთ მიჰყვეთ ინსტრუქციას:
+            </p>
+        </div>
 
         <div style="background: #161622; border: 1px dashed #00ffcc; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 12px; color: #fff;">
             <p style="margin: 0 0 5px 0; color: #ffcc00; font-weight: bold;">📝 ინსტრუქცია:</p>
@@ -216,16 +216,31 @@
 
         <form action="{{ url_for('submit_verification') }}" method="POST" enctype="multipart/form-data">
             <div style="margin-bottom: 12px; text-align: left;">
-                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 4px;">პირადი ნომერი (11 ციფრი):</label>
-                <input type="text" name="personal_number" maxlength="11" minlength="11" placeholder="010................" required class="input-field">
+                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
+                <input type="tel" name="phone" value="{{ current_user.phone }}" required class="input-field">
+            </div>
+
+            <div style="margin-bottom: 12px; text-align: left;">
+                <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">საბანკო ანგარიში (IBAN):</label>
+                <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000" required class="input-field">
             </div>
 
             <div style="margin-bottom: 15px; text-align: left;">
-                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 4px;">ატვირთეთ სელფი (პირადობით და ფურცლით ხელში):</label>
+                <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
+                <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი" required class="input-field">
+            </div>
+
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">პირადი ნომერი (11 ნიშნა):</label>
+                <input type="text" name="personal_number" value="{{ current_user.personal_number }}" maxlength="11" minlength="11" placeholder="აუცილებლად 11 ციფრი" required class="input-field">
+            </div>
+
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ვერიფიკაციის ფოტო (სელფი პირადობით და ფურცლით):</label>
                 <input type="file" name="verification_photo" accept="image/*" required class="input-field" style="padding: 6px;">
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px;">🚀 ვერიფიკაციის მოთხოვნის გაგზავნა</button>
+            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">🚀 მონაცემების და ვერიფიკაციის გაგზავნა</button>
         </form>
     {% endif %}
 </div>
@@ -379,36 +394,14 @@ updateCountdown();
         </details>
     </div>
 
-    <!-- ციფრული საფულე და რეკვიზიტები -->
-    <div class="card">
-        <h3>💰 ციფრული საფულე</h3>
-        <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
-        <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;"><span id="userBalance">{{ current_user.balance }}</span> ₾</div>
-        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: <span id="userReputation">{{ current_user.reputation }}</span></p>
-        <p style="font-size: 11px; color: #00ffcc; margin: 0 0 15px 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
-
-        <hr style="border: 0; border-top: 1px solid #222233; margin: 15px 0;">
-
-        <!-- საბანკო რეკვიზიტების შესავსები ფორმა -->
-        <form method="POST" action="{{ url_for('profile') }}">
-            <div style="margin-bottom: 12px; text-align: left;">
-                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
-                <input type="tel" name="phone" value="{{ current_user.phone }}" required class="input-field">
-            </div>
-
-            <div style="margin-bottom: 12px; text-align: left;">
-                <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">საბანკო ანგარიში (IBAN):</label>
-                <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000" required class="input-field">
-            </div>
-
-            <div style="margin-bottom: 15px; text-align: left;">
-                <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
-                <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი" required class="input-field">
-            </div>
-
-            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 რეკვიზიტების შენახვა</button>
-        </form>
-    </div>
+   <!-- ციფრული საფულე და რეკვიზიტები -->
+<div class="card">
+    <h3>💰 ციფრული საფულე</h3>
+    <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
+    <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;"><span id="userBalance">{{ current_user.balance }}</span> ₾</div>
+    <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: <span id="userReputation">{{ current_user.reputation }}</span></p>
+    <p style="font-size: 11px; color: #00ffcc; margin: 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
+</div>
 
     {% if current_user.is_admin %}
     <!-- ⚙️ ადმინ პანელის ღილაკი (ყოველთვის ხელმისაწვდომია ნიქნეიმისთვის noventra_admin) -->
