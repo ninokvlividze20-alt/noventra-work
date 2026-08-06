@@ -6,6 +6,7 @@ from flask_login import UserMixin, LoginManager, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import datetime
+import base64
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config.update(
@@ -732,12 +733,18 @@ def admin_update_sponsor():
         abort(403)
     region_id = request.form.get('region_id')
     file = request.files.get('sponsor_image')
-    if file and region_id:
-        filename = f"{region_id}.jpg"
-        ads_folder = os.path.join(app.root_path, 'static', 'ads')
-        os.makedirs(ads_folder, exist_ok=True)
-        file.save(os.path.join(ads_folder, filename))
-        flash("სპონსორის ფოტო წარმატებით აიტვირთა!", "success")
+    if file and region_id and allowed_file(file.filename):
+        # ფოტოს გადაყვანა Base64 ტექსტში
+        encoded_string = base64.b64encode(file.read()).decode('utf-8')
+        image_data = f"data:image/jpeg;base64,{encoded_string}"
+        
+        # რადგან რეგიონის სპონსორის სვეტი უნდა გვქონდეს, შევინახოთ ბაზაში
+        # (მივაქციოთ ყურადღება, რომ RegionScore ცხრილს სჭირდება sponsor_image სვეტი)
+        region = RegionScore.query.filter_by(region_id=region_id).first()
+        if region:
+            region.sponsor_image = image_data
+            db.session.commit()
+            flash("სპონსორის ფოტო წარმატებით შეინახა ბაზაში!", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/region/<region_id>/delete_sponsor', methods=['POST'])
@@ -1020,20 +1027,16 @@ def admin_add_quiz_question():
     option_4 = request.form.get('option_4')
     correct_option = int(request.form.get('correct_option', 1))
     
-    image_url = ""
+   image_url = ""
     file = request.files.get('sponsor_image')
-    if file and file.filename != '':
-        filename = f"quiz_{datetime.datetime.now().timestamp()}.jpg"
-        ads_folder = os.path.join(app.root_path, 'static', 'quiz_ads')
-        os.makedirs(ads_folder, exist_ok=True)
-        filepath = os.path.join(ads_folder, filename)
-        file.save(filepath)
-        image_url = url_for('static', filename=f'quiz_ads/{filename}')
+    if file and file.filename != '' and allowed_file(file.filename):
+        encoded_string = base64.b64encode(file.read()).decode('utf-8')
+        image_url = f"data:image/jpeg;base64,{encoded_string}"
 
     if sponsor_name and question_text:
         new_q = QuizQuestion(
             sponsor_name=sponsor_name,
-            sponsor_image=image_url,
+            sponsor_image=image_url,  # ინახება ბაზაში ტექსტად
             package_type=package_type,
             question_text=question_text,
             option_1=option_1,
@@ -1177,16 +1180,15 @@ def submit_verification():
         return redirect(url_for('dashboard'))
 
     if photo and allowed_file(photo.filename):
-        filename = secure_filename(f"verify_{current_user.id}_{photo.filename}")
-        os.makedirs(os.path.join('static', 'uploads'), exist_ok=True)
-        photo.save(os.path.join('static', 'uploads', filename))
+        encoded_string = base64.b64encode(photo.read()).decode('utf-8')
+        image_data = f"data:image/jpeg;base64,{encoded_string}"
         
         current_user.personal_number = personal_number
-        current_user.verification_photo = f"/static/uploads/{filename}"
+        current_user.verification_photo = image_data  # ინახება ბაზაში ტექსტად
         current_user.verification_status = 'pending'
         db.session.commit()
         
-        flash('ვერიფიკაციის მოთხოვნა წარმატებით გაიგზავნა! ადმინისტრატორი შეამოწმებს.', 'success')
+        flash('ვერიფიკაციის მოთხოვნა წარმატებით გაიგზავნა!', 'success')
     else:
         flash('გთხოვთ ატვირთოთ სწორი ფოტო ფორმატი.', 'danger')
 
@@ -1210,14 +1212,13 @@ def admin_add_partner_sponsor():
     logo = request.files.get('logo')
 
     if logo and allowed_file(logo.filename):
-        filename = secure_filename(f"partner_{logo.filename}")
-        os.makedirs(os.path.join('static', 'uploads'), exist_ok=True)
-        logo.save(os.path.join('static', 'uploads', filename))
-        
+        encoded_string = base64.b64encode(logo.read()).decode('utf-8')
+        image_data = f"data:image/jpeg;base64,{encoded_string}"
+         
         new_sponsor = PartnerSponsor(
             name=name,
             website_url=website_url,
-            logo=f"/static/uploads/{filename}"
+            logo=image_data  # ინახება ბაზაში ტექსტად
         )
         db.session.add(new_sponsor)
         db.session.commit()
