@@ -54,17 +54,15 @@ class User(db.Model, UserMixin):
     total_clicks = db.Column(db.Integer, default=0)
     region = db.Column(db.String(50), default="tbilisi")
     is_banned = db.Column(db.Boolean, default=False)
+    
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
     last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
-# 🪪 KYC ვერიფიკაციის ველები
+    
+    # 🪪 KYC ვერიფიკაციის ველები
     verification_status = db.Column(db.String(20), default='none') # none, pending, approved
     personal_number = db.Column(db.String(11), nullable=True)
     verification_photo = db.Column(db.String(255), nullable=True)
-
-    transactions = db.relationship('Transaction', backref='user', lazy=True)
-    withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
-    last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -1027,7 +1025,7 @@ def admin_add_quiz_question():
     option_4 = request.form.get('option_4')
     correct_option = int(request.form.get('correct_option', 1))
     
-   image_url = ""
+    image_url = ""
     file = request.files.get('sponsor_image')
     if file and file.filename != '' and allowed_file(file.filename):
         encoded_string = base64.b64encode(file.read()).decode('utf-8')
@@ -1036,7 +1034,7 @@ def admin_add_quiz_question():
     if sponsor_name and question_text:
         new_q = QuizQuestion(
             sponsor_name=sponsor_name,
-            sponsor_image=image_url,  # ინახება ბაზაში ტექსტად
+            sponsor_image=image_url,
             package_type=package_type,
             question_text=question_text,
             option_1=option_1,
@@ -1048,7 +1046,7 @@ def admin_add_quiz_question():
         db.session.add(new_q)
         db.session.commit()
         flash("სპონსორის ვიქტორინის კითხვა და ბანერი წარმატებით დაემატა!", "success")
-         
+        
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/quiz/delete/<int:quiz_id>', methods=['POST'])
