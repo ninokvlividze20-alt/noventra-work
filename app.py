@@ -118,7 +118,6 @@ class RegionScore(db.Model):
     region_id = db.Column(db.String(50), unique=True, nullable=False)
     region_name = db.Column(db.String(100), nullable=False)
     score = db.Column(db.Integer, default=0)
-    sponsor_image = db.Column(db.Text, default="")  # 🛠️ აი ეს ველი დავამატეთ ბაზაში შესანახად
     
 class Settings(db.Model):
     __tablename__ = 'settings'
@@ -1125,7 +1124,6 @@ def restore_energy():
 # 🛠️ აპლიკაციის ინიციალიზაცია და ბაზის ცხრილების/სვეტების შექმნა
 with app.app_context():
     db.create_all()
-    init_regions()
     
     # პირველი ბლოკი
     try:
@@ -1145,6 +1143,9 @@ with app.app_context():
         db.session.commit()
     except Exception as e:
         db.session.rollback()
+
+    # რეგიონების ინიციალიზაცია გადავიტანეთ აქ, სვეტების შექმნის მერე
+    init_regions()
 
     # მეორე ბლოკი (ვერიფიკაცია და პარტნიორები)
     try:
