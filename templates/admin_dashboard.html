@@ -75,21 +75,34 @@
                             <th>მომხმარებელი</th>
                             <th>ტელეფონი (Profile)</th>
                             <th>საბანკო ანგარიში IBAN (Profile)</th>
-                            <th>აქტიურობა (დახარჯული კლიკები)</th>
+                            <th>მფლობელი (სახელი/გვარი)</th>
+                            <th>აქტიურობა (კლიკები)</th>
+                            <th>სტატუსი (5000 ზღვარი)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for tu in top_region_users[:5] %}
-                        <tr>
+                        {% for tu in top_region_users %}
+                        <tr style="{% if tu.total_clicks >= 5000 %}background: rgba(0, 255, 204, 0.05);{% else %}opacity: 0.6;{% endif %}">
                             <td><strong>{{ tu.username }}</strong></td>
-                            <td style="color: #00ffcc;">{{ tu.phone if tu.phone else 'არ არის მითითებული ⚠️' }}</td>
-                            <td style="color: #ffcc00; font-family: monospace;">{{ tu.bank_account if tu.bank_account else 'არ არის მითითებული ⚠️' }}</td>
+                            <td style="color: #00ffcc;">{{ tu.phone if tu.phone else 'არ არის ⚠️' }}</td>
+                            <td style="color: #ffcc00; font-family: monospace;">{{ tu.bank_account if tu.bank_account else 'არ არის ⚠️' }}</td>
+                            <td style="color: #fff;">{{ tu.holder_name if tu.holder_name else 'არ არის ⚠️' }}</td>
                             <td style="color: #00ffcc; font-weight: bold;">{{ tu.total_clicks }} კლიკი</td>
+                            <td>
+                                {% if tu.total_clicks >= 5000 %}
+                                    <span style="color: #00ffcc; font-weight: bold;">✅ კვალიფიციურია</span>
+                                {% else %}
+                                    <span style="color: #ff4757;">❌ ნაკლებია 5000-ზე</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% else %}
+            <p style="color: #ff4757; font-size: 13px; margin-bottom: 0;">ლიდერ რეგიონში მოთამაშეები არ მოიძებნა.</p>
+            {% endif %}
 
             <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');" style="margin-top: 20px;">
                 <button type="submit" class="btn-sm btn-success" style="padding: 12px 25px; font-size: 14px; width: 100%;">
@@ -122,6 +135,30 @@
                     <option value="Bronze">🥉 Bronze პაკეტი (სტანდარტული)</option>
                 </select>
             </div>
+
+<!-- 🏢 საჯარო პარტნიორების / სპონსორების კატალოგის მართვა ადმინკაში -->
+<div class="admin-section" style="border-color: #00ffcc; margin-top: 20px;">
+    <h3>🏢 პარტნიორი სპონსორის დამატება კატალოგში</h3>
+    <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">ეს კომპანიები გამოჩნდება მომხმარებლებისთვის საიტის მთავარ "სპონსორების" გვერდზე მათი ლინკებით.</p>
+
+    <form action="{{ url_for('admin_add_partner_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <div>
+            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">კომპანიის სახელი:</label>
+            <input type="text" name="name" placeholder="მაგ: TechGeoriga" required class="input-field">
+        </div>
+        <div>
+            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ვებსაიტის ლინკი (URL):</label>
+            <input type="url" name="website_url" placeholder="https://example.ge" required class="input-field">
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">კომპანიის ლოგო ან ბანერი:</label>
+            <input type="file" name="logo" accept="image/*" required class="input-field">
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 პარტნიორის კატალოგში დამატება</button>
+        </div>
+    </form>
+</div>
 
             <!-- 🖼️ ფოტოს ატვირთვის ოპტიმიზებული ველი -->
             <div style="grid-column: 1 / -1; background: #161622; border: 2px dashed #33334d; padding: 15px; border-radius: 12px; text-align: center;">
@@ -293,70 +330,58 @@
                 📍 {{ data.name }} (იუზერები: {{ data.users|length }})
             </summary>
             <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px;">
-                {% if data.users %}
-                <div style="overflow-x: auto;">
-                    <table class="admin-table" style="margin-top: 5px;">
-                        <thead>
-                            <tr>
-                                <th>იუზერი / სრული სახელი</th>
-                                <th>მეილი / ტელეფონი</th>
-                                <th>ბალანსი (₾)</th>
-                                <th>კლიკები / ახალი პაროლი</th>
-                                <th>რეგიონი</th>
-                                <th>სტატუსები</th>
-                                <th>მოქმედება</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in data.users %}
-                            <tr>
-                                <td>
-                                    <strong>{{ u.username }}</strong><br>
-                                    <input type="text" name="full_name" value="{{ u.full_name }}" form="update_form_{{ u.id }}" class="input-field" style="margin-top: 4px; font-size: 11px; padding: 4px;" placeholder="სრული სახელი">
-                                </td>
-                                <td>
-                                    <input type="text" name="email" value="{{ u.email }}" form="update_form_{{ u.id }}" class="input-field" style="font-size: 11px; padding: 4px; margin-bottom: 3px;" placeholder="მეილი"><br>
-                                    <small style="color: #888;">{{ u.phone }}</small>
-                                </td>
-                                <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" form="update_form_{{ u.id }}" class="input-field" style="width: 70px;"></td>
-                                <td>
-                                    <input type="number" name="clicks_left" value="{{ u.clicks_left }}" form="update_form_{{ u.id }}" class="input-field" style="width: 60px; margin-bottom: 4px;" title="დარჩენილი კლიკები"><br>
-                                    <input type="text" name="new_password" placeholder="ახალი პაროლი" form="update_form_{{ u.id }}" class="input-field" style="font-size: 10px; padding: 3px; width: 100px;" title="შეიყვანეთ ახალი პაროლი თუ იუზერს დაავიწყდა">
-                                </td>
-                                <td>
-                                    <select name="region" form="update_form_{{ u.id }}" class="input-field" style="width: 100px; font-size: 11px;">
-                                        <option value="tbilisi" {% if u.region == 'tbilisi' %}selected{% endif %}>თბილისი</option>
-                                        <option value="imereti" {% if u.region == 'imereti' %}selected{% endif %}>იმერეთი</option>
-                                        <option value="adjara" {% if u.region == 'adjara' %}selected{% endif %}>აჭარა</option>
-                                        <option value="kakheti" {% if u.region == 'kakheti' %}selected{% endif %}>კახეთი</option>
-                                        <option value="samegrelo" {% if u.region == 'samegrelo' %}selected{% endif %}>სამეგრელო</option>
-                                        <option value="guria" {% if u.region == 'guria' %}selected{% endif %}>გურია</option>
-                                        <option value="racha_lechkhumi" {% if u.region == 'racha_lechkhumi' %}selected{% endif %}>რაჭა-ლეჩხუმი</option>
-                                        <option value="samtskhe_javakheti" {% if u.region == 'samtskhe_javakheti' %}selected{% endif %}>სამცხე-ჯავახ.</option>
-                                        <option value="shida_kartli" {% if u.region == 'shida_kartli' %}selected{% endif %}>შიდა ქართლი</option>
-                                        <option value="kvemo_kartli" {% if u.region == 'kvemo_kartli' %}selected{% endif %}>ქვემო ქართლი</option>
-                                        <option value="mtskheta_mtianeti" {% if u.region == 'mtskheta_mtianeti' %}selected{% endif %}>მცხეთა-მთიან.</option>
-                                        <option value="abkhazia" {% if u.region == 'abkhazia' %}selected{% endif %}>აფხაზეთი</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 8px; font-size: 11px; align-items: center;">
-                                        <label style="cursor: pointer;"><input type="checkbox" name="is_admin" form="update_form_{{ u.id }}" {% if u.is_admin %}checked{% endif %}> ადმინი</label>
-                                        <label style="cursor: pointer; color: #ff4757;"><input type="checkbox" name="is_banned" form="update_form_{{ u.id }}" {% if u.is_banned %}checked{% endif %}> ბანი</label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 5px;">
-                                        <form id="update_form_{{ u.id }}" action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition()">
-                                            <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px;">შენახვა</button>
-                                        </form>
-                                        <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ მომხმარებლის წაშლა?');">
-                                            <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                {% for u in data.users %}
+                        <tr>
+                            <td>
+                                <strong>{{ u.username }}</strong><br>
+                                <input type="text" name="full_name" value="{{ u.full_name }}" form="update_form_{{ u.id }}" class="input-field" style="margin-top: 4px; font-size: 11px; padding: 4px;" placeholder="სრული სახელი">
+                            </td>
+                            <td>
+                                <input type="text" name="email" value="{{ u.email }}" form="update_form_{{ u.id }}" class="input-field" style="font-size: 11px; padding: 4px; margin-bottom: 3px;" placeholder="მეილი"><br>
+                                <small style="color: #00ffcc;">📞 {{ u.phone if u.phone else 'ტელ. არ არის' }}</small><br>
+                                <small style="color: #ffcc00; font-family: monospace;">🏦 IBAN: {{ u.bank_account if u.bank_account else 'არ არის' }}</small><br>
+                                <small style="color: #fff;">👤 მფლობელი: {{ u.holder_name if u.holder_name else 'არ არის' }}</small>
+                            </td>
+                            <td><input type="number" step="0.1" name="balance" value="{{ u.balance }}" form="update_form_{{ u.id }}" class="input-field" style="width: 70px;"></td>
+                            <td>
+                                <input type="number" name="clicks_left" value="{{ u.clicks_left }}" form="update_form_{{ u.id }}" class="input-field" style="width: 60px; margin-bottom: 4px;" title="დარჩენილი კლიკები"><br>
+                                <input type="text" name="new_password" placeholder="ახალი პაროლი" form="update_form_{{ u.id }}" class="input-field" style="font-size: 10px; padding: 3px; width: 100px;" title="შეიყვანეთ ახალი პაროლი თუ იუზერს დაავიწყდა">
+                            </td>
+                            <td>
+                                <select name="region" form="update_form_{{ u.id }}" class="input-field" style="width: 100px; font-size: 11px;">
+                                    <option value="tbilisi" {% if u.region == 'tbilisi' %}selected{% endif %}>თბილისი</option>
+                                    <option value="imereti" {% if u.region == 'imereti' %}selected{% endif %}>იმერეთი</option>
+                                    <option value="adjara" {% if u.region == 'adjara' %}selected{% endif %}>აჭარა</option>
+                                    <option value="kakheti" {% if u.region == 'kakheti' %}selected{% endif %}>კახეთი</option>
+                                    <option value="samegrelo" {% if u.region == 'samegrelo' %}selected{% endif %}>სამეგრელო</option>
+                                    <option value="guria" {% if u.region == 'guria' %}selected{% endif %}>გურია</option>
+                                    <option value="racha_lechkhumi" {% if u.region == 'racha_lechkhumi' %}selected{% endif %}>რაჭა-ლეჩხუმი</option>
+                                    <option value="samtskhe_javakheti" {% if u.region == 'samtskhe_javakheti' %}selected{% endif %}>სამცხე-ჯავახ.</option>
+                                    <option value="shida_kartli" {% if u.region == 'shida_kartli' %}selected{% endif %}>შიდა ქართლი</option>
+                                    <option value="kvemo_kartli" {% if u.region == 'kvemo_kartli' %}selected{% endif %}>ქვემო ქართლი</option>
+                                    <option value="mtskheta_mtianeti" {% if u.region == 'mtskheta_mtianeti' %}selected{% endif %}>მცხეთა-მთიან.</option>
+                                    <option value="abkhazia" {% if u.region == 'abkhazia' %}selected{% endif %}>აფხაზეთი</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+                                    <label style="cursor: pointer;"><input type="checkbox" name="is_admin" form="update_form_{{ u.id }}" {% if u.is_admin %}checked{% endif %}> ადმინი</label>
+                                    <label style="cursor: pointer; color: #ff4757;"><input type="checkbox" name="is_banned" form="update_form_{{ u.id }}" {% if u.is_banned %}checked{% endif %}> ბანი</label>
+                                    <span style="color: #ffcc00; font-size: 10px;">ვერიფიკაცია: <b>{{ u.verification_status | default('არ არის') }}</b></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 5px; flex-direction: column;">
+                                    <form id="update_form_{{ u.id }}" action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                        <button type="submit" class="btn-sm btn-success" style="padding: 4px 8px; width: 100%;">შენახვა</button>
+                                    </form>
+                                    <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ მომხმარებლის წაშლა?');">
+                                        <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px; width: 100%;">წაშლა</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>

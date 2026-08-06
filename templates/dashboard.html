@@ -153,6 +153,12 @@
     </details>
 </div>
 
+<!-- ℹ️ 5000 კლიკიანი ლიმიტის საინფორმაციო შეტყობინება მოთამაშეებისთვის -->
+<div style="background: rgba(255, 204, 0, 0.08); border: 1px solid #ffcc00; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: #fff;">
+    <strong style="color: #ffcc00;">ℹ️ მნიშვნელოვანი წესი პრიზების განაწილებაზე:</strong> 
+    კვირის ბოლოს საპრიზო ფონდიდან თანხების მისაღებად აუცილებელია რეგიონის თითოეულმა მოთამაშემ დააგროვოს **მინიმუმ 5000 კლიკი** (დღეში საშუალოდ ~715 კლიკი). მოთამაშეები, რომლებსაც 5000-ზე ნაკლები კლიკი ექნებათ, განაწილებაში ვერ მიიღებენ მონაწილეობას.
+</div>
+
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1 style="color: #fff; font-size: 22px; margin: 0;">⚡ მოთამაშე: <span style="color: #00ffcc;">{{ current_user.username }}</span></h1>
 </div>
@@ -172,6 +178,49 @@
         </div>
         <div style="font-size: 11px; color: #888; margin-top: 3px;">(სეზონი სრულდება კვირას 22:00 სთ-ზე)</div>
     </div>
+</div>
+
+<!-- 🪪 მომხმარებლის ვერიფიკაციის (KYC) ბლოკი -->
+<div class="card" style="border-color: #00ffcc; margin-bottom: 20px;">
+    <h3 style="color: #00ffcc;">🪪 ანგარიშის ვერიფიკაცია (KYC & ასაკის შემოწმება)</h3>
+    
+    {% if current_user.verification_status == 'approved' %}
+        <div style="background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; text-align: center;">
+            <p style="color: #00ffcc; font-weight: bold; margin: 0; font-size: 15px;">✅ შენი ანგარიში ვერიფიცირებულია!</p>
+            <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">შენ სრულად გაიარე იდენტიფიკაცია და გაქვს პრიზების მიღების უფლება.</p>
+        </div>
+    {% elif current_user.verification_status == 'pending' %}
+        <div style="background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; padding: 15px; border-radius: 10px; text-align: center;">
+            <p style="color: #ffcc00; font-weight: bold; margin: 0; font-size: 15px;">⏳ შენი ვერიფიკაციის მოთხოვნა განხილვაშია</p>
+            <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">ადმინისტრატორი ამოწმებს ატვირთულ ფოტოსა და მონაცემებს. გთხოვთ მოიცადოთ.</p>
+        </div>
+    {% else %}
+        <p style="color: #a1a1aa; font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
+            საპრიზო თანხების გამოსატანად და არასრულწლოვნების ასაცილებლად, აუცილებელია ანგარიშის ვერიფიკაცია. 
+            გთხოვთ მიჰყვეთ ინსტრუქციას:
+        </p>
+
+        <div style="background: #161622; border: 1px dashed #00ffcc; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 12px; color: #fff;">
+            <p style="margin: 0 0 5px 0; color: #ffcc00; font-weight: bold;">📝 ინსტრუქცია:</p>
+            1. აიღეთ სუფთა თეთრი ფურცელი და მიაწერეთ ეს უნიკალური კოდი: <strong style="color: #00ffcc; font-size: 14px;" id="verificationCodeText">NOVENTRA-{{ current_user.id }}42</strong> და დღევანდელი თარიღი.<br>
+            2. ერთ ხელში დაიჭირეთ ეს ფურცელი, მეორეში კი თქვენი პირადობის მოწმობა.<br>
+            3. გადაიღეთ სელფი ისე, რომ სახე, პირადობა და ფურცელზე არსებული კოდი მკაფიოდ ჩანდეს.
+        </div>
+
+        <form action="{{ url_for('submit_verification') }}" method="POST" enctype="multipart/form-data">
+            <div style="margin-bottom: 12px; text-align: left;">
+                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 4px;">პირადი ნომერი (11 ციფრი):</label>
+                <input type="text" name="personal_number" maxlength="11" minlength="11" placeholder="010................" required class="input-field">
+            </div>
+
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 4px;">ატვირთეთ სელფი (პირადობით და ფურცლით ხელში):</label>
+                <input type="file" name="verification_photo" accept="image/*" required class="input-field" style="padding: 6px;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px;">🚀 ვერიფიკაციის მოთხოვნის გაგზავნა</button>
+        </form>
+    {% endif %}
 </div>
 
 <!-- ⏱️ რეალური დროის ცოცხალი ტაიმერის სკრიპტი -->

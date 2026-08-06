@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding-bottom: 40px;">
+    <div style="text-align: center; margin-bottom: 25px;">
+        <h1 style="color: #00ffcc; font-size: 24px; margin-bottom: 8px;">🏢 ჩვენი პარტნიორები და სპონსორები</h1>
+        <p style="color: #a1a1aa; font-size: 13px;">გაეცანით Noventra-ს მხარდაჭერ კომპანიებს და ეწვიეთ მათ ოფიციალურ ვებსაიტებს.</p>
+    </div>
+
+    {% if sponsors %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+            {% for s in sponsors %}
+            <div style="background: #111118; border: 1px solid #222233; border-radius: 14px; padding: 18px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.4); transition: transform 0.2s, border-color 0.2s;" onmouseover="this.style.borderColor='#00ffcc'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='#222233'; this.style.transform='translateY(0)';">
+                <div style="width: 100%; height: 100px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #333;">
+                    <img src="{{ s.logo }}" alt="{{ s.name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+                <h3 style="color: #fff; font-size: 16px; margin: 0 0 10px 0;">{{ s.name }}</h3>
+                <a href="{{ s.website_url }}" target="_blank" class="btn-sm btn-success" style="display: block; text-decoration: none; padding: 8px; font-size: 12px;">
+                    🌐 ვებსაიტზე გადასვლა →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background: #111118; border: 1px dashed #333; padding: 30px; border-radius: 14px; text-align: center; color: #a1a1aa;">
+            <p style="margin: 0; font-size: 14px;">პარტნიორები ჯერ არ არიან დამატებული.</p>
+        </div>
+    {% endif %}
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('dashboard') }}" style="color: #00ffcc; text-decoration: none; font-size: 13px; font-weight: bold;">← დაბრუნება არენაზე (დაშბორდზე)</a>
+    </div>
+</div>
+{% endblock %}

@@ -28,6 +28,14 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -45,6 +53,14 @@ class User(db.Model, UserMixin):
     total_clicks = db.Column(db.Integer, default=0)
     region = db.Column(db.String(50), default="tbilisi")
     is_banned = db.Column(db.Boolean, default=False)
+    transactions = db.relationship('Transaction', backref='user', lazy=True)
+    withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
+    last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
+# 🪪 KYC ვერიფიკაციის ველები
+    verification_status = db.Column(db.String(20), default='none') # none, pending, approved
+    personal_number = db.Column(db.String(11), nullable=True)
+    verification_photo = db.Column(db.String(255), nullable=True)
+
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
     last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -117,6 +133,14 @@ class UserQuizAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'), nullable=False)
+
+# 🏢 საჯარო პარტნიორების / სპონსორების ცხრილი
+class PartnerSponsor(db.Model):
+    __tablename__ = 'partner_sponsors'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    website_url = db.Column(db.String(255), nullable=False)
+    logo = db.Column(db.String(255), nullable=False)
 
 class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
@@ -935,9 +959,11 @@ def admin_distribute_prizes():
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     total_prize = float(prize_setting.value) if prize_setting else 1200.0
 
-    region_users = [u for u in User.query.filter_by(region=top_region.region_id).all() if not u.is_admin]
+    # 🛠️ ფილტრი: ვტოვებთ მხოლოდ იმ იუზერებს, ვისაც აქვთ მინიმუმ 5000 კლიკი და არ არიან ადმინები
+    region_users = [u for u in User.query.filter_by(region=top_region.region_id).all() if not u.is_admin and u.total_clicks >= 5000]
+    
     if not region_users:
-        flash("გამარჯვებულ რეგიონში აქტიური მომხმარებლები არ არიან!", "warning")
+        flash("გამარჯვებულ რეგიონში არ არიან მომხმარებლები, რომლებმაც დააგროვეს მინიმუმ 5000 კლიკი!", "warning")
         return redirect(url_for('admin_dashboard'))
 
     sorted_r_users = sorted(region_users, key=lambda x: x.total_clicks, reverse=True)
@@ -961,14 +987,14 @@ def admin_distribute_prizes():
             u.balance += rest_share
 
     winner_st = Settings.query.filter_by(key='last_winner').first()
-    winner_text = f"{top_region.region_name} (1-ლი ადგილი: {sorted_r_users[0].username} - {p1:.1f} ₾)"
+    winner_text = f"{top_region.region_name} (1-ლი ადგილი: {sorted_r_users[0].username} - {p1:.1f} ₾ | მინ. 5000 კლიკი დაკმაყოფილებულია)"
     if winner_st:
         winner_st.value = winner_text
     else:
         db.session.add(Settings(key='last_winner', value=winner_text))
 
     db.session.commit()
-    flash(f"საპრიზო თანხები წარმატებით ჩაერიცხა გამარჯვებულებს!", "success")
+    flash(f"საპრიზო თანხები წარმატებით ჩაერიცხა იმ მოთამაშეებს, რომლებმაც გადალახეს 5000 კლიკის ზღვარი!", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/quiz/add', methods=['POST'])
@@ -1117,6 +1143,91 @@ with app.app_context():
     if not game_status_st:
         db.session.add(Settings(key='game_status', value='active'))
     db.session.commit()
+
+try:
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'none';"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS personal_number VARCHAR(11);"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_photo VARCHAR(255);"))
+        
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS partner_sponsors (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, website_url VARCHAR(255) NOT NULL, logo VARCHAR(255) NOT NULL);"))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+
+# 🪪 ვერიფიკაციის მოთხოვნის გაგზავნა იუზერის მიერ
+@app.route('/submit_verification', methods=['POST'])
+@login_required
+def submit_verification():
+    personal_number = request.form.get('personal_number')
+    photo = request.files.get('verification_photo')
+
+    if not personal_number or len(personal_number) != 11:
+        flash('გთხოვთ შეიყვანოთ სწორი 11-ნიშნა პირადი ნომერი.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    if photo and allowed_file(photo.filename):
+        filename = secure_filename(f"verify_{current_user.id}_{photo.filename}")
+        os.makedirs(os.path.join('static', 'uploads'), exist_ok=True)
+        photo.save(os.path.join('static', 'uploads', filename))
+        
+        current_user.personal_number = personal_number
+        current_user.verification_photo = f"/static/uploads/{filename}"
+        current_user.verification_status = 'pending'
+        db.session.commit()
+        
+        flash('ვერიფიკაციის მოთხოვნა წარმატებით გაიგზავნა! ადმინისტრატორი შეამოწმებს.', 'success')
+    else:
+        flash('გთხოვთ ატვირთოთ სწორი ფოტო ფორმატი.', 'danger')
+
+    return redirect(url_for('dashboard'))
+
+# 🏢 საჯარო სპონსორების კატალოგის გვერდი
+@app.route('/sponsors')
+def sponsors_catalog():
+    sponsors = PartnerSponsor.query.all()
+    return render_template('sponsors_catalog.html', sponsors=sponsors)
+
+# ⚙️ ადმინი: პარტნიორი სპონსორის დამატება კატალოგში
+@app.route('/admin/add_partner_sponsor', methods=['POST'])
+@login_required
+def admin_add_partner_sponsor():
+    if not current_user.is_admin:
+        abort(403)
+        
+    name = request.form.get('name')
+    website_url = request.form.get('website_url')
+    logo = request.files.get('logo')
+
+    if logo and allowed_file(logo.filename):
+        filename = secure_filename(f"partner_{logo.filename}")
+        os.makedirs(os.path.join('static', 'uploads'), exist_ok=True)
+        logo.save(os.path.join('static', 'uploads', filename))
+        
+        new_sponsor = PartnerSponsor(
+            name=name,
+            website_url=website_url,
+            logo=f"/static/uploads/{filename}"
+        )
+        db.session.add(new_sponsor)
+        db.session.commit()
+        flash('პარტნიორი სპონსორი წარმატებით დაემატა კატალოგში!', 'success')
+    else:
+        flash('გთხოვთ ატვირთოთ სწორი ლოგოს ფოტო.', 'danger')
+
+    return redirect(url_for('admin_dashboard'))
+
+# ⚙️ ადმინი: პარტნიორი სპონსორის წაშლა კატალოგიდან
+@app.route('/admin/delete_partner_sponsor/<int:sponsor_id>', methods=['POST'])
+@login_required
+def admin_delete_partner_sponsor(sponsor_id):
+    if not current_user.is_admin:
+        abort(403)
+        
+    sponsor = PartnerSponsor.query.get_or_404(sponsor_id)
+    db.session.delete(sponsor)
+    db.session.commit()
+    flash('პარტნიორი წაიშალა კატალოგიდან.', 'success')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/api/user_status')
 @login_required
