@@ -100,9 +100,6 @@
                     </tbody>
                 </table>
             </div>
-            {% else %}
-            <p style="color: #ff4757; font-size: 13px; margin-bottom: 0;">ლიდერ რეგიონში მოთამაშეები არ მოიძებნა.</p>
-            {% endif %}
 
             <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');" style="margin-top: 20px;">
                 <button type="submit" class="btn-sm btn-success" style="padding: 12px 25px; font-size: 14px; width: 100%;">

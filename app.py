@@ -597,14 +597,14 @@ def admin_dashboard():
     
     if top_region:
         region_users = [u for u in users if u.region == top_region.region_id and not u.is_admin]
-        top_region_users = sorted(region_users, key=lambda x: x.total_clicks, reverse=True)
+        top_region_users = sorted(region_users, key=lambda x: (x.total_clicks or 0), reverse=True)
 
     user_stats = {}
     for u in users:
         watched_ads_count = UserAdView.query.filter_by(user_id=u.id).count()
         user_stats[u.id] = {
             'watched_ads': watched_ads_count,
-            'activity_score': u.total_clicks + (watched_ads_count * 2)
+            'activity_score': (u.total_clicks or 0) + (watched_ads_count * 2)
         }
 
     users_sorted = sorted(users, key=lambda x: user_stats[x.id]['activity_score'], reverse=True)
