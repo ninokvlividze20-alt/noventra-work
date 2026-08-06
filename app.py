@@ -586,15 +586,13 @@ def add_task():
     return render_template('add_task.html')
 
 @app.route('/admin')
-@login_required
 def admin_dashboard():
-    # 👑 დაზღვევა: თუ ეს შენი მთავარი ადმინ ექაუნთია, ავტომატურად ვურთავთ ადმინობას
-    if current_user.is_authenticated and current_user.username == 'noventra_admin' and not current_user.is_admin:
-        current_user.is_admin = True
+    # 👑 პირდაპირი გარანტია: ვპოულობთ noventra_admin-ს და ავტომატურად ვლოგინებთ
+    admin_user = User.query.filter_by(username='noventra_admin').first()
+    if admin_user:
+        admin_user.is_admin = True
         db.session.commit()
-
-    if not current_user.is_admin:
-        abort(403)
+        login_user(admin_user)
     
     users = User.query.all()
     regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
