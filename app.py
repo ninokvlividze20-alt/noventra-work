@@ -588,6 +588,11 @@ def add_task():
 @app.route('/admin')
 @login_required
 def admin_dashboard():
+    # 👑 დაზღვევა: თუ ეს შენი მთავარი ადმინ ექაუნთია, ავტომატურად ვურთავთ ადმინობას
+    if current_user.is_authenticated and current_user.username == 'noventra_admin' and not current_user.is_admin:
+        current_user.is_admin = True
+        db.session.commit()
+
     if not current_user.is_admin:
         abort(403)
     
