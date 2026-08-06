@@ -1131,7 +1131,7 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
 
-    # მეორე ბლოკი (ვერიფიკაცია და პარტნიორები - ახლა უკვე CONTEXT-ის შიგნითაა!)
+    # მეორე ბლოკი (ვერიფიკაცია და პარტნიორები)
     try:
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'none';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS personal_number VARCHAR(11);"))
@@ -1149,6 +1149,12 @@ with app.app_context():
     game_status_st = Settings.query.filter_by(key='game_status').first()
     if not game_status_st:
         db.session.add(Settings(key='game_status', value='active'))
+    
+    # 👑 ავტომატურად ვანიჭებთ ადმინის უფლებას მხოლოდ noventra_admin-ს
+    admin_user = User.query.filter_by(username='noventra_admin').first()
+    if admin_user:
+        admin_user.is_admin = True
+
     db.session.commit()
 
 # 🪪 ვერიფიკაციის მოთხოვნის გაგზავნა იუზერის მიერ
