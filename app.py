@@ -118,7 +118,8 @@ class RegionScore(db.Model):
     region_id = db.Column(db.String(50), unique=True, nullable=False)
     region_name = db.Column(db.String(100), nullable=False)
     score = db.Column(db.Integer, default=0)
-
+    sponsor_image = db.Column(db.Text, default="")  # 🛠️ აი ეს ველი დავამატეთ ბაზაში შესანახად
+    
 class Settings(db.Model):
     __tablename__ = 'settings'
     id = db.Column(db.Integer, primary_key=True)
@@ -738,10 +739,13 @@ def admin_update_sponsor():
         
         region = RegionScore.query.filter_by(region_id=region_id).first()
         if region:
-            # თუ გაქვს sponsor_image სვეტი region_scores ცხრილში, აქ შეინახება
-            region.sponsor_image = image_data 
+            region.sponsor_image = image_data  # ინახება ბაზაში Base64 ფორმატით
             db.session.commit()
             flash("სპონსორის ფოტო წარმატებით შეინახა ბაზაში!", "success")
+        else:
+            flash("რეგიონი ვერ მოიძებნა ბაზაში.", "danger")
+    else:
+        flash("გთხოვთ ატვირთოთ სწორი ფოტო.", "danger")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/region/<region_id>/delete_sponsor', methods=['POST'])
