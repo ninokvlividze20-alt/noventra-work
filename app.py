@@ -1110,26 +1110,33 @@ def restore_energy():
     db.session.commit()
     return jsonify({"success": True, "new_clicks": 250})
 
-# 🛠️ აპლიკაციის ინიციალიზაცია და ბაზის ცხრილების შექმნა სწორ ადგილას
+# 🛠️ აპლიკაციის ინიციალიზაცია და ბაზის ცხრილების/სვეტების შექმნა
 with app.app_context():
     db.create_all()
     init_regions()
+    
+    # პირველი ბლოკი
     try:
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS clicks_left INTEGER DEFAULT 250;"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS total_clicks INTEGER DEFAULT 0;"))
         db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
-        # 🛠️ სრული სახელისა და გვარის ველი
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(100) DEFAULT '';"))
-        # 🛠️ მეილის ველი
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(100) DEFAULT '';"))
-        # 🛠️ ანგარიშის მფლობელის სახელი და გვარი
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS holder_name VARCHAR(100) DEFAULT '';"))
         
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
-        
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS user_quiz_answers (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), quiz_id INTEGER REFERENCES quiz_questions(id));"))
-        
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+
+    # მეორე ბლოკი (ვერიფიკაცია და პარტნიორები - ახლა უკვე CONTEXT-ის შიგნითაა!)
+    try:
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'none';"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS personal_number VARCHAR(11);"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_photo VARCHAR(255);"))
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS partner_sponsors (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, website_url VARCHAR(255) NOT NULL, logo VARCHAR(255) NOT NULL);"))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -1143,16 +1150,6 @@ with app.app_context():
     if not game_status_st:
         db.session.add(Settings(key='game_status', value='active'))
     db.session.commit()
-
-try:
-    db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'none';"))
-    db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS personal_number VARCHAR(11);"))
-    db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_photo VARCHAR(255);"))
-    
-    db.session.execute(db.text("CREATE TABLE IF NOT EXISTS partner_sponsors (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, website_url VARCHAR(255) NOT NULL, logo VARCHAR(255) NOT NULL);"))
-    db.session.commit()
-except Exception as e:
-    db.session.rollback()
 
 # 🪪 ვერიფიკაციის მოთხოვნის გაგზავნა იუზერის მიერ
 @app.route('/submit_verification', methods=['POST'])
