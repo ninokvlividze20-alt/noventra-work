@@ -1254,13 +1254,5 @@ def api_user_status():
         "regions": regions_data
     })
 
-# 👑 ავტომატურად ვანიჭებთ ადმინის უფლებას მხოლოდ noventra_admin-ს (ბაზის კონტექსტის შიგნით ან საიტის ჩართვისას რომ ყოველთვის ქონდეს)
-# შენი ინიციალიზაციის ბოლო ნაწილში უბრალოდ დაამატე ეს:
-with app.app_context():
-    admin_user = User.query.filter_by(username='noventra_admin').first()
-    if admin_user:
-        admin_user.is_admin = True
-        db.session.commit()
-
 if __name__ == '__main__':
     app.run(debug=True)
