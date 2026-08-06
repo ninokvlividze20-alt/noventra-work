@@ -324,13 +324,27 @@
             </div>
         </div>
        
-       {% for reg_id, data in users_by_region.items() %}
+        {% for reg_id, data in users_by_region.items() %}
         <details class="region-user-block" style="margin-bottom: 15px; background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d;">
             <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px;">
                 📍 {{ data.name }} (იუზერები: {{ data.users|length }})
             </summary>
-            <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px;">
-                {% for u in data.users %}
+            <div style="margin-top: 10px; border-top: 1px solid #222233; padding-top: 10px; overflow-x: auto;">
+                {% if data.users %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>მომხმარებელი</th>
+                            <th>საკონტაქტო / რექვიზიტები</th>
+                            <th>ბალანსი</th>
+                            <th>კლიკები / პაროლი</th>
+                            <th>რეგიონი</th>
+                            <th>სტატუსები</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in data.users %}
                         <tr>
                             <td>
                                 <strong>{{ u.username }}</strong><br>
@@ -382,9 +396,8 @@
                             </td>
                         </tr>
                         {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
                 {% else %}
                 <p style="color: #777; font-size: 12px; margin: 5px 0 0 0;">ამ რეგიონში მომხმარებლები არ არიან.</p>
                 {% endif %}
