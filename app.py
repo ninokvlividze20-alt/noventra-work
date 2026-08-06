@@ -731,16 +731,15 @@ def admin_update_sponsor():
         abort(403)
     region_id = request.form.get('region_id')
     file = request.files.get('sponsor_image')
+    
     if file and region_id and allowed_file(file.filename):
-        # ფოტოს გადაყვანა Base64 ტექსტში
         encoded_string = base64.b64encode(file.read()).decode('utf-8')
         image_data = f"data:image/jpeg;base64,{encoded_string}"
         
-        # რადგან რეგიონის სპონსორის სვეტი უნდა გვქონდეს, შევინახოთ ბაზაში
-        # (მივაქციოთ ყურადღება, რომ RegionScore ცხრილს სჭირდება sponsor_image სვეტი)
         region = RegionScore.query.filter_by(region_id=region_id).first()
         if region:
-            region.sponsor_image = image_data
+            # თუ გაქვს sponsor_image სვეტი region_scores ცხრილში, აქ შეინახება
+            region.sponsor_image = image_data 
             db.session.commit()
             flash("სპონსორის ფოტო წარმატებით შეინახა ბაზაში!", "success")
     return redirect(url_for('admin_dashboard'))
