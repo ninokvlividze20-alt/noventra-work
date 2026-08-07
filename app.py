@@ -733,14 +733,16 @@ def admin_update_sponsor():
     file = request.files.get('sponsor_image')
     
     if file and region_id and allowed_file(file.filename):
-        encoded_string = base64.b64encode(file.read()).decode('utf-8')
-        image_data = f"data:image/jpeg;base64,{encoded_string}"
+        ads_folder = os.path.join(app.root_path, 'static', 'ads')
+        os.makedirs(ads_folder, exist_ok=True)
+        filename = f"{region_id}.jpg"
+        filepath = os.path.join(ads_folder, filename)
+        file.save(filepath)
         
         region = RegionScore.query.filter_by(region_id=region_id).first()
         if region:
-            region.sponsor_image = image_data  # ინახება ბაზაში Base64 ფორმატით
             db.session.commit()
-            flash("სპონსორის ფოტო წარმატებით შეინახა ბაზაში!", "success")
+            flash("სპონსორის ფოტო წარმატებით აიტვირთა!", "success")
         else:
             flash("რეგიონი ვერ მოიძებნა ბაზაში.", "danger")
     else:

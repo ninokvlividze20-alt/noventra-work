@@ -630,19 +630,19 @@ function loadQuiz() {
         if (data.success) {
             window.currentQuizData = data; 
 
-            let bannerHtml = '';
-            if (data.sponsor_image && data.sponsor_image.trim() !== "") {
-                bannerHtml = `
-                    <div style="margin-bottom: 10px; border: 1px solid #ffcc00; border-radius: 8px; overflow: hidden; background: #000;">
-                        <div style="background: #ffcc00; color: #000; font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; text-align: left;">
-                            📢 სპონსორი: ${data.sponsor_name}
-                        </div>
-                        <img src="${data.sponsor_image}" alt="Sponsor Banner" style="width: 100%; height: 110px; object-fit: cover; display: block;">
-                    </div>
-                `;
-            } else {
-                bannerHtml = `<div style="margin-bottom: 8px; font-size: 11px; color: #ffcc00; font-weight: bold;">სპონსორი: ${data.sponsor_name}</div>`;
-            }
+           let bannerHtml = '';
+if (data.sponsor_image && data.sponsor_image.trim() !== "") {
+    bannerHtml = `
+        <div style="margin-bottom: 10px; border: 1px solid #ffcc00; border-radius: 8px; overflow: hidden; background: #000;">
+            <div style="background: #ffcc00; color: #000; font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; text-align: left;">
+                📢 სპონსორი: ${data.sponsor_name}
+            </div>
+            <img src="${data.sponsor_image}" alt="Sponsor Banner" style="width: 100%; height: 130px; object-fit: cover; display: block;">
+        </div>
+    `;
+} else {
+    bannerHtml = `<div style="margin-bottom: 8px; font-size: 11px; color: #ffcc00; font-weight: bold;">სპონსორი: ${data.sponsor_name}</div>`;
+}
 
             let html = `
                 ${bannerHtml}
