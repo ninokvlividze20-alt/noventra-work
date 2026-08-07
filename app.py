@@ -1153,8 +1153,8 @@ with app.app_context():
     try:
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'none';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS personal_number VARCHAR(11);"))
-        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_photo VARCHAR(255);"))
-        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS partner_sponsors (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, website_url VARCHAR(255) NOT NULL, logo VARCHAR(255) NOT NULL);"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_photo TEXT;"))
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS partner_sponsors (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, website_url VARCHAR(255) NOT NULL, logo TEXT NOT NULL);"))
         db.session.commit()
     except Exception as e:
         db.session.rollback()

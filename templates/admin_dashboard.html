@@ -1,4 +1,4 @@
-% extends 'base.html' %}
+{% extends 'base.html' %}
 {% block content %}
 <style>
     .admin-container { max-width: 1200px; margin: 0 auto; padding-bottom: 50px; }
@@ -198,6 +198,48 @@
             <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 პარტნიორის კატალოგში დამატება</button>
         </div>
     </form>
+
+    <!-- 📋 ჩამოსაშლელი სია (Details) რომ ბევრი კომპანიის ატვირთვისას ეკრანი არ გაჭედოს -->
+    <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
+        <details>
+            <summary style="color: #00ffcc; cursor: pointer; font-size: 15px; font-weight: bold; outline: none;">
+                📚 კატალოგში არსებული პარტნიორების სია (სულ: {{ partners|length }})
+            </summary>
+            
+            <div style="margin-top: 15px; overflow-x: auto; max-height: 350px; overflow-y: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ლოგო</th>
+                            <th>კომპანია</th>
+                            <th>ვებსაიტი</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if partners %}
+                            {% for p in partners %}
+                            <tr>
+                                <td><img src="{{ p.logo }}" class="sponsor-preview" alt="Logo"></td>
+                                <td><strong>{{ p.name }}</strong></td>
+                                <td><a href="{{ p.website_url }}" target="_blank" style="color: #00ffcc;">{{ p.website_url }}</a></td>
+                                <td>
+                                    <form action="{{ url_for('admin_delete_partner_sponsor', sponsor_id=p.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ პარტნიორის წაშლა?');">
+                                        <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="color: #888; text-align: center; font-size: 12px;">პარტნიორები ჯერ არ არიან დამატებული.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </div>
 </div>
 
     <!-- 📚 ატვირთული ვიქტორინების სრული სია და მართვა -->
