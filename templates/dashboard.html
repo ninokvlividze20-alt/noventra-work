@@ -176,7 +176,7 @@
         <div style="font-size: 18px; color: #ff4757; font-weight: bold; font-family: monospace;" id="liveCountdown">
             იტვირთება...
         </div>
-        <div style="font-size: 11px; color: #888; margin-top: 3px;">(სეზონი სრულდება კვირას 22:00 სთ-ზე)</div>
+        <div style="font-size: 11px; color: #888; margin-top: 3px;">(სეზონი სრულდება კვირას 18:00 სთ-ზე)</div>
     </div>
 </div>
 
@@ -260,7 +260,7 @@ function updateCountdown() {
     let day = now.getDay();
 
     target.setDate(now.getDate() + (7 - day) % 7);
-    target.setHours(22, 0, 0, 0);
+    target.setHours(18, 0, 0, 0);
 
     if (now > target) {
         target.setDate(target.getDate() + 7);
