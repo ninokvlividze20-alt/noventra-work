@@ -118,6 +118,7 @@ class RegionScore(db.Model):
     region_id = db.Column(db.String(50), unique=True, nullable=False)
     region_name = db.Column(db.String(100), nullable=False)
     score = db.Column(db.Integer, default=0)
+    sponsor_image = db.Column(db.Text, default="") # <-- აი ეს ხაზი ჩაამატე!
     
 class Settings(db.Model):
     __tablename__ = 'settings'
