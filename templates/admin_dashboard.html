@@ -288,70 +288,74 @@
     </div>
 
     <div class="grid-2">
-        <!-- 📍 რეგიონის სპონსორების ფოტოები და დიდი ზომები (800x450) -->
-        <div class="admin-section">
-            <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
-            <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა კლიკების ზონის თავზე: მკაცრად პროპორციული **800 x 450 px (16:9)** (.jpg/.png)</p>
-           
-            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
-                <select name="region_id" class="input-field">
-                    {% for reg in regions %}
-                    <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
-                    {% endfor %}
-                </select>
+        <!-- 📍 რეგიონის სპონსორების ფოტოები და მართვა (სრული სიგანე) -->
+<div class="admin-section" style="grid-column: 1 / -1;">
+    <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
+    <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: მკაცრად პროპორციული **800 x 450 px (16:9)** (.jpg/.png)</p>
+    
+    <div class="grid-2" style="align-items: start; gap: 30px;">
+        <!-- მარცხენა მხარე: ფორმა -->
+        <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: flex; flex-direction: column; gap: 10px;">
+            <label style="font-size: 11px; color: #00ffcc;">აირჩიე რეგიონი:</label>
+            <select name="region_id" class="input-field">
+                {% for reg in regions %}
+                <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
+                {% endfor %}
+            </select>
+            
+            <div style="background: #161622; border: 1px dashed #33334d; padding: 10px; border-radius: 8px; text-align: center;">
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 5px; font-weight: bold;">აირჩიე სპონსორის ბანერი:</label>
+                <input type="file" name="sponsor_image" accept="image/*" id="regionImageInput" onchange="previewRegionImage(event)" style="display: none;" required>
                 
-                <div style="background: #161622; border: 1px dashed #33334d; padding: 10px; border-radius: 8px; text-align: center;">
-                    <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 5px; font-weight: bold;">აირჩიე სპონსორის დიდი ბანერი (800x450 px):</label>
-                    <input type="file" name="sponsor_image" accept="image/*" id="regionImageInput" onchange="previewRegionImage(event)" style="display: none;" required>
-                    
-                    <div onclick="document.getElementById('regionImageInput').click()" style="cursor: pointer; border: 1px solid #444; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto; background: #111; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <img id="regionImagePreview" src="" alt="პრევიუ" style="width: 100%; height: 100%; object-fit: contain; display: none; background: #000;">
-                        <span id="regionImagePlaceholder" style="color: #888; font-size: 11px; padding: 5px;">📁 დააკლიკე ფოტოს ასარჩევად</span>
-                    </div>
+                <div onclick="document.getElementById('regionImageInput').click()" style="cursor: pointer; border: 1px solid #444; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto; background: #111; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <img id="regionImagePreview" src="" alt="პრევიუ" style="width: 100%; height: 100%; object-fit: contain; display: none; background: #000;">
+                    <span id="regionImagePlaceholder" style="color: #888; font-size: 11px; padding: 5px;">📁 დააკლიკე ფოტოს ასარჩევად</span>
                 </div>
-
-                <button type="submit" class="btn-sm btn-success" style="padding: 8px;">💾 სპონსორის ატვირთვა</button>
-            </form>
-
-            <div style="max-height: 180px; overflow-y: auto;">
-                <table class="admin-table" style="margin-top: 0;">
-                    <thead>
-                        <tr>
-                            <th>რეგიონი</th>
-                            <th>სპონსორის ფოტო</th>
-                            <th>მოქმედება</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for reg in regions %}
-                        <tr>
-                            <td>{{ reg.region_name }}</td>
-                            <td>
-                                {% if region_sponsors[reg.region_id] %}
-                                    <img src="{{ region_sponsors[reg.region_id] }}" class="sponsor-preview" alt="Sponsor">
-                                {% else %}
-                                    <span style="color: #ff4757; font-size: 11px;">სპონსორი არ ჰყავს</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div style="display: flex; gap: 5px;">
-                                    {% if region_sponsors[reg.region_id] %}
-                                    <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
-                                        <button type="submit" class="btn-sm btn-danger" style="padding: 3px 6px; font-size: 10px;">წაშლა</button>
-                                    </form>
-                                    {% endif %}
-                                    <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
-                                        <button type="submit" class="btn-sm btn-warning" style="padding: 3px 6px; font-size: 10px; color:#000;">ქულ. განულება</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
+
+            <button type="submit" class="btn-sm btn-success" style="padding: 10px;">💾 სპონსორის ატვირთვა</button>
+        </form>
+
+        <!-- მარჯვენა მხარე: სია -->
+        <div style="max-height: 350px; overflow-y: auto;">
+            <table class="admin-table" style="margin-top: 0;">
+                <thead>
+                    <tr>
+                        <th>რეგიონი</th>
+                        <th>ფოტო</th>
+                        <th>მოქმედება</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in regions %}
+                    <tr>
+                        <td style="white-space: nowrap;">{{ reg.region_name }}</td>
+                        <td>
+                            {% if region_sponsors[reg.region_id] %}
+                                <img src="{{ region_sponsors[reg.region_id] }}" class="sponsor-preview" alt="Sponsor">
+                            {% else %}
+                                <span style="color: #ff4757; font-size: 10px;">არაა</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 5px;">
+                                {% if region_sponsors[reg.region_id] %}
+                                <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                    <button type="submit" class="btn-sm btn-danger" style="padding: 3px 6px; font-size: 10px;">წაშლა</button>
+                                </form>
+                                {% endif %}
+                                <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                    <button type="submit" class="btn-sm btn-warning" style="padding: 3px 6px; font-size: 10px; color:#000;">განულება</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
     <!-- 👥 მომხმარებლების სრული კონტროლი რეგიონების მიხედვით (ჩამოსაშლელებით) -->
     <div class="admin-section" style="grid-column: 1 / -1;">
@@ -528,23 +532,23 @@ function filterUsers() {
     let regionBlocks = document.querySelectorAll('.region-user-block');
     
     regionBlocks.forEach(block => {
-        let rows = block.querySelectorAll('tbody tr');
-        let hasVisibleRow = false;
+        let userCards = block.querySelectorAll('.user-collapse-card');
+        let hasVisibleUser = false;
         
-        rows.forEach(row => {
-            let usernameTd = row.querySelector('td strong');
-            if (usernameTd) {
-                let username = usernameTd.textContent || usernameTd.innerText;
+        userCards.forEach(card => {
+            let usernameSpan = card.querySelector('span'); // პოულობს იუზერის სახელს
+            if (usernameSpan) {
+                let username = usernameSpan.textContent || usernameSpan.innerText;
                 if (username.toLowerCase().indexOf(filter) > -1) {
-                    row.style.display = "";
-                    hasVisibleRow = true;
+                    card.style.display = "";
+                    hasVisibleUser = true;
                 } else {
-                    row.style.display = "none";
+                    card.style.display = "none";
                 }
             }
         });
         
-        if (filter === "" || hasVisibleRow) {
+        if (filter === "" || hasVisibleUser) {
             block.style.display = "";
         } else {
             block.style.display = "none";

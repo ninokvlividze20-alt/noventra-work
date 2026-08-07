@@ -49,7 +49,7 @@ class User(db.Model, UserMixin):
     reputation = db.Column(db.Integer, default=100)
     is_admin = db.Column(db.Boolean, default=False)
     bank_account = db.Column(db.String(50), default="")
-    holder_name = db.Column(db.String(100), default="") # 🛠️ ახალი: მიმღების სახელი და გვარი საბანკო გადარიცხვისთვის
+    holder_name = db.Column(db.String(100), default="") # 🛠️ მიმღების სახელი და გვარი საბანკო გადარიცხვისთვის
     clicks_left = db.Column(db.Integer, default=250)
     total_clicks = db.Column(db.Integer, default=0)
     region = db.Column(db.String(50), default="tbilisi")
@@ -59,10 +59,10 @@ class User(db.Model, UserMixin):
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
     last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
     
-    # 🪪 KYC ვერიფიკაციის ველები
+    # 🪪 KYC ვერიფიკაციის ველები (შეცვლილია TEXT-ად ბაზის ლიმიტის ასაცილებლად)
     verification_status = db.Column(db.String(20), default='none') # none, pending, approved
     personal_number = db.Column(db.String(11), nullable=True)
-    verification_photo = db.Column(db.String(255), nullable=True)
+    verification_photo = db.Column(db.Text, nullable=True)
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -139,13 +139,13 @@ class PartnerSponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     website_url = db.Column(db.String(255), nullable=False)
-    logo = db.Column(db.String(255), nullable=False)
+    logo = db.Column(db.Text, nullable=False) # <-- შეცვლილია TEXT-ად
 
 class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
     id = db.Column(db.Integer, primary_key=True)
     sponsor_name = db.Column(db.String(100), nullable=False)
-    sponsor_image = db.Column(db.String(255), default="")
+    sponsor_image = db.Column(db.Text, default="") # <-- შეცვლილია TEXT-ად
     package_type = db.Column(db.String(20), default="Bronze")
     question_text = db.Column(db.Text, nullable=False)
     option_1 = db.Column(db.String(150), nullable=False)
@@ -1137,11 +1137,14 @@ with app.app_context():
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(100) DEFAULT '';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS holder_name VARCHAR(100) DEFAULT '';"))
         
-        # 🛠️ აი ეს ხაზი უნდა ჩასვა აუცილებლად აქ:
         db.session.execute(db.text("ALTER TABLE region_scores ADD COLUMN IF NOT EXISTS sponsor_image TEXT DEFAULT '';"))
         
-        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image VARCHAR(255) DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
+        db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image TEXT DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS user_quiz_answers (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), quiz_id INTEGER REFERENCES quiz_questions(id));"))
+        
+        # 🛠️ ვზრდით ლიმიტებს TEXT ტიპზე, რომ დიდი ბაზის ფოტოები ჩაეტიოს
+        db.session.execute(db.text("ALTER TABLE quiz_questions ALTER COLUMN sponsor_image TYPE TEXT;"))
+        
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -1155,6 +1158,11 @@ with app.app_context():
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS personal_number VARCHAR(11);"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_photo TEXT;"))
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS partner_sponsors (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, website_url VARCHAR(255) NOT NULL, logo TEXT NOT NULL);"))
+        
+        # 🛠️ ვზრდით ლიმიტებს ვერიფიკაციისა და პარტნიორების ფოტოებისთვისაც
+        db.session.execute(db.text("ALTER TABLE users ALTER COLUMN verification_photo TYPE TEXT;"))
+        db.session.execute(db.text("ALTER TABLE partner_sponsors ALTER COLUMN logo TYPE TEXT;"))
+        
         db.session.commit()
     except Exception as e:
         db.session.rollback()
