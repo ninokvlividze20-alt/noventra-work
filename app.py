@@ -464,23 +464,48 @@ def dashboard():
                          last_winner_region=last_winner_region,
                          game_status=game_status)
 
+import time
+
 @app.route('/api/score', methods=['POST'])
 @login_required
 def add_score():
+    # 🤖 ბოტებისგან დაცვა: სერვერის მხარეს კლიკების სიჩქარის კონტროლი (Rate Limiting)
+    now = time.time()
+    if not hasattr(current_user, 'last_click_time'):
+        current_user.last_click_time = now
+        current_user.rapid_clicks_count = 0
+
+    time_diff = now - current_user.last_click_time
+    current_user.last_click_time = now
+
+    # თუ მომხმარებელი აკეთებს კლიკებს ზედმეტად სწრაფად (მაგ. წამში 15 კლიკზე მეტს, რაც ფიზიკურად შეუძლებელია)
+    if time_diff < 0.06:  
+        current_user.rapid_clicks_count += 1
+        if current_user.rapid_clicks_count > 10:
+            current_user.is_banned = True
+            db.session.commit()
+            return jsonify({"success": False, "message": "ბოტი გამოვლინდა! ანგარიში დაიბლოკა."}), 403
+    else:
+        current_user.rapid_clicks_count = max(0, current_user.rapid_clicks_count - 1)
+
     data = request.get_json() or {}
     region_id = data.get('region_id')
     points = int(data.get('points', 1))
+    
+    # ერთ ჯერზე მაქსიმუმ 50 კლიკის მიღება (უსაფრთხოების ზომა)
+    if points > 50 or points < 1:
+        return jsonify({"success": False, "message": "არასწორი მოთხოვნა"}), 400
     
     region = RegionScore.query.filter_by(region_id=region_id).first()
     if region:
         region.score += points
         current_user.total_clicks += points 
-        
+         
         if current_user.clicks_left >= points:
             current_user.clicks_left -= points
         else:
             current_user.clicks_left = 0
-            
+             
         db.session.commit()
         return jsonify({"success": True, "new_score": region.score, "clicks_left": current_user.clicks_left})
     
@@ -1022,42 +1047,40 @@ def admin_distribute_prizes():
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     total_prize = float(prize_setting.value) if prize_setting else 1200.0
 
-    # 🛠️ ფილტრი: ვტოვებთ მხოლოდ იმ იუზერებს, ვისაც აქვთ მინიმუმ 5000 კლიკი და არ არიან ადმინები
-    region_users = [u for u in User.query.filter_by(region=top_region.region_id).all() if not u.is_admin and u.total_clicks >= 5000]
+    # 🛠️ სამართლიანი ფილტრი: ვტოვებთ მხოლოდ იმ იუზერებს, ვინც არ არიან ადმინები, 
+    # აქვთ გავლილი სავალდებულო ვერიფიკაცია (approved) და დაგროვებული აქვთ მინიმუმ 5000 კლიკი.
+    qualified_users = [
+        u for u in User.query.filter_by(region=top_region.region_id).all() 
+        if not u.is_admin and u.total_clicks >= 5000 and u.verification_status == 'approved'
+    ]
     
-    if not region_users:
-        flash("გამარჯვებულ რეგიონში არ არიან მომხმარებლები, რომლებმაც დააგროვეს მინიმუმ 5000 კლიკი!", "warning")
+    if not qualified_users:
+        flash("გამარჯვებულ რეგიონში არ არიან ვერიფიცირებული მომხმარებლები (მინ. 5000 კლიკით)!", "warning")
         return redirect(url_for('admin_dashboard'))
 
-    sorted_r_users = sorted(region_users, key=lambda x: x.total_clicks, reverse=True)
+    # 🧮 ვთვლით ჯამურ კლიკებს ამ კვალიფიციურ ჯგუფში
+    total_group_clicks = sum(u.total_clicks for u in qualified_users)
+    
+    if total_group_clicks == 0:
+        flash("ჯამური კლიკები ნულია!", "warning")
+        return redirect(url_for('admin_dashboard'))
 
-    p1, p2, rest = 0, 0, 0
-    if len(sorted_r_users) == 1:
-        p1 = total_prize
-        sorted_r_users[0].balance += p1
-    elif len(sorted_r_users) == 2:
-        p1 = total_prize * 0.60
-        p2 = total_prize * 0.40
-        sorted_r_users[0].balance += p1
-        sorted_r_users[1].balance += p2
-    else:
-        p1 = total_prize * 0.50
-        p2 = total_prize * 0.30
-        sorted_r_users[0].balance += p1
-        sorted_r_users[1].balance += p2
-        rest_share = (total_prize * 0.20) / (len(sorted_r_users) - 2)
-        for u in sorted_r_users[2:]:
-            u.balance += rest_share
+    # ⚖️ პროპორციული განაწილება (Share-based Pool System)
+    distribution_summary = []
+    for u in qualified_users:
+        user_share = (u.total_clicks / total_group_clicks) * total_prize
+        u.balance += user_share  # ვუმატებთ ვირტუალურ საფულეში
+        distribution_summary.append(f"{u.username}: {user_share:.2f} ₾")
 
     winner_st = Settings.query.filter_by(key='last_winner').first()
-    winner_text = f"{top_region.region_name} (1-ლი ადგილი: {sorted_r_users[0].username} - {p1:.1f} ₾ | მინ. 5000 კლიკი დაკმაყოფილებულია)"
+    winner_text = f"{top_region.region_name} (პროპორციულად განაწილდა {total_prize} ₾ {len(qualified_users)} ვერიფიცირებულ მოთამაშეზე)"
     if winner_st:
         winner_st.value = winner_text
     else:
         db.session.add(Settings(key='last_winner', value=winner_text))
 
     db.session.commit()
-    flash(f"საპრიზო თანხები წარმატებით ჩაერიცხა იმ მოთამაშეებს, რომლებმაც გადალახეს 5000 კლიკის ზღვარი!", "success")
+    flash(f"საპრიზო თანხები წარმატებით და სამართლიანად განაწილდა {len(qualified_users)} მოთამაშეზე!", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/quiz/add', methods=['POST'])

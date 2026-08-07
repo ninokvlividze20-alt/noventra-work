@@ -580,8 +580,17 @@ function updateRegionTeamStats() {
     .catch(err => console.error("Team stats error:", err));
 }
 
+let lastClickTimestamp = 0;
+
 function boostRegion(event) {
     let regionId = document.getElementById('userRegionSelect').value;
+    
+    // 🛡️ კლიენტ მხარეს დაცვა სპამისა და სწრაფი დაკლიკებისგან (მინ. 50 მილიწამი კლიკებს შორის)
+    let now = Date.now();
+    if (now - lastClickTimestamp < 50) {
+        return; 
+    }
+    lastClickTimestamp = now;
     
     if (clickLimit <= 0) {
         document.getElementById('adModal').style.display = 'flex';
@@ -633,6 +642,9 @@ function boostRegion(event) {
                             scoreCell.innerText = data.new_score + " ⚡";
                         }
                     }
+                } else {
+                    alert(data.message || "შეცდომაა კლიკების გაგზავნისას.");
+                    location.reload();
                 }
             })
             .catch(err => console.error(err));

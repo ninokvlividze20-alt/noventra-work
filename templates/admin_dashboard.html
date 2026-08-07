@@ -42,15 +42,12 @@
             </form>
 
             <div style="display: flex; flex-direction: column; gap: 10px; border-left: 1px solid #222233; padding-left: 20px;">
-                <!-- თამაშის ჩართვა/გამორთვა -->
                 <form action="{{ url_for('admin_toggle_game') }}" method="POST" onsubmit="saveScrollPosition()">
                     <button type="submit" class="btn-sm btn-warning" style="width: 100%; padding: 10px;">
                         ⚡ თამაშის რეჟიმის გადართვა (ჩართ./გამორთ.)
                     </button>
                 </form>
                
-                <!-- სეზონის დასრულება / ქულების განულება -->
-                <!-- სეზონის დასრულება / ქულების განულება -->
                 <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
                     <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
                 </form>
@@ -58,7 +55,7 @@
         </div>
     </div>
 
-<!-- 🪪 KYC ვერიფიკაციის მოსაცდელი მოთხოვნები -->
+    <!-- 🪪 KYC ვერიფიკაციის მოსაცდელი მოთხოვნები -->
     <div class="admin-section" style="border-color: #00ffcc;">
         <h3>🪪 ვერიფიკაციის მოსაცდელი მოთხოვნები</h3>
         <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">აქ ჩანს ყველა მომხმარებელი, ვინც ატვირთა პერსონალური მონაცემები და ელოდება ადმინისტრატორის დადასტურებას.</p>
@@ -134,22 +131,33 @@
                             <th>საბანკო ანგარიში IBAN (Profile)</th>
                             <th>მფლობელი (სახელი/გვარი)</th>
                             <th>აქტიურობა (კლიკები)</th>
-                            <th>სტატუსი (5000 ზღვარი)</th>
+                            <th>ვერიფიკაცია (KYC)</th>
+                            <th>საბოლოო სტატუსი</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tu in top_region_users %}
-                        <tr style="{% if tu.total_clicks >= 5000 %}background: rgba(0, 255, 204, 0.05);{% else %}opacity: 0.6;{% endif %}">
+                        {% set is_qualified = tu.total_clicks >= 5000 and tu.verification_status == 'approved' %}
+                        <tr style="{% if is_qualified %}background: rgba(0, 255, 204, 0.05);{% else %}opacity: 0.6;{% endif %}">
                             <td><strong>{{ tu.username }}</strong></td>
                             <td style="color: #00ffcc;">{{ tu.phone if tu.phone else 'არ არის ⚠️' }}</td>
                             <td style="color: #ffcc00; font-family: monospace;">{{ tu.bank_account if tu.bank_account else 'არ არის ⚠️' }}</td>
                             <td style="color: #fff;">{{ tu.holder_name if tu.holder_name else 'არ არის ⚠️' }}</td>
                             <td style="color: #00ffcc; font-weight: bold;">{{ tu.total_clicks }} კლიკი</td>
                             <td>
-                                {% if tu.total_clicks >= 5000 %}
-                                    <span style="color: #00ffcc; font-weight: bold;">✅ კვალიფიციურია</span>
+                                {% if tu.verification_status == 'approved' %}
+                                    <span style="color: #00ffcc;">✅ გავლილია</span>
+                                {% elif tu.verification_status == 'pending' %}
+                                    <span style="color: #ffcc00;">⏳ მოლოდინში</span>
                                 {% else %}
-                                    <span style="color: #ff4757;">❌ ნაკლებია 5000-ზე</span>
+                                    <span style="color: #ff4757;">❌ არ აუქცია</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_qualified %}
+                                    <span style="color: #00ffcc; font-weight: bold;">✅ მიიღებს წილს</span>
+                                {% else %}
+                                    <span style="color: #ff4757;">❌ ვერ მიიღებს</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -158,7 +166,7 @@
                 </table>
             </div>
 
-            <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ მოთამაშეების ვირტუალურ საფულეებში?');" style="margin-top: 20px;">
+            <form action="{{ url_for('admin_distribute_prizes') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ საპრიზო თანხების ავტომატურად ჩარიცხვა ამ კვალიფიციური მოთამაშეების ვირტუალურ საფულეებში?');" style="margin-top: 20px;">
                 <button type="submit" class="btn-sm btn-success" style="padding: 12px 25px; font-size: 14px; width: 100%;">
                     🚀 თანხების ავტომატურად ჩარიცხვა გამარჯვებულების საფულეებში
                 </button>
@@ -190,7 +198,7 @@
                 </select>
             </div>
 
-           <!-- 🖼️ ფოტოს ატვირთვის ოპტიმიზებული ველი -->
+            <!-- 🖼️ ფოტოს ატვირთვის ოპტიმიზებული ველი -->
             <div style="grid-column: 1 / -1; background: #161622; border: 2px dashed #33334d; padding: 15px; border-radius: 12px; text-align: center;">
                 <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 8px; font-weight: bold;">
                     📸 ვიქტორინის სარეკლამო ბანერი (რეკომენდებული ზომა: 800 x 450 px)
@@ -233,74 +241,73 @@
         </form>
     </div>
 
-<!-- 🏢 საჯარო პარტნიორების / სპონსორების კატალოგის მართვა ადმინკაში -->
-<div class="admin-section" style="border-color: #00ffcc; margin-top: 20px;">
-    <h3>🏢 პარტნიორი სპონსორის დამატება კატალოგში</h3>
-    <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">ეს კომპანიები გამოჩნდება მომხმარებლებისთვის საიტის მთავარ "სპონსორების" გვერდზე მათი ლინკებით.</p>
+    <!-- 🏢 საჯარო პარტნიორების / სპონსორების კატალოგის მართვა ადმინკაში -->
+    <div class="admin-section" style="border-color: #00ffcc; margin-top: 20px;">
+        <h3>🏢 პარტნიორი სპონსორის დამატება კატალოგში</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">ეს კომპანიები გამოჩნდება მომხმარებლებისთვის საიტის მთავარ "სპონსორების" გვერდზე მათი ლინკებით.</p>
 
-    <form action="{{ url_for('admin_add_partner_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-        <div>
-            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">კომპანიის სახელი:</label>
-            <input type="text" name="name" placeholder="მაგ: TechGeoriga" required class="input-field">
-        </div>
-        <div>
-            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ვებსაიტის ლინკი (URL):</label>
-            <input type="url" name="website_url" placeholder="https://example.ge" required class="input-field">
-        </div>
-        <div style="grid-column: 1 / -1;">
-            <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">კომპანიის ლოგო ან ბანერი:</label>
-            <input type="file" name="logo" accept="image/*" required class="input-field">
-        </div>
-        <div style="grid-column: 1 / -1;">
-            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 პარტნიორის კატალოგში დამატება</button>
-        </div>
-    </form>
-
-    <!-- 📋 ჩამოსაშლელი სია (Details) რომ ბევრი კომპანიის ატვირთვისას ეკრანი არ გაჭედოს -->
-    <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
-        <details>
-            <summary style="color: #00ffcc; cursor: pointer; font-size: 15px; font-weight: bold; outline: none;">
-                📚 კატალოგში არსებული პარტნიორების სია (სულ: {{ partners|length }})
-            </summary>
-            
-            <div style="margin-top: 15px; overflow-x: auto; max-height: 350px; overflow-y: auto;">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>ლოგო</th>
-                            <th>კომპანია</th>
-                            <th>ვებსაიტი</th>
-                            <th>მოქმედება</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if partners %}
-                            {% for p in partners %}
-                            <tr>
-                                <td><img src="{{ p.logo }}" class="sponsor-preview" alt="Logo"></td>
-                                <td><strong>{{ p.name }}</strong></td>
-                                <td><a href="{{ p.website_url }}" target="_blank" style="color: #00ffcc;">{{ p.website_url }}</a></td>
-                                <td>
-                                    <form action="{{ url_for('admin_delete_partner_sponsor', sponsor_id=p.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ პარტნიორის წაშლა?');">
-                                        <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="4" style="color: #888; text-align: center; font-size: 12px;">პარტნიორები ჯერ არ არიან დამატებული.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+        <form action="{{ url_for('admin_add_partner_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+            <div>
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">კომპანიის სახელი:</label>
+                <input type="text" name="name" placeholder="მაგ: TechGeoriga" required class="input-field">
             </div>
-        </details>
+            <div>
+                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ვებსაიტის ლინკი (URL):</label>
+                <input type="url" name="website_url" placeholder="https://example.ge" required class="input-field">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">კომპანიის ლოგო ან ბანერი:</label>
+                <input type="file" name="logo" accept="image/*" required class="input-field">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">💾 პარტნიორის კატალოგში დამატება</button>
+            </div>
+        </form>
+
+        <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
+            <details>
+                <summary style="color: #00ffcc; cursor: pointer; font-size: 15px; font-weight: bold; outline: none;">
+                    📚 კატალოგში არსებული პარტნიორების სია (სულ: {{ partners|length }})
+                </summary>
+               
+                <div style="margin-top: 15px; overflow-x: auto; max-height: 350px; overflow-y: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ლოგო</th>
+                                <th>კომპანია</th>
+                                <th>ვებსაიტი</th>
+                                <th>მოქმედება</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if partners %}
+                                {% for p in partners %}
+                                <tr>
+                                    <td><img src="{{ p.logo }}" class="sponsor-preview" alt="Logo"></td>
+                                    <td><strong>{{ p.name }}</strong></td>
+                                    <td><a href="{{ p.website_url }}" target="_blank" style="color: #00ffcc;">{{ p.website_url }}</a></td>
+                                    <td>
+                                        <form action="{{ url_for('admin_delete_partner_sponsor', sponsor_id=p.id) }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ამ პარტნიორის წაშლა?');">
+                                            <button type="submit" class="btn-sm btn-danger" style="padding: 4px 8px;">წაშლა</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" style="color: #888; text-align: center; font-size: 12px;">პარტნიორები ჯერ არ არიან დამატებული.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
     </div>
-</div>
 
     <!-- 📚 ატვირთული ვიქტორინების სრული სია და მართვა -->
-    <div class="admin-section" style="border-color: #ffcc00;">
+    <div class="admin-section" style="border-color: #ffcc00; margin-top: 20px;">
         <details>
             <summary style="color: #00ffcc; cursor: pointer; font-size: 16px; font-weight: bold;">📚 ატვირთული ვიქტორინების სია (სულ: {{ quiz_questions|length }})</summary>
             <div style="margin-top: 15px; overflow-x: auto;">
@@ -344,81 +351,77 @@
         </details>
     </div>
 
-    <div class="grid-2">
-        <!-- 📍 რეგიონის სპონსორების ფოტოები და მართვა (სრული სიგანე) -->
-<div class="admin-section" style="grid-column: 1 / -1;">
-    <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
-    <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: მკაცრად პროპორციული **800 x 450 px (16:9)** (.jpg/.png)</p>
-    
-    <div class="grid-2" style="align-items: start; gap: 30px;">
-        <!-- მარცხენა მხარე: ფორმა -->
-        <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: flex; flex-direction: column; gap: 10px;">
-            <label style="font-size: 11px; color: #00ffcc;">აირჩიე რეგიონი:</label>
-            <select name="region_id" class="input-field">
-                {% for reg in regions %}
-                <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
-                {% endfor %}
-            </select>
-            
-            <div style="background: #161622; border: 1px dashed #33334d; padding: 10px; border-radius: 8px; text-align: center;">
-                <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 5px; font-weight: bold;">აირჩიე სპონსორის ბანერი:</label>
-                <input type="file" name="sponsor_image" accept="image/*" id="regionImageInput" onchange="previewRegionImage(event)" style="display: none;" required>
-                
-                <div onclick="document.getElementById('regionImageInput').click()" style="cursor: pointer; border: 1px solid #444; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto; background: #111; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
-                    <img id="regionImagePreview" src="" alt="პრევიუ" style="width: 100%; height: 100%; object-fit: contain; display: none; background: #000;">
-                    <span id="regionImagePlaceholder" style="color: #888; font-size: 11px; padding: 5px;">📁 დააკლიკე ფოტოს ასარჩევად</span>
-                </div>
-            </div>
-
-            <button type="submit" class="btn-sm btn-success" style="padding: 10px;">💾 სპონსორის ატვირთვა</button>
-        </form>
-
-        <!-- მარჯვენა მხარე: სია -->
-        <div style="max-height: 350px; overflow-y: auto;">
-            <table class="admin-table" style="margin-top: 0;">
-                <thead>
-                    <tr>
-                        <th>რეგიონი</th>
-                        <th>ფოტო</th>
-                        <th>მოქმედება</th>
-                    </tr>
-                </thead>
-                <tbody>
+    <!-- 📍 რეგიონის სპონსორების ფოტოები და მართვა -->
+    <div class="admin-section" style="margin-top: 20px;">
+        <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: მკაცრად პროპორციული **800 x 450 px (16:9)** (.jpg/.png)</p>
+        
+        <div class="grid-2" style="align-items: start; gap: 30px;">
+            <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: flex; flex-direction: column; gap: 10px;">
+                <label style="font-size: 11px; color: #00ffcc;">აირჩიე რეგიონი:</label>
+                <select name="region_id" class="input-field">
                     {% for reg in regions %}
-                    <tr>
-                        <td style="white-space: nowrap;">{{ reg.region_name }}</td>
-                        <td>
-                            {% if region_sponsors[reg.region_id] %}
-                                <img src="{{ region_sponsors[reg.region_id] }}" class="sponsor-preview" alt="Sponsor">
-                            {% else %}
-                                <span style="color: #ff4757; font-size: 10px;">არაა</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div style="display: flex; gap: 5px;">
-                                {% if region_sponsors[reg.region_id] %}
-                                <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
-                                    <button type="submit" class="btn-sm btn-danger" style="padding: 3px 6px; font-size: 10px;">წაშლა</button>
-                                </form>
-                                {% endif %}
-                                <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
-                                    <button type="submit" class="btn-sm btn-warning" style="padding: 3px 6px; font-size: 10px; color:#000;">განულება</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+                    <option value="{{ reg.region_id }}">{{ reg.region_name }} (ქულები: {{ reg.score }})</option>
                     {% endfor %}
-                </tbody>
-            </table>
+                </select>
+               
+                <div style="background: #161622; border: 1px dashed #33334d; padding: 10px; border-radius: 8px; text-align: center;">
+                    <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 5px; font-weight: bold;">აირჩიე სპონსორის ბანერი:</label>
+                    <input type="file" name="sponsor_image" accept="image/*" id="regionImageInput" onchange="previewRegionImage(event)" style="display: none;" required>
+                   
+                    <div onclick="document.getElementById('regionImageInput').click()" style="cursor: pointer; border: 1px solid #444; border-radius: 6px; overflow: hidden; max-width: 300px; margin: 0 auto; background: #111; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <img id="regionImagePreview" src="" alt="პრევიუ" style="width: 100%; height: 100%; object-fit: contain; display: none; background: #000;">
+                        <span id="regionImagePlaceholder" style="color: #888; font-size: 11px; padding: 5px;">📁 დააკლიკე ფოტოს ასარჩევად</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-sm btn-success" style="padding: 10px;">💾 სპონსორის ატვირთვა</button>
+            </form>
+
+            <div style="max-height: 350px; overflow-y: auto;">
+                <table class="admin-table" style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th>რეგიონი</th>
+                            <th>ფოტო</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in regions %}
+                        <tr>
+                            <td style="white-space: nowrap;">{{ reg.region_name }}</td>
+                            <td>
+                                {% if region_sponsors[reg.region_id] %}
+                                    <img src="{{ region_sponsors[reg.region_id] }}" class="sponsor-preview" alt="Sponsor">
+                                {% else %}
+                                    <span style="color: #ff4757; font-size: 10px;">არაა</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    {% if region_sponsors[reg.region_id] %}
+                                    <form action="{{ url_for('admin_delete_sponsor', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                        <button type="submit" class="btn-sm btn-danger" style="padding: 3px 6px; font-size: 10px;">წაშლა</button>
+                                    </form>
+                                    {% endif %}
+                                    <form action="{{ url_for('admin_reset_region_score', region_id=reg.region_id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                        <button type="submit" class="btn-sm btn-warning" style="padding: 3px 6px; font-size: 10px; color:#000;">განულება</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
-    <!-- 👥 მომხმარებლების სრული კონტროლი რეგიონების მიხედვით (ჩამოსაშლელებით) -->
-    <div class="admin-section" style="grid-column: 1 / -1;">
+    <!-- 👥 მომხმარებლების სრული კონტროლი რეგიონების მიხედვით -->
+    <div class="admin-section" style="margin-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
             <h3 style="margin: 0; border: none;">👥 მომხმარებლების სრული კონტროლი (ბალანსი, კლიკები, ბანი, რეგიონი)</h3>
-           
             <div style="width: 100%; max-width: 300px;">
                 <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="🔍 მოძებნე იუზერი სახელით..." class="input-field">
             </div>
@@ -429,11 +432,10 @@
             <summary style="color: #ffcc00; cursor: pointer; font-size: 15px; font-weight: bold; outline: none; padding-bottom: 5px;">
                 📍 {{ data.name }} (იუზერები: {{ data.users|length }})
             </summary>
-            
+           
             <div style="margin-top: 15px; border-top: 1px solid #222233; padding-top: 15px;">
                 {% if data.users %}
                     {% for u in data.users %}
-                    <!-- თითოეული იუზერი არის ჩამოსაშლელი დეტალების ბლოკი -->
                     <details class="user-collapse-card" style="background: #111118; border: 1px solid #2b2b40; border-radius: 12px; padding: 12px 18px; margin-bottom: 10px;">
                         <summary style="cursor: pointer; outline: none; display: flex; justify-content: space-between; align-items: center; color: #00ffcc; font-size: 15px; font-weight: bold;">
                             <div>
@@ -451,7 +453,6 @@
 
                         <div style="margin-top: 15px; border-top: 1px solid #222233; padding-top: 15px;">
                             <form id="update_form_{{ u.id }}" action="{{ url_for('admin_full_update_user', user_id=u.id) }}" method="POST" onsubmit="saveScrollPosition()">
-                                
                                 <div style="display: flex; justify-content: flex-end; gap: 15px; align-items: center; font-size: 12px; margin-bottom: 12px;">
                                     <label style="cursor: pointer; color: #fff;"><input type="checkbox" name="is_admin" {% if u.is_admin %}checked{% endif %}> 👑 ადმინი</label>
                                     <label style="cursor: pointer; color: #ff4757;"><input type="checkbox" name="is_banned" {% if u.is_banned %}checked{% endif %}> 🚫 ბანი</label>
@@ -461,7 +462,7 @@
                                     <div style="display: flex; flex-direction: column; gap: 4px;">
                                         <label style="font-size: 11px; color: #00ffcc; font-weight: bold;">სრული სახელი</label>
                                         <input type="text" name="full_name" value="{{ u.full_name }}" class="input-field" placeholder="სახელი და გვარი">
-                                        
+                                       
                                         <label style="font-size: 11px; color: #00ffcc; font-weight: bold; margin-top: 6px;">ელ-ფოსტა</label>
                                         <input type="text" name="email" value="{{ u.email }}" class="input-field" placeholder="user@gmail.com">
                                     </div>
@@ -469,7 +470,7 @@
                                     <div style="display: flex; flex-direction: column; gap: 4px;">
                                         <label style="font-size: 11px; color: #00ffcc; font-weight: bold;">მობილური</label>
                                         <input type="text" value="{{ u.phone }}" disabled class="input-field" style="background: #161622; color: #00ffcc;">
-                                        
+                                       
                                         <label style="font-size: 11px; color: #00ffcc; font-weight: bold; margin-top: 6px;">საბანკო IBAN</label>
                                         <input type="text" value="{{ u.bank_account }}" disabled class="input-field" style="background: #161622; color: #ffcc00; font-family: monospace;">
                                     </div>
@@ -477,7 +478,7 @@
                                     <div style="display: flex; flex-direction: column; gap: 4px;">
                                         <label style="font-size: 11px; color: #00ffcc; font-weight: bold;">ანგარიშის მფლობელი</label>
                                         <input type="text" name="holder_name" value="{{ u.holder_name }}" class="input-field" placeholder="მფლობელი">
-                                        
+                                       
                                         <label style="font-size: 11px; color: #00ffcc; font-weight: bold; margin-top: 6px;">პირადი ნომერი</label>
                                         <input type="text" value="{{ u.personal_number if u.personal_number else 'არ არის' }}" disabled class="input-field" style="background: #161622; color: #fff;">
                                     </div>
@@ -518,7 +519,7 @@
                                             <label style="font-size: 10px; color: #a1a1aa; display: block; margin-bottom: 2px;">ახალი პაროლი:</label>
                                             <input type="text" name="new_password" placeholder="შეცვალე პაროლი..." class="input-field" style="font-size: 11px; padding: 5px; width: 150px;">
                                         </div>
-                                        
+                                       
                                         {% if u.verification_photo %}
                                         <div>
                                             <label style="font-size: 10px; color: #00ffcc; display: block; margin-bottom: 2px;">ვერიფიკაციის სელფი:</label>
@@ -593,7 +594,7 @@ function filterUsers() {
         let hasVisibleUser = false;
         
         userCards.forEach(card => {
-            let usernameSpan = card.querySelector('span'); // პოულობს იუზერის სახელს
+            let usernameSpan = card.querySelector('span'); 
             if (usernameSpan) {
                 let username = usernameSpan.textContent || usernameSpan.innerText;
                 if (username.toLowerCase().indexOf(filter) > -1) {
