@@ -670,15 +670,10 @@ def admin_dashboard():
             'users': [u for u in users_sorted if u.region == reg.region_id]
         }
     
-    ads_folder = os.path.join(app.root_path, 'static', 'ads')
-    os.makedirs(ads_folder, exist_ok=True)
-    
     region_sponsors = {}
     for reg in regions:
-        filename = f"{reg.region_id}.jpg"
-        filepath = os.path.join(ads_folder, filename)
-        if os.path.exists(filepath):
-            region_sponsors[reg.region_id] = url_for('static', filename=f'ads/{filename}')
+        if reg.sponsor_image and reg.sponsor_image.strip() != "":
+            region_sponsors[reg.region_id] = reg.sponsor_image
         else:
             region_sponsors[reg.region_id] = None
 
