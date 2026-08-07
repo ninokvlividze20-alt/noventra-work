@@ -584,17 +584,42 @@ def add_task():
             return redirect(url_for('admin_dashboard'))
     return render_template('add_task.html')
 
+# 🛠️ დაამატე ეს მარშრუტი ვერიფიკაციის მართვისთვის
+@app.route('/admin/verify-user/<int:user_id>/<action>', methods=['POST'])
+@login_required
+def admin_verify_user(user_id, action):
+    if not current_user.is_admin:
+        abort(403)
+    
+    user = User.query.get_or_404(user_id)
+    if action == 'approve':
+        user.verification_status = 'approved'
+        flash(f'მომხმარებელი {user.username} წარმატებით დავერიფიცირდა!', 'success')
+    elif action == 'reject':
+        user.verification_status = 'rejected'
+        # ფოტოს ვშლით უარის შემთხვევაში, რომ ადგილი არ დაიკავოს
+        user.verification_photo = None
+        user.personal_number = None
+        flash(f'მომხმარებელი {user.username} ვერიფიკაცია უარყოფილია.', 'error')
+        
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# 🛠️ შესწორებული ადმინ-დაშბორდის მარშრუტი (დაამატე partners)
 @app.route('/admin')
+@login_required
 def admin_dashboard():
-    # 👑 პირდაპირი გარანტია: ვპოულობთ noventra_admin-ს და ავტომატურად ვლოგინებთ
+    # 👑 ავტორიზაცია
     admin_user = User.query.filter_by(username='noventra_admin').first()
     if admin_user:
         admin_user.is_admin = True
         db.session.commit()
-        login_user(admin_user)
+        if not current_user.is_admin:
+            login_user(admin_user)
     
     users = User.query.all()
     regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
+    partners = PartnerSponsor.query.all() # 🛠️ ეს აკლდა შენს კოდს
     
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     current_week_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
@@ -638,15 +663,18 @@ def admin_dashboard():
     quiz_questions = QuizQuestion.query.all()
 
     return render_template('admin_dashboard.html', 
-                         users=users_sorted, 
-                         users_by_region=users_by_region,
-                         user_stats=user_stats,
-                         regions=regions, 
-                         region_sponsors=region_sponsors,
-                         current_week_prize_pool=current_week_prize_pool,
-                         top_region=top_region,
-                         top_region_users=top_region_users,
-                         quiz_questions=quiz_questions)
+                           users=users_sorted, 
+                           users_by_region=users_by_region,
+                           user_stats=user_stats,
+                           regions=regions, 
+                           partners=partners, # 🛠️ გადავცემთ partners
+                           region_sponsors=region_sponsors,
+                           current_week_prize_pool=current_week_prize_pool,
+                           top_region=top_region,
+                           top_region_users=top_region_users,
+                           quiz_questions=quiz_questions)
+
+# ... (დანარჩენი ფუნქციები დატოვე ისე, როგორც იყო) ...
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -733,16 +761,15 @@ def admin_update_sponsor():
     file = request.files.get('sponsor_image')
     
     if file and region_id and allowed_file(file.filename):
-        ads_folder = os.path.join(app.root_path, 'static', 'ads')
-        os.makedirs(ads_folder, exist_ok=True)
-        filename = f"{region_id}.jpg"
-        filepath = os.path.join(ads_folder, filename)
-        file.save(filepath)
+        # 🛠️ ვცვლით ფაილად შენახვას ბაზაში Base64 ტექსტად შენახვით
+        encoded_string = base64.b64encode(file.read()).decode('utf-8')
+        image_data = f"data:image/jpeg;base64,{encoded_string}"
         
         region = RegionScore.query.filter_by(region_id=region_id).first()
         if region:
+            region.sponsor_image = image_data  # ვწერთ ბაზის სვეტში
             db.session.commit()
-            flash("სპონსორის ფოტო წარმატებით აიტვირთა!", "success")
+            flash("სპონსორის ფოტო წარმატებით შეინახა ბაზაში!", "success")
         else:
             flash("რეგიონი ვერ მოიძებნა ბაზაში.", "danger")
     else:
@@ -754,13 +781,14 @@ def admin_update_sponsor():
 def admin_delete_sponsor(region_id):
     if not current_user.is_admin:
         abort(403)
-    filename = f"{region_id}.jpg"
-    filepath = os.path.join(app.root_path, 'static', 'ads', filename)
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    
+    region = RegionScore.query.filter_by(region_id=region_id).first()
+    if region:
+        region.sponsor_image = ""  # ვასუფთავებთ ბაზაში სურათის ველს
+        db.session.commit()
         flash("სპონსორის ფოტო წაშლილია!", "success")
     else:
-        flash("ფოტო ვერ მოიძებნა.", "warning")
+        flash("რეგიონი ვერ მოიძებნა.", "warning")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/region/<region_id>/reset_score', methods=['POST'])

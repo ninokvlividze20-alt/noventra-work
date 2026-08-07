@@ -58,6 +58,63 @@
         </div>
     </div>
 
+<!-- 🪪 KYC ვერიფიკაციის მოსაცდელი მოთხოვნები -->
+    <div class="admin-section" style="border-color: #00ffcc;">
+        <h3>🪪 ვერიფიკაციის მოსაცდელი მოთხოვნები</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">აქ ჩანს ყველა მომხმარებელი, ვინც ატვირთა პერსონალური მონაცემები და ელოდება ადმინისტრატორის დადასტურებას.</p>
+
+        {% set pending_users = [] %}
+        {% for reg_id, data in users_by_region.items() %}
+            {% for u in data.users %}
+                {% if u.verification_status == 'pending' %}
+                    {% set _ = pending_users.append(u) %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+
+        {% if pending_users %}
+        <div style="overflow-x: auto; margin-top: 15px;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>მომხმარებელი</th>
+                        <th>პირადი ნომერი</th>
+                        <th>სელფი / ფოტო</th>
+                        <th>მოქმედება</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in pending_users %}
+                    <tr>
+                        <td><strong>{{ u.username }}</strong><br><span style="font-size: 11px; color: #888;">{{ u.full_name }}</span></td>
+                        <td style="color: #ffcc00; font-family: monospace; font-weight: bold;">{{ u.personal_number }}</td>
+                        <td>
+                            {% if u.verification_photo %}
+                                <a href="{{ u.verification_photo }}" target="_blank" class="btn-sm btn-warning" style="padding: 4px 8px; text-decoration: none;">🖼️ ფოტოს ნახვა</a>
+                            {% else %}
+                                <span style="color: #ff4757;">არ არის ფოტო</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <form action="{{ url_for('admin_verify_user', user_id=u.id, action='approve') }}" method="POST" onsubmit="saveScrollPosition()">
+                                    <button type="submit" class="btn-sm btn-success" style="padding: 6px 12px;">✅ დამტკიცება</button>
+                                </form>
+                                <form action="{{ url_for('admin_verify_user', user_id=u.id, action='reject') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ ვერიფიკაციის უარყოფა?');">
+                                    <button type="submit" class="btn-sm btn-danger" style="padding: 6px 12px;">❌ უარყოფა</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #00ffcc; font-size: 13px; margin-top: 10px; margin-bottom: 0;">არ არის ვერიფიკაციის მოლოდინში მყოფი მომხმარებლები.</p>
+        {% endif %}
+    </div>
+
     <!-- 🧮 გამარჯვებული რეგიონის საპრიზო თანხების მართვა და ჩარიცხვა -->
     <div class="admin-section" style="border-color: #00ffcc;">
         <h3>🧮 გამარჯვებული რეგიონის თანხების ავტომატური გადანაწილება</h3>
