@@ -90,7 +90,7 @@
                         <td style="color: #ffcc00; font-family: monospace; font-weight: bold;">{{ u.personal_number }}</td>
                         <td>
                             {% if u.verification_photo %}
-                                <a href="{{ u.verification_photo }}" target="_blank" class="btn-sm btn-warning" style="padding: 4px 8px; text-decoration: none;">🖼️ ფოტოს ნახვა</a>
+                                <a href="{{ url_for('get_verification_image', user_id=u.id) }}" target="_blank" class="btn-sm btn-warning" style="padding: 4px 8px; text-decoration: none;">🖼️ ფოტოს ნახვა</a>
                             {% else %}
                                 <span style="color: #ff4757;">არ არის ფოტო</span>
                             {% endif %}
@@ -522,7 +522,7 @@
                                         {% if u.verification_photo %}
                                         <div>
                                             <label style="font-size: 10px; color: #00ffcc; display: block; margin-bottom: 2px;">ვერიფიკაციის სელფი:</label>
-                                            <a href="{{ u.verification_photo }}" target="_blank" class="btn-sm btn-warning" style="padding: 5px 10px; font-size: 11px; text-decoration: none;">🖼️ ფოტოს ნახვა</a>
+                                            <a href="{{ url_for('get_verification_image', user_id=u.id) }}" target="_blank" class="btn-sm btn-warning" style="padding: 5px 10px; font-size: 11px; text-decoration: none;">🖼️ ფოტოს ნახვა</a>
                                         </div>
                                         {% endif %}
                                     </div>

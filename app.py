@@ -605,6 +605,28 @@ def admin_verify_user(user_id, action):
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/user/<int:user_id>/verification_image')
+@login_required
+def get_verification_image(user_id):
+    if not current_user.is_admin:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    if not user.verification_photo:
+        return "ფოტო არ მოიძებნა", 404
+    
+    try:
+        # ბაზიდან წამოღებული Base64-ის დამუშავება
+        if "," in user.verification_photo:
+            header, encoded = user.verification_photo.split(",", 1)
+        else:
+            encoded = user.verification_photo
+            
+        data = base64.b64decode(encoded)
+        from flask import Response
+        return Response(data, mimetype='image/jpeg')
+    except Exception as e:
+        return "ფოტოს დამუშავების შეცდომა", 500
+
 # 🛠️ შესწორებული ადმინ-დაშბორდის მარშრუტი (დაამატე partners)
 @app.route('/admin')
 @login_required

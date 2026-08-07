@@ -424,29 +424,37 @@ updateCountdown();
     {% endif %}
 </div> <!-- აქ მთავრდება .dashboard-grid -->
 
-<!-- 🔒 პაროლის შეცვლის ბლოკი ყველასთვის (იუზერისთვისაც და ადმინისთვისაც) -->
+<!-- 🔒 უსაფრთხოება: პაროლის შეცვლა (ჩამოსაშლელი) -->
 <div class="card" style="margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
-    <h3 style="color: #ffcc00;">🔒 უსაფრთხოება: პაროლის შეცვლა</h3>
-    <p style="color: #a1a1aa; font-size: 13px; margin-bottom: 15px;">თუ გსურთ მიმდინარე პაროლის შეცვლა, შეიყვანეთ ძველი და ახალი პაროლები:</p>
-    
-    <form action="{{ url_for('change_password') }}" method="POST">
-        <div style="margin-bottom: 12px;">
-            <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">მიმდინარე პაროლი:</label>
-            <input type="password" name="current_password" required class="input-field" placeholder="••••••••">
-        </div>
+    <details style="cursor: pointer;">
+        <summary style="color: #ffcc00; font-size: 18px; font-weight: bold; outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+            <span>🔒 უსაფრთხოება: პაროლის შეცვლა</span>
+            <span style="font-size: 12px; color: #a1a1aa; font-weight: normal;">(გახსნა / დახურვა ▼)</span>
+        </summary>
         
-        <div style="margin-bottom: 12px;">
-            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ახალი პაროლი (მინ. 6 სიმბოლო):</label>
-            <input type="password" name="new_password" required class="input-field" placeholder="••••••••">
+        <div style="margin-top: 15px; border-top: 1px solid #222233; padding-top: 15px;">
+            <p style="color: #a1a1aa; font-size: 13px; margin-bottom: 15px;">თუ გსურთ მიმდინარე პაროლის შეცვლა, შეიყვანეთ ძველი და ახალი პაროლები:</p>
+            
+            <form action="{{ url_for('change_password') }}" method="POST">
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">მიმდინარე პაროლი:</label>
+                    <input type="password" name="current_password" required class="input-field" placeholder="••••••••">
+                </div>
+                
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ახალი პაროლი (მინ. 6 სიმბოლო):</label>
+                    <input type="password" name="new_password" required class="input-field" placeholder="••••••••">
+                </div>
+                
+                <div style="margin-bottom: 18px;">
+                    <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">გაიმეორეთ ახალი პაროლი:</label>
+                    <input type="password" name="confirm_password" required class="input-field" placeholder="••••••••">
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 10px; font-weight: bold; background: #00ffcc; color: #000; border: none; border-radius: 8px; cursor: pointer;">პაროლის განახლება</button>
+            </form>
         </div>
-        
-        <div style="margin-bottom: 18px;">
-            <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">გაიმეორეთ ახალი პაროლი:</label>
-            <input type="password" name="confirm_password" required class="input-field" placeholder="••••••••">
-        </div>
-        
-        <button type="submit" class="btn btn-success" style="width: 100%; padding: 10px; font-weight: bold; background: #00ffcc; color: #000; border: none; border-radius: 8px; cursor: pointer;">პაროლის განახლება</button>
-    </form>
+    </details>
 </div>
 
 <div class="board-card">
