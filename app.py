@@ -1306,15 +1306,18 @@ with app.app_context():
     if admin_user:
         admin_user.is_admin = True
         admin_user.role = 'admin'
-    else:
-        new_admin = User(
-            username='noventra_admin',
+
+    # 🟢 მეორე ადმინი მობილურისთვის
+    admin_mobile = User.query.filter_by(username='noventra_mobile').first()
+    if not admin_mobile:
+        new_mobile_admin = User(
+            username='noventra_mobile',
             password=generate_password_hash('admin12345', method='pbkdf2:sha256'),
             is_admin=True,
             role='admin',
             verification_status='approved'
         )
-        db.session.add(new_admin)
+        db.session.add(new_mobile_admin)
 
     db.session.commit()
 
