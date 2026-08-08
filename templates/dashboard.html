@@ -113,27 +113,31 @@
 
     /* 🪟 დიზაინერული მოდალური ფანჯარა ენერგიის ამოწურვისთვის (მხოლოდ ვიქტორინა) */
     .ad-modal {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.85);
-        backdrop-filter: blur(5px);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-    .ad-modal-content {
-        background: #111118;
-        border: 1px solid #00ffcc;
-        padding: 20px;
-        border-radius: 16px;
-        width: 90%;
-        max-width: 450px;
-        max-height: 90vh;
-        overflow-y: auto;
-        text-align: center;
-        box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
-    }
+    display: none;
+    position: fixed; /* 👈 მთავარია იყოს fixed და არა absolute */
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999; /* 👈 რომ ყველაზე ზევით იყოს და სხვებმა არ გადაფარონ */
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.ad-modal-content {
+    background: #111118;
+    border: 1px solid #00ffcc;
+    padding: 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    margin: auto; /* 👈 ეხმარება ეკრანის ცენტრში მყარად დგომაში */
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+}
 </style>
 
 <!-- 🏆 გასული კვირის ისტორია და გამჭვირვალობის პრინციპი (დეტალური სია) -->
