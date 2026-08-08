@@ -435,17 +435,22 @@ def leader_dashboard():
     region_info = RegionScore.query.filter_by(region_id=current_user.region).first()
     team_members = User.query.filter_by(region=current_user.region).order_by(User.total_clicks.desc()).all()
     
+    # მთავარი საპრიზო ფონდის წამოღება
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     total_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
     
-    leader_prize_pool = 500.0
+    # ლიდერების ფონდის წამოღება ბაზიდან (თუ არ არსებობს, დეფალტად 500.0)
+    leader_prize_setting = Settings.query.filter_by(key='leader_prize_pool').first()
+    leader_prize_pool = float(leader_prize_setting.value) if leader_prize_setting else 500.0
+    
+    # მოთამაშეების ფონდი = სრული ფონდი მინუს ლიდერების წილი
     user_prize_pool = total_prize_pool - leader_prize_pool
 
     return render_template('leader_dashboard.html', 
-                           region_info=region_info,
-                           team_members=team_members,
-                           user_prize_pool=user_prize_pool,
-                           leader_prize_pool=leader_prize_pool)
+                          region_info=region_info,
+                          team_members=team_members,
+                          user_prize_pool=user_prize_pool,
+                          leader_prize_pool=leader_prize_pool)
 
 @app.route('/dashboard')
 @login_required
@@ -1380,6 +1385,44 @@ def api_user_status():
         "prize_pool": prize_pool,
         "regions": regions_data
     })
+
+# 🌐 ლაივ რეიტინგის API ლიდერების პანელისთვის
+@app.route('/api/live_leader_stats')
+@login_required
+def api_live_leader_stats():
+    if current_user.role != 'leader' and not current_user.is_admin:
+        return jsonify({"success": False}), 403
+    
+    regions = RegionScore.query.all()
+    regions_data = {r.region_id: {"name": r.region_name, "score": r.score} for r in regions}
+    
+    return jsonify({
+        "success": True,
+        "regions": regions_data
+    })
+
+# 💬 ლიდერების გლობალური ჩატი
+@app.route('/leader/global_chat', methods=['GET', 'POST'])
+@login_required
+def leader_global_chat():
+    if current_user.role != 'leader' and not current_user.is_admin:
+        abort(403)
+    
+    if request.method == 'POST':
+        text = request.form.get('message')
+        if text and text.strip():
+            new_msg = Question(
+                text=text.strip(),
+                username=f"👑 {current_user.username}",
+                user_phone=current_user.phone or "",
+                region_id='leaders_global_room'
+            )
+            db.session.add(new_msg)
+            db.session.commit()
+        return redirect(url_for('leader_global_chat'))
+        
+    messages = Question.query.filter_by(region_id='leaders_global_room').order_by(Question.id.asc()).all()
+    return render_template('leader_global_chat.html', messages=messages)
 
 if __name__ == '__main__':
     app.run(debug=True)

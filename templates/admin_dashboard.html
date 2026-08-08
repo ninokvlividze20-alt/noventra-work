@@ -132,30 +132,43 @@
     </div>
 
     <!-- 🏆 სეზონისა და საპრიზო ფონდის მართვა -->
-    <div class="admin-section" style="border-color: #ffcc00;">
-        <h3>🏆 სეზონისა და საპრიზო ფონდის მართვა</h3>
-        <div class="grid-2" style="align-items: center;">
-            <form action="{{ url_for('admin_update_prize') }}" method="POST" onsubmit="saveScrollPosition()" style="display: flex; gap: 10px; align-items: center;">
-                <div style="flex-grow: 1;">
-                    <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">კვირის საპრიზო ფონდი (₾):</label>
+<div class="admin-section" style="border-color: #ffcc00;">
+    <h3>🏆 სეზონისა და საპრიზო ფონდის მართვა</h3>
+    <div class="grid-2" style="align-items: center;">
+        
+        <!-- ფონდების მართვის სექცია -->
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <form action="{{ url_for('admin_update_prize') }}" method="POST" onsubmit="saveScrollPosition()">
+                <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">კვირის საერთო საპრიზო ფონდი (₾):</label>
+                <div style="display: flex; gap: 10px;">
                     <input type="text" name="prize_pool" value="{{ current_week_prize_pool | default('1200') }}" required class="input-field">
+                    <button type="submit" class="btn-sm btn-success" style="padding: 10px 15px;">შენახვა</button>
                 </div>
-                <button type="submit" class="btn-sm btn-success" style="margin-top: 18px; padding: 10px 15px;">შენახვა</button>
             </form>
 
-            <div style="display: flex; flex-direction: column; gap: 10px; border-left: 1px solid #222233; padding-left: 20px;">
-                <form action="{{ url_for('admin_toggle_game') }}" method="POST" onsubmit="saveScrollPosition()">
-                    <button type="submit" class="btn-sm btn-warning" style="width: 100%; padding: 10px;">
-                        ⚡ თამაშის რეჟიმის გადართვა (ჩართ./გამორთ.)
-                    </button>
-                </form>
-               
-                <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ სეზონის დასრულება, გამარჯვებულის გამოვლენა და ყველა რეგიონის ქულების განულება?');">
-                    <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
-                </form>
-            </div>
+            <form action="{{ url_for('admin_update_leader_prize') }}" method="POST" onsubmit="saveScrollPosition()">
+                <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">👑 ლიდერების საპრიზო ფონდი (₾):</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" name="leader_prize_pool" value="500" required class="input-field">
+                    <button type="submit" class="btn-sm btn-success" style="padding: 10px 15px;">შენახვა</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ფუნქციური მართვის სექცია -->
+        <div style="display: flex; flex-direction: column; gap: 10px; border-left: 1px solid #222233; padding-left: 20px;">
+            <form action="{{ url_for('admin_toggle_game') }}" method="POST" onsubmit="saveScrollPosition()">
+                <button type="submit" class="btn-sm btn-warning" style="width: 100%; padding: 10px;">
+                    ⚡ თამაშის რეჟიმის გადართვა (ჩართ./გამორთ.)
+                </button>
+            </form>
+            
+            <form action="{{ url_for('admin_reset_season') }}" method="POST" onsubmit="saveScrollPosition(); return confirm('ნამდვილად გსურთ სეზონის დასრულება?');">
+                <button type="submit" class="btn-sm btn-danger" style="width: 100%; padding: 10px;">🔴 სეზონის დასრულება / ქულების განულება</button>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- 🪪 KYC ვერიფიკაციის მოსაცდელი მოთხოვნები -->
     <div class="admin-section" style="border-color: #00ffcc;">
