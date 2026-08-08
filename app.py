@@ -469,30 +469,10 @@ import time
 @app.route('/api/score', methods=['POST'])
 @login_required
 def add_score():
-    # 🤖 ბოტებისგან დაცვა: სერვერის მხარეს კლიკების სიჩქარის კონტროლი (Rate Limiting)
-    now = time.time()
-    if not hasattr(current_user, 'last_click_time'):
-        current_user.last_click_time = now
-        current_user.rapid_clicks_count = 0
-
-    time_diff = now - current_user.last_click_time
-    current_user.last_click_time = now
-
-    # თუ მომხმარებელი აკეთებს კლიკებს ზედმეტად სწრაფად (მაგ. წამში 15 კლიკზე მეტს, რაც ფიზიკურად შეუძლებელია)
-    if time_diff < 0.06:  
-        current_user.rapid_clicks_count += 1
-        if current_user.rapid_clicks_count > 10:
-            current_user.is_banned = True
-            db.session.commit()
-            return jsonify({"success": False, "message": "ბოტი გამოვლინდა! ანგარიში დაიბლოკა."}), 403
-    else:
-        current_user.rapid_clicks_count = max(0, current_user.rapid_clicks_count - 1)
-
     data = request.get_json() or {}
     region_id = data.get('region_id')
     points = int(data.get('points', 1))
     
-    # ერთ ჯერზე მაქსიმუმ 50 კლიკის მიღება (უსაფრთხოების ზომა)
     if points > 50 or points < 1:
         return jsonify({"success": False, "message": "არასწორი მოთხოვნა"}), 400
     

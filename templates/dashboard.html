@@ -153,12 +153,6 @@
     </details>
 </div>
 
-<!-- ℹ️ 5000 კლიკიანი ლიმიტის საინფორმაციო შეტყობინება მოთამაშეებისთვის -->
-<div style="background: rgba(255, 204, 0, 0.08); border: 1px solid #ffcc00; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: #fff;">
-    <strong style="color: #ffcc00;">ℹ️ მნიშვნელოვანი წესი პრიზების განაწილებაზე:</strong> 
-    კვირის ბოლოს საპრიზო ფონდიდან თანხების მისაღებად აუცილებელია რეგიონის თითოეულმა მოთამაშემ დააგროვოს **მინიმუმ 5000 კლიკი** (დღეში საშუალოდ ~715 კლიკი). მოთამაშეები, რომლებსაც 5000-ზე ნაკლები კლიკი ექნებათ, განაწილებაში ვერ მიიღებენ მონაწილეობას.
-</div>
-
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1 style="color: #fff; font-size: 22px; margin: 0;">⚡ მოთამაშე: <span style="color: #00ffcc;">{{ current_user.username }}</span></h1>
 </div>
@@ -179,110 +173,6 @@
         <div style="font-size: 11px; color: #888; margin-top: 3px;">(სეზონი სრულდება კვირას 18:00 სთ-ზე)</div>
     </div>
 </div>
-
-<!-- 🪪 მომხმარებლის ვერიფიკაციისა და საბანკო რეკვიზიტების ერთიანი ბლოკი (ჩამოსაშლელი) -->
-<div class="card" style="border-color: #00ffcc; margin-bottom: 20px;">
-    <details style="cursor: pointer;">
-        <summary style="color: #00ffcc; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; outline: none;">
-            <span style="display: flex; align-items: center; gap: 8px;">🪪 გაიარეთ სავალდებულო ვერიფიკაცია</span>
-            <span style="font-size: 12px; color: #ffcc00; font-weight: normal;">(გახსნა / დახურვა ▼)</span>
-        </summary>
-        
-        <div style="margin-top: 15px; border-top: 1px solid #222233; padding-top: 15px;">
-            {% if current_user.verification_status == 'approved' %}
-                <div style="background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; text-align: center;">
-                    <p style="color: #00ffcc; font-weight: bold; margin: 0; font-size: 15px;">✅ შენი ანგარიში ვერიფიცირებულია!</p>
-                    <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">შენ სრულად გაიარე იდენტიფიკაცია და გაქვს პრიზების მიღების უფლება.</p>
-                </div>
-            {% elif current_user.verification_status == 'pending' %}
-                <div style="background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; padding: 15px; border-radius: 10px; text-align: center;">
-                    <p style="color: #ffcc00; font-weight: bold; margin: 0; font-size: 15px;">⏳ შენი ვერიფიკაციის მოთხოვნა განხილვაშია</p>
-                    <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">ადმინისტრატორი ამოწმებს ატვირთულ ფოტოსა და მონაცემებს. გთხოვთ მოიცადოთ.</p>
-                </div>
-            {% else %}
-                <div style="background: rgba(255, 71, 87, 0.05); border: 1px solid rgba(255, 71, 87, 0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-                    <p style="color: #ff4757; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">
-                        ⚠️ მკაცრი ასაკობრივი შეზღუდვა და ვერიფიკაცია
-                    </p>
-                    <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
-                        საქართველოს კანონმდებლობის შესაბამისად, პლატფორმაზე, სადაც გათვალისწინებულია ფულადი პრიზები და საპრიზო ფონდები, არასრულწლოვნების მონაწილეობა მკაცრად აკრძალულია. მაქსიმალური სამართლებრივი დაცულობისა და გამჭვირვალობის მიזნით, ყველა მონაწილე ვალდებულია გაიაროს სავალდებულო ვერიფიკაცია (KYC). არასრულწლოვნის გამოვლენის შემთხვევაში ანგარიში დაიბლოკება და თანხა გაუქმდება.
-                    </p>
-                    <p style="color: #fff; font-size: 12px; margin: 0; font-weight: bold;">
-                        გთხოვთ მიჰყვეთ ინსტრუქციას:
-                    </p>
-                </div>
-
-                <div style="background: #161622; border: 1px dashed #00ffcc; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 12px; color: #fff;">
-                    <p style="margin: 0 0 5px 0; color: #ffcc00; font-weight: bold;">📝 ინსტრუქცია:</p>
-                    1. აიღეთ სუფთა თეთრი ფურცელი და მიაწერეთ ეს უნიკალური კოდი: <strong style="color: #00ffcc; font-size: 14px;" id="verificationCodeText">NOVENTRA-{{ current_user.id }}42</strong> და დღევანდელი თარიღი.<br>
-                    2. ერთ ხელში დაიჭირეთ ეს ფურცელი, მეორეში კი თქვენი პირადობის მოწმობა.<br>
-                    3. გადაიღეთ სელფი ისე, რომ სახე, პირადობა და ფურცელზე არსებული კოდი მკაფიოდ ჩანდეს.
-                </div>
-
-                <form action="{{ url_for('submit_verification') }}" method="POST" enctype="multipart/form-data">
-                    <div style="margin-bottom: 12px; text-align: left;">
-                        <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
-                        <input type="tel" name="phone" value="{{ current_user.phone }}" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 12px; text-align: left;">
-                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">საბანკო ანგარიში (IBAN):</label>
-                        <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
-                        <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">პირადი ნომერი (11 ნიშნა):</label>
-                        <input type="text" name="personal_number" value="{{ current_user.personal_number }}" maxlength="11" minlength="11" placeholder="აუცილებლად 11 ციფრი" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ვერიფიკაციის ფოტო (სელფი პირადობით და ფურცლით):</label>
-                        <input type="file" name="verification_photo" accept="image/*" required class="input-field" style="padding: 6px;">
-                    </div>
-
-                    <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">🚀 მონაცემების და ვერიფიკაციის გაგზავნა</button>
-                </form>
-            {% endif %}
-        </div>
-    </details>
-</div>
-
-<!-- ⏱️ რეალური დროის ცოცხალი ტაიმერის სკრიპტი -->
-<script>
-function updateCountdown() {
-    const now = new Date();
-    const target = new Date();
-    let day = now.getDay();
-
-    target.setDate(now.getDate() + (7 - day) % 7);
-    target.setHours(18, 0, 0, 0);
-
-    if (now > target) {
-        target.setDate(target.getDate() + 7);
-    }
-
-    const diff = target - now;
-    if (diff <= 0) {
-        document.getElementById("liveCountdown").innerText = "🔴 სეზონი დასრულებულია!";
-        return;
-    }
-
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const m = Math.floor((diff / 1000 / 60) % 60);
-    const s = Math.floor((diff / 1000) % 60);
-
-    document.getElementById("liveCountdown").innerText = `${d}დ დღე : ${h}სთ : ${m}წთ : ${s}წმ`;
-}
-
-setInterval(updateCountdown, 1000);
-updateCountdown();
-</script>
 
     <!-- 🌟 მთავარი არენა: რეგიონული შეჯიბრი (ფიქსირებული მომხმარებლის რეგიონი) -->
     <div class="card" style="border-color: #ffcc00;">
@@ -387,7 +277,7 @@ updateCountdown();
                 <span>👥 შენი რეგიონის გუნდი და აქტიური მოთამაშეები (Live)</span>
                 <span style="font-size: 11px; color: #ffcc00;" id="myRegionNameBadge">({{ current_user.region | upper }})</span>
             </summary>
-            
+             
             <div style="margin-top: 12px; border-top: 1px solid #222233; padding-top: 10px;">
                 <!-- 🎯 შენი პირადი კლიკების გამოყოფილი ბლოკი -->
                 <div style="background: rgba(0, 255, 204, 0.08); border: 1px solid #00ffcc; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -414,7 +304,86 @@ updateCountdown();
         </details>
     </div>
 
-   <!-- ციფრული საფულე და რეკვიზიტები -->
+    <!-- 🪪 მომხმარებლის ვერიფიკაციისა და საბანკო რეკვიზიტების ერთიანი ბლოკი (ამოწეული ციფრული საფულის ზემოთ) -->
+<div class="card" style="border-color: #00ffcc; margin-top: 20px;">
+    <details style="cursor: pointer;">
+        <summary style="color: #00ffcc; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; outline: none;">
+            <span style="display: flex; align-items: center; gap: 8px;">🪪 გაიარეთ სავალდებულო ვერიფიკაცია</span>
+            <span style="font-size: 12px; color: #ffcc00; font-weight: normal;">(გახსნა / დახურვა ▼)</span>
+        </summary>
+        
+        <div style="margin-top: 15px; border-top: 1px solid #222233; padding-top: 15px;">
+            
+            <!-- ℹ️ 5000 კლიკიანი ლიმიტის საინფორმაციო შეტყობინება გადატანილია ვერიფიკაციის ბლოკში -->
+            <div style="background: rgba(255, 204, 0, 0.08); border: 1px solid #ffcc00; padding: 12px 16px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; color: #fff; text-align: left;">
+                <strong style="color: #ffcc00;">ℹ️ მნიშვნელოვანი წესი პრიზების განაწილებაზე:</strong> 
+                კვირის ბოლოს საპრიზო ფონდიდან თანხების მისაღებად აუცილებელია რეგიონის თითოეულმა მოთამაშემ დააგროვოს <strong>მინიმუმ 5000 კლიკი</strong> (დღეში საშუალოდ ~715 კლიკი). მოთამაშეები, რომლებსაც 5000-ზე ნაკლები კლიკი ექნებათ, განაწილებაში ვერ მიიღებენ მონაწილეობას.
+            </div>
+
+            {% if current_user.verification_status == 'approved' %}
+                <div style="background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; text-align: center;">
+                    <p style="color: #00ffcc; font-weight: bold; margin: 0; font-size: 15px;">✅ შენი ანგარიში ვერიფიცირებულია!</p>
+                    <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">შენ სრულად გაიარე იდენტიფიკაცია და გაქვს პრიზების მიღების უფლება.</p>
+                </div>
+            {% elif current_user.verification_status == 'pending' %}
+                <div style="background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; padding: 15px; border-radius: 10px; text-align: center;">
+                    <p style="color: #ffcc00; font-weight: bold; margin: 0; font-size: 15px;">⏳ შენი ვერიფიკაციის მოთხოვნა განხილვაშია</p>
+                    <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">ადმინისტრატორი ამოწმებს ატვირთულ ფოტოსა და მონაცემებს. გთხოვთ მოიცადოთ.</p>
+                </div>
+            {% else %}
+                <div style="background: rgba(255, 71, 87, 0.05); border: 1px solid rgba(255, 71, 87, 0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: left;">
+                    <p style="color: #ff4757; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">
+                        ⚠️ მკაცრი ასაკობრივი შეზღუდვა და ვერიფიკაცია
+                    </p>
+                    <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
+                        საქართველოს კანონმდებლობის შესაბამისად, პლატფორმაზე, სადაც გათვალისწინებულია ფულადი პრიზები და საპრიზო ფონდები, არასრულწლოვნების მონაწილეობა მკაცრად აკრძალულია. მაქსიმალური სამართლებრივი დაცულობისა და გამჭვირვალობის მიזნით, ყველა მონაწილე ვალდებულია გაიაროს სავალდებულო ვერიფიკაცია (KYC). არასრულწლოვნის გამოვლენის შემთხვევაში ანგარიში დაიბლოკება და თანხა გაუქმდება.
+                    </p>
+                    <p style="color: #fff; font-size: 12px; margin: 0; font-weight: bold;">
+                        გთხოვთ მიჰყვეთ ინსტრუქციას:
+                    </p>
+                </div>
+
+                <div style="background: #161622; border: 1px dashed #00ffcc; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 12px; color: #fff; text-align: left;">
+                    <p style="margin: 0 0 5px 0; color: #ffcc00; font-weight: bold;">📝 ინსტრუქცია:</p>
+                    1. აიღეთ სუფთა თეთრი ფურცელი და მიაწერეთ ეს უნიკალური კოდი: <strong style="color: #00ffcc; font-size: 14px;" id="verificationCodeText">NOVENTRA-{{ current_user.id }}42</strong> და დღევანდელი თარიღი.<br>
+                    2. ერთ ხელში დაიჭირეთ ეს ფურცელი, მეორეში კი თქვენი პირადობის მოწმობა.<br>
+                    3. გადაიღეთ სელფი ისე, რომ სახე, პირადობა და ფურცელზე არსებული კოდი მკაფიოდ ჩანდეს.
+                </div>
+
+                <form action="{{ url_for('submit_verification') }}" method="POST" enctype="multipart/form-data">
+                    <div style="margin-bottom: 12px; text-align: left;">
+                        <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
+                        <input type="tel" name="phone" value="{{ current_user.phone }}" required class="input-field">
+                    </div>
+
+                    <div style="margin-bottom: 12px; text-align: left;">
+                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">საბანკო ანგარიში (IBAN):</label>
+                        <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000" required class="input-field">
+                    </div>
+
+                    <div style="margin-bottom: 15px; text-align: left;">
+                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
+                        <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი" required class="input-field">
+                    </div>
+
+                    <div style="margin-bottom: 15px; text-align: left;">
+                        <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">პირადი ნომერი (11 ნიშნა):</label>
+                        <input type="text" name="personal_number" value="{{ current_user.personal_number }}" maxlength="11" minlength="11" placeholder="აუცილებლად 11 ციფრი" required class="input-field">
+                    </div>
+
+                    <div style="margin-bottom: 15px; text-align: left;">
+                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ვერიფიკაციის ფოტო (სელფი პირადობით და ფურცლით):</label>
+                        <input type="file" name="verification_photo" accept="image/*" required class="input-field" style="padding: 6px;">
+                    </div>
+
+                    <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">🚀 მონაცემების და ვერიფიკაციის გაგზავნა</button>
+                </form>
+            {% endif %}
+        </div>
+    </details>
+</div>
+
+  <!-- ციფრული საფულე და რეკვიზიტები -->
 <div class="card">
     <h3>💰 ციფრული საფულე</h3>
     <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
@@ -585,13 +554,7 @@ let lastClickTimestamp = 0;
 function boostRegion(event) {
     let regionId = document.getElementById('userRegionSelect').value;
     
-    // 🛡️ კლიენტ მხარეს დაცვა სპამისა და სწრაფი დაკლიკებისგან (მინ. 50 მილიწამი კლიკებს შორის)
-    let now = Date.now();
-    if (now - lastClickTimestamp < 50) {
-        return; 
-    }
-    lastClickTimestamp = now;
-    
+    // 🚀 სრულიად თავისუფალი და სწრაფი დაკლიკება ყოველგვარი ხელოვნური შეზღუდვების გარეშე
     if (clickLimit <= 0) {
         document.getElementById('adModal').style.display = 'flex';
         loadQuiz(); 
@@ -643,13 +606,12 @@ function boostRegion(event) {
                         }
                     }
                 } else {
-                    alert(data.message || "შეცდომაა კლიკების გაგზავნისას.");
-                    location.reload();
+                    console.log("Sync info:", data.message);
                 }
             })
             .catch(err => console.error(err));
         }
-    }, 1000);
+    }, 400); // 0.4 წამში ერთხელ ბაკგრაუნდში სინქრონიზაცია აბსოლუტურად შეუმჩნეველი და სწრაფია
 }
 
 // 🧠 ვიქტორინის ჩატვირთვა API-დან
@@ -663,7 +625,7 @@ function loadQuiz() {
         if (data.success) {
             window.currentQuizData = data; 
 
-           let bannerHtml = '';
+          let bannerHtml = '';
 if (data.sponsor_image && data.sponsor_image.trim() !== "") {
     bannerHtml = `
         <div style="margin-bottom: 10px; border: 1px solid #ffcc00; border-radius: 8px; overflow: hidden; background: #000;">
@@ -715,7 +677,7 @@ function submitQuiz(q_id, chosen_opt) {
             document.getElementById('modalIconHeader').innerText = "🎉";
             document.getElementById('modalTitleText').innerText = "ბრავო, სწორია!";
             document.getElementById('correctAnswerText').innerHTML = `<span style="font-size: 16px; color: #00ffcc;">შენ წარმატებით გასცე პასუხი! ენერგია აღდგენილია! ⚡</span>`;
-            document.getElementById('modalSubText').innerText = "✨ აბა, განაგრძე რეგიონის ქაჩვა!";
+            document.getElementById('modalSubText').innerText = "✨ ახლა გააგრძელე ქულების დაგროვება!";
             document.getElementById('wrongModal').style.display = 'flex';
 
             setTimeout(() => {

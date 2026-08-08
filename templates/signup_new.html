@@ -5,6 +5,17 @@
     <div class="form-container" style="background-color: #121212; padding: 25px; border-radius: 15px; border: 1px solid #00ffcc; width: 360px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
         <h2 style="color: #00ffcc; margin-bottom: 20px; font-size: 20px; text-align: center;">რეგისტრაცია</h2>
         
+        <!-- ⚡ ლამაზი ფლეშ შეტყობინებების ჩვენება (ნიკნეიმის ან მეილის დუბლირებისას) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: rgba(255, 71, 87, 0.15); border: 1px solid #ff4757; color: #ff4757; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; text-align: center; font-weight: bold;">
+                        ⚠️ {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
         <form method="POST" action="{{ url_for('register') }}">
             <!-- სრული სახელი და გვარი (ვერიფიკაციისთვის) -->
             <div style="margin-bottom: 10px;">
