@@ -153,6 +153,12 @@
     </details>
 </div>
 
+<!-- ℹ️ 5000 კლიკიანი ლიმიტის საინფორმაციო შეტყობინება მოთამაშეებისთვის -->
+<div style="background: rgba(255, 204, 0, 0.08); border: 1px solid #ffcc00; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: #fff;">
+    <strong style="color: #ffcc00;">ℹ️ მნიშვნელოვანი წესი პრიზების განაწილებაზე:</strong> 
+    კვირის ბოლოს საპრიზო ფონდიდან თანხების მისაღებად აუცილებელია რეგიონის თითოეულმა მოთამაშემ დააგროვოს **მინიმუმ 5000 კლიკი** (დღეში საშუალოდ ~715 კლიკი). მოთამაშეები, რომლებსაც 5000-ზე ნაკლები კლიკი ექნებათ, განაწილებაში ვერ მიიღებენ მონაწილეობას.
+</div>
+
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h1 style="color: #fff; font-size: 22px; margin: 0;">⚡ მოთამაშე: <span style="color: #00ffcc;">{{ current_user.username }}</span></h1>
 </div>
@@ -160,19 +166,123 @@
 <div class="dashboard-grid">
     
     <!-- 📅 კვირის სეზონის ტაიმერი და ცოცხლად განახლებადი საპრიზო ფონდი -->
-<div style="background: linear-gradient(135deg, #1b1b2f, #111118); border: 2px solid #00ffcc; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 0 25px rgba(0, 255, 204, 0.15); margin-bottom: 20px;">
-    <div>
-        <span style="font-size: 12px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: bold; letter-spacing: 0.5px;">🏆 მიმდინარე კვირის საპრიზო ფონდი</span>
-        <div style="font-size: 32px; color: #00ffcc; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,204,0.3);"><span id="prizePoolDisplay">{{ current_week_prize_pool | default(1200) }}</span> ₾</div>
-    </div>
-    <div style="text-align: right;">
-        <span style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 4px; font-weight: bold;">⏳ კვირის დასრულებამდე დარჩენილია:</span>
-        <div style="font-size: 18px; color: #ff4757; font-weight: bold; font-family: monospace;" id="liveCountdown">
-            იტვირთება...
+    <div style="background: linear-gradient(135deg, #1b1b2f, #111118); border: 2px solid #00ffcc; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 0 25px rgba(0, 255, 204, 0.15); margin-bottom: 20px;">
+        <div>
+            <span style="font-size: 12px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: bold; letter-spacing: 0.5px;">🏆 მიმდინარე კვირის საპრიზო ფონდი</span>
+            <div style="font-size: 32px; color: #00ffcc; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,204,0.3);"><span id="prizePoolDisplay">{{ current_week_prize_pool | default(1200) }}</span> ₾</div>
         </div>
-        <div style="font-size: 11px; color: #888; margin-top: 3px;">(სეზონი სრულდება კვირას 18:00 სთ-ზე)</div>
+        <div style="text-align: right;">
+            <span style="font-size: 12px; color: #a1a1aa; display: block; margin-bottom: 4px; font-weight: bold;">⏳ კვირის დასრულებამდე დარჩენილია:</span>
+            <div style="font-size: 18px; color: #ff4757; font-weight: bold; font-family: monospace;" id="liveCountdown">
+                იტვირთება...
+            </div>
+            <div style="font-size: 11px; color: #888; margin-top: 3px;">(სეზონი სრულდება კვირას 18:00 სთ-ზე)</div>
+        </div>
     </div>
-</div>
+
+    <!-- 🪪 მომხმარებლის ვერიფიკაციისა და საბანკო რეკვიზიტების ერთიანი ბლოკი (ჩამოსაშლელი) -->
+    <div class="card" style="border-color: #00ffcc; margin-bottom: 20px;">
+        <details style="cursor: pointer;">
+            <summary style="color: #00ffcc; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; outline: none;">
+                <span style="display: flex; align-items: center; gap: 8px;">🪪 გაიარეთ სავალდებულო ვერიფიკაცია</span>
+                <span style="font-size: 12px; color: #ffcc00; font-weight: normal;">(გახსნა / დახურვა ▼)</span>
+            </summary>
+            
+            <div style="margin-top: 15px; border-top: 1px solid #222233; padding-top: 15px;">
+                {% if current_user.verification_status == 'approved' %}
+                    <div style="background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; text-align: center;">
+                        <p style="color: #00ffcc; font-weight: bold; margin: 0; font-size: 15px;">✅ შენი ანგარიში ვერიფიცირებულია!</p>
+                        <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">შენ სრულად გაიარე იდენტიფიკაცია და გაქვს პრიზების მიღების უფლება.</p>
+                    </div>
+                {% elif current_user.verification_status == 'pending' %}
+                    <div style="background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; padding: 15px; border-radius: 10px; text-align: center;">
+                        <p style="color: #ffcc00; font-weight: bold; margin: 0; font-size: 15px;">⏳ შენი ვერიფიკაციის მოთხოვნა განხილვაშია</p>
+                        <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">ადმინისტრატორი ამოწმებს ატვირთულ ფოტოსა და მონაცემებს. გთხოვთ მოიცადოთ.</p>
+                    </div>
+                {% else %}
+                    <div style="background: rgba(255, 71, 87, 0.05); border: 1px solid rgba(255, 71, 87, 0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <p style="color: #ff4757; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">
+                            ⚠️ მკაცრი ასაკობრივი შეზღუდვა და ვერიფიკაცია
+                        </p>
+                        <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
+                            საქართველოს კანონმდებლობის შესაბამისად, პლატფორმაზე, სადაც გათვალისწინებულია ფულადი პრიზები და საპრიზო ფონდები, არასრულწლოვნების მონაწილეობა მკაცრად აკრძალულია. მაქსიმალური სამართლებრივი დაცულობისა და გამჭვირვალობის მიזნით, ყველა მონაწილე ვალდებულია გაიაროს სავალდებულო ვერიფიკაცია (KYC). არასრულწლოვნის გამოვლენის შემთხვევაში ანგარიში დაიბლოკება და თანხა გაუქმდება.
+                        </p>
+                        <p style="color: #fff; font-size: 12px; margin: 0; font-weight: bold;">
+                            გთხოვთ მიჰყვეთ ინსტრუქციას:
+                        </p>
+                    </div>
+
+                    <div style="background: #161622; border: 1px dashed #00ffcc; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 12px; color: #fff;">
+                        <p style="margin: 0 0 5px 0; color: #ffcc00; font-weight: bold;">📝 ინსტრუქცია:</p>
+                        1. აიღეთ სუფთა თეთრი ფურცელი და მიაწერეთ ეს უნიკალური კოდი: <strong style="color: #00ffcc; font-size: 14px;" id="verificationCodeText">NOVENTRA-{{ current_user.id }}42</strong> და დღევანდელი თარიღი.<br>
+                        2. ერთ ხელში დაიჭირეთ ეს ფურცელი, მეორეში კი თქვენი პირადობის მოწმობა.<br>
+                        3. გადაიღეთ სელფი ისე, რომ სახე, პირადობა და ფურცელზე არსებული კოდი მკაფიოდ ჩანდეს.
+                    </div>
+
+                    <form action="{{ url_for('submit_verification') }}" method="POST" enctype="multipart/form-data">
+                        <div style="margin-bottom: 12px; text-align: left;">
+                            <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
+                            <input type="tel" name="phone" value="{{ current_user.phone }}" required class="input-field">
+                        </div>
+
+                        <div style="margin-bottom: 12px; text-align: left;">
+                            <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">საბანკო ანგარიში (IBAN):</label>
+                            <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000" required class="input-field">
+                        </div>
+
+                        <div style="margin-bottom: 15px; text-align: left;">
+                            <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
+                            <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი" required class="input-field">
+                        </div>
+
+                        <div style="margin-bottom: 15px; text-align: left;">
+                            <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">პირადი ნომერი (11 ნიშნა):</label>
+                            <input type="text" name="personal_number" value="{{ current_user.personal_number }}" maxlength="11" minlength="11" placeholder="აუცილებლად 11 ციფრი" required class="input-field">
+                        </div>
+
+                        <div style="margin-bottom: 15px; text-align: left;">
+                            <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ვერიფიკაციის ფოტო (სელფი პირადობით და ფურცლით):</label>
+                            <input type="file" name="verification_photo" accept="image/*" required class="input-field" style="padding: 6px;">
+                        </div>
+
+                        <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">🚀 მონაცემების და ვერიფიკაციის გაგზავნა</button>
+                    </form>
+                {% endif %}
+            </div>
+        </details>
+    </div>
+
+    <!-- ⏱️ რეალური დროის ცოცხალი ტაიმერის სკრიპტი -->
+    <script>
+    function updateCountdown() {
+        const now = new Date();
+        const target = new Date();
+        let day = now.getDay();
+
+        target.setDate(now.getDate() + (7 - day) % 7);
+        target.setHours(18, 0, 0, 0);
+
+        if (now > target) {
+            target.setDate(target.getDate() + 7);
+        }
+
+        const diff = target - now;
+        if (diff <= 0) {
+            document.getElementById("liveCountdown").innerText = "🔴 სეზონი დასრულებულია!";
+            return;
+        }
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / 1000 / 60) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+
+        document.getElementById("liveCountdown").innerText = `${d}დ დღე : ${h}სთ : ${m}წთ : ${s}წმ`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+    </script>
 
     <!-- 🌟 მთავარი არენა: რეგიონული შეჯიბრი (ფიქსირებული მომხმარებლის რეგიონი) -->
     <div class="card" style="border-color: #ffcc00;">
@@ -183,19 +293,19 @@
         <div style="background: #161622; border: 2px solid #ffcc00; border-radius: 14px; padding: 14px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(255, 204, 0, 0.15);">
             <span style="font-size: 11px; color: #ffcc00; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: bold;">📍 შენი რეგიონის გენერალური სპონსორი</span>
             {% set reg_sponsor_img = namespace(url='') %}
-{% for r in regions %}
-    {% if r.region_id == current_user.region and r.sponsor_image %}
-        {% set reg_sponsor_img.url = r.sponsor_image %}
-    {% endif %}
-{% endfor %}
+            {% for r in regions %}
+                {% if r.region_id == current_user.region and r.sponsor_image %}
+                    {% set reg_sponsor_img.url = r.sponsor_image %}
+                {% endif %}
+            {% endfor %}
 
-{% if reg_sponsor_img.url %}
-    <img src="{{ reg_sponsor_img.url }}" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
-{% else %}
-    <div style="width: 100%; height: 160px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #777; font-size: 12px; margin-bottom: 10px; border: 1px solid #33334d;">
-        სპონსორის ბანერი არ არის
-    </div>
-{% endif %}
+            {% if reg_sponsor_img.url %}
+                <img src="{{ reg_sponsor_img.url }}" alt="Region Sponsor" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #33334d;">
+            {% else %}
+                <div style="width: 100%; height: 160px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #777; font-size: 12px; margin-bottom: 10px; border: 1px solid #33334d;">
+                    სპონსორის ბანერი არ არის
+                </div>
+            {% endif %}
             <p style="font-size: 12px; color: #d1d1d6; margin: 0; line-height: 1.5;">
                 ⚠️ <strong>ყურადღება:</strong> კლიკების ამოწურვისას ჩაირთვება სპონსორის ვიქტორინა! უპასუხე და აღადგინე ენერგია! 🧠🔥
             </p>
@@ -226,27 +336,27 @@
         </div>
 
         <!-- 🪟 მოდალური ფანჯარა მხოლოდ ვიქტორინისთვის (მობილურზე ოპტიმიზებული) -->
-<div id="adModal" class="ad-modal">
-    <div class="ad-modal-content">
-        <h3 style="color: #ffcc00; margin-top: 0; font-size: 16px;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
-        <p style="font-size: 12px; color: #a1a1aa; margin-bottom: 12px;">
-            ენერგიის აღსადგენად უპასუხე სპონსორის ვიქტორინას:
-        </p>
-        <div id="quizContainer" style="margin-bottom: 10px;">
-            <!-- დინამიური ვიქტორინა ჩაიტვირთება აქ -->
+        <div id="adModal" class="ad-modal">
+            <div class="ad-modal-content">
+                <h3 style="color: #ffcc00; margin-top: 0; font-size: 16px;">⚡ შენი ენერგია (250 კლიკი) ამოიწურა!</h3>
+                <p style="font-size: 12px; color: #a1a1aa; margin-bottom: 12px;">
+                    ენერგიის აღსადგენად უპასუხე სპონსორის ვიქტორინას:
+                </p>
+                <div id="quizContainer" style="margin-bottom: 10px;">
+                    <!-- დინამიური ვიქტორინა ჩაიტვირთება აქ -->
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<!-- 💡 სწორი პასუხის საინფორმაციო ფანჯარა აიკონით -->
-<div id="wrongModal" class="ad-modal">
-    <div class="ad-modal-content" style="border-color: #ffcc00; background: linear-gradient(135deg, #161622, #111118); box-shadow: 0 0 35px rgba(255, 204, 0, 0.3); padding: 25px;">
-        <div id="modalIconHeader" style="font-size: 45px; margin-bottom: 10px;">💡</div>
-        <h3 id="modalTitleText" style="color: #ffcc00; margin-top: 0; font-size: 18px; letter-spacing: 0.5px;">სწორი პასუხი</h3>
-        <p id="correctAnswerText" style="font-size: 16px; color: #ffffff; margin: 15px 0; font-weight: bold; line-height: 1.6;"></p>
-        <p id="modalSubText" style="font-size: 12px; color: #00ffcc; margin: 0; font-weight: bold;">⏳ 5 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...</p>
-    </div>
-</div>
+        <!-- 💡 სწორი პასუხის საინფორმაციო ფანჯარა აიკონით -->
+        <div id="wrongModal" class="ad-modal">
+            <div class="ad-modal-content" style="border-color: #ffcc00; background: linear-gradient(135deg, #161622, #111118); box-shadow: 0 0 35px rgba(255, 204, 0, 0.3); padding: 25px;">
+                <div id="modalIconHeader" style="font-size: 45px; margin-bottom: 10px;">💡</div>
+                <h3 id="modalTitleText" style="color: #ffcc00; margin-top: 0; font-size: 18px; letter-spacing: 0.5px;">სწორი პასუხი</h3>
+                <p id="correctAnswerText" style="font-size: 16px; color: #ffffff; margin: 15px 0; font-weight: bold; line-height: 1.6;"></p>
+                <p id="modalSubText" style="font-size: 12px; color: #00ffcc; margin: 0; font-weight: bold;">⏳ 5 წამში ენერგია ავტომატურად აღდგება და დაბრუნდები დაშბორდზე...</p>
+            </div>
+        </div>
 
         <!-- რეგიონების ლიდერბორდის ცხრილი -->
         <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
@@ -259,13 +369,13 @@
                     </tr>
                 </thead>
                 <tbody id="regionsTableBody">
-    {% for reg in regions %}
-    <tr data-region-id="{{ reg.region_id }}" {% if reg.region_id == current_user.region %}style="background: rgba(0, 255, 204, 0.05);"{% endif %}>
-        <td>{{ reg.region_name }} {% if reg.region_id == current_user.region %}📍 (შენი){% endif %}</td>
-        <td class="region-score-cell" style="text-align: right; color: #00ffcc; font-weight: bold;">{{ reg.score }} ⚡</td>
-    </tr>
-    {% endfor %}
-</tbody>
+                    {% for reg in regions %}
+                    <tr data-region-id="{{ reg.region_id }}" {% if reg.region_id == current_user.region %}style="background: rgba(0, 255, 204, 0.05);"{% endif %}>
+                        <td>{{ reg.region_name }} {% if reg.region_id == current_user.region %}📍 (შენი){% endif %}</td>
+                        <td class="region-score-cell" style="text-align: right; color: #00ffcc; font-weight: bold;">{{ reg.score }} ⚡</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
@@ -304,93 +414,14 @@
         </details>
     </div>
 
-    <!-- 🪪 მომხმარებლის ვერიფიკაციისა და საბანკო რეკვიზიტების ერთიანი ბლოკი (ამოწეული ციფრული საფულის ზემოთ) -->
-<div class="card" style="border-color: #00ffcc; margin-top: 20px;">
-    <details style="cursor: pointer;">
-        <summary style="color: #00ffcc; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; outline: none;">
-            <span style="display: flex; align-items: center; gap: 8px;">🪪 გაიარეთ სავალდებულო ვერიფიკაცია</span>
-            <span style="font-size: 12px; color: #ffcc00; font-weight: normal;">(გახსნა / დახურვა ▼)</span>
-        </summary>
-        
-        <div style="margin-top: 15px; border-top: 1px solid #222233; padding-top: 15px;">
-            
-            <!-- ℹ️ 5000 კლიკიანი ლიმიტის საინფორმაციო შეტყობინება გადატანილია ვერიფიკაციის ბლოკში -->
-            <div style="background: rgba(255, 204, 0, 0.08); border: 1px solid #ffcc00; padding: 12px 16px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; color: #fff; text-align: left;">
-                <strong style="color: #ffcc00;">ℹ️ მნიშვნელოვანი წესი პრიზების განაწილებაზე:</strong> 
-                კვირის ბოლოს საპრიზო ფონდიდან თანხების მისაღებად აუცილებელია რეგიონის თითოეულმა მოთამაშემ დააგროვოს <strong>მინიმუმ 5000 კლიკი</strong> (დღეში საშუალოდ ~715 კლიკი). მოთამაშეები, რომლებსაც 5000-ზე ნაკლები კლიკი ექნებათ, განაწილებაში ვერ მიიღებენ მონაწილეობას.
-            </div>
-
-            {% if current_user.verification_status == 'approved' %}
-                <div style="background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; text-align: center;">
-                    <p style="color: #00ffcc; font-weight: bold; margin: 0; font-size: 15px;">✅ შენი ანგარიში ვერიფიცირებულია!</p>
-                    <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">შენ სრულად გაიარე იდენტიფიკაცია და გაქვს პრიზების მიღების უფლება.</p>
-                </div>
-            {% elif current_user.verification_status == 'pending' %}
-                <div style="background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; padding: 15px; border-radius: 10px; text-align: center;">
-                    <p style="color: #ffcc00; font-weight: bold; margin: 0; font-size: 15px;">⏳ შენი ვერიფიკაციის მოთხოვნა განხილვაშია</p>
-                    <p style="color: #a1a1aa; font-size: 12px; margin: 5px 0 0 0;">ადმინისტრატორი ამოწმებს ატვირთულ ფოტოსა და მონაცემებს. გთხოვთ მოიცადოთ.</p>
-                </div>
-            {% else %}
-                <div style="background: rgba(255, 71, 87, 0.05); border: 1px solid rgba(255, 71, 87, 0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: left;">
-                    <p style="color: #ff4757; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">
-                        ⚠️ მკაცრი ასაკობრივი შეზღუდვა და ვერიფიკაცია
-                    </p>
-                    <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0;">
-                        საქართველოს კანონმდებლობის შესაბამისად, პლატფორმაზე, სადაც გათვალისწინებულია ფულადი პრიზები და საპრიზო ფონდები, არასრულწლოვნების მონაწილეობა მკაცრად აკრძალულია. მაქსიმალური სამართლებრივი დაცულობისა და გამჭვირვალობის მიזნით, ყველა მონაწილე ვალდებულია გაიაროს სავალდებულო ვერიფიკაცია (KYC). არასრულწლოვნის გამოვლენის შემთხვევაში ანგარიში დაიბლოკება და თანხა გაუქმდება.
-                    </p>
-                    <p style="color: #fff; font-size: 12px; margin: 0; font-weight: bold;">
-                        გთხოვთ მიჰყვეთ ინსტრუქციას:
-                    </p>
-                </div>
-
-                <div style="background: #161622; border: 1px dashed #00ffcc; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 12px; color: #fff; text-align: left;">
-                    <p style="margin: 0 0 5px 0; color: #ffcc00; font-weight: bold;">📝 ინსტრუქცია:</p>
-                    1. აიღეთ სუფთა თეთრი ფურცელი და მიაწერეთ ეს უნიკალური კოდი: <strong style="color: #00ffcc; font-size: 14px;" id="verificationCodeText">NOVENTRA-{{ current_user.id }}42</strong> და დღევანდელი თარიღი.<br>
-                    2. ერთ ხელში დაიჭირეთ ეს ფურცელი, მეორეში კი თქვენი პირადობის მოწმობა.<br>
-                    3. გადაიღეთ სელფი ისე, რომ სახე, პირადობა და ფურცელზე არსებული კოდი მკაფიოდ ჩანდეს.
-                </div>
-
-                <form action="{{ url_for('submit_verification') }}" method="POST" enctype="multipart/form-data">
-                    <div style="margin-bottom: 12px; text-align: left;">
-                        <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">მობილურის ნომერი:</label>
-                        <input type="tel" name="phone" value="{{ current_user.phone }}" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 12px; text-align: left;">
-                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">საბანკო ანგარიში (IBAN):</label>
-                        <input type="text" name="bank_account" value="{{ current_user.bank_account }}" placeholder="GE00TB0000000000000000" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ანგარიშის მფლობელი (სახელი და გვარი):</label>
-                        <input type="text" name="holder_name" value="{{ current_user.holder_name }}" placeholder="მაგ: ნინო ჩადუნელი" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="color: #00ffcc; font-size: 11px; display: block; margin-bottom: 3px;">პირადი ნომერი (11 ნიშნა):</label>
-                        <input type="text" name="personal_number" value="{{ current_user.personal_number }}" maxlength="11" minlength="11" placeholder="აუცილებლად 11 ციფრი" required class="input-field">
-                    </div>
-
-                    <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="color: #ffcc00; font-size: 11px; display: block; margin-bottom: 3px;">ვერიფიკაციის ფოტო (სელფი პირადობით და ფურცლით):</label>
-                        <input type="file" name="verification_photo" accept="image/*" required class="input-field" style="padding: 6px;">
-                    </div>
-
-                    <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 12px; font-size: 14px;">🚀 მონაცემების და ვერიფიკაციის გაგზავნა</button>
-                </form>
-            {% endif %}
-        </div>
-    </details>
-</div>
-
-  <!-- ციფრული საფულე და რეკვიზიტები -->
-<div class="card">
-    <h3>💰 ციფრული საფულე</h3>
-    <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
-    <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;"><span id="userBalance">{{ current_user.balance }}</span> ₾</div>
-    <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: <span id="userReputation">{{ current_user.reputation }}</span></p>
-    <p style="font-size: 11px; color: #00ffcc; margin: 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
-</div>
+    <!-- ციფრული საფულე და რეკვიზიტები -->
+    <div class="card">
+        <h3>💰 ციფრული საფულე</h3>
+        <p style="color: #a1a1aa; font-size: 13px; margin: 5px 0;">მიმდინარე ბალანსი:</p>
+        <div style="font-size: 30px; color: #00ffcc; font-weight: bold; margin-bottom: 5px;"><span id="userBalance">{{ current_user.balance }}</span> ₾</div>
+        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">რეპუტაციის ქულა: <span id="userReputation">{{ current_user.reputation }}</span></p>
+        <p style="font-size: 11px; color: #00ffcc; margin: 0; line-height: 1.4;">ℹ️ მოგებული თანხები ავტომატურად გერიცხებათ ყოველ ორშაბათს რეალურ ანგარიშზე.</p>
+    </div>
 
     {% if current_user.is_admin %}
     <!-- ⚙️ ადმინ პანელის ღილაკი (ყოველთვის ხელმისაწვდომია ნიქნეიმისთვის noventra_admin) -->
@@ -625,19 +656,19 @@ function loadQuiz() {
         if (data.success) {
             window.currentQuizData = data; 
 
-          let bannerHtml = '';
-if (data.sponsor_image && data.sponsor_image.trim() !== "") {
-    bannerHtml = `
-        <div style="margin-bottom: 10px; border: 1px solid #ffcc00; border-radius: 8px; overflow: hidden; background: #000;">
-            <div style="background: #ffcc00; color: #000; font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; text-align: left;">
-                📢 სპონსორი: ${data.sponsor_name}
-            </div>
-            <img src="${data.sponsor_image}" alt="Sponsor Banner" style="width: 100%; height: 130px; object-fit: cover; display: block;">
-        </div>
-    `;
-} else {
-    bannerHtml = `<div style="margin-bottom: 8px; font-size: 11px; color: #ffcc00; font-weight: bold;">სპონსორი: ${data.sponsor_name}</div>`;
-}
+            let bannerHtml = '';
+            if (data.sponsor_image && data.sponsor_image.trim() !== "") {
+                bannerHtml = `
+                    <div style="margin-bottom: 10px; border: 1px solid #ffcc00; border-radius: 8px; overflow: hidden; background: #000;">
+                        <div style="background: #ffcc00; color: #000; font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; text-align: left;">
+                            📢 სპონსორი: ${data.sponsor_name}
+                        </div>
+                        <img src="${data.sponsor_image}" alt="Sponsor Banner" style="width: 100%; height: 130px; object-fit: cover; display: block;">
+                    </div>
+                `;
+            } else {
+                bannerHtml = `<div style="margin-bottom: 8px; font-size: 11px; color: #ffcc00; font-weight: bold;">სპონსორი: ${data.sponsor_name}</div>`;
+            }
 
             let html = `
                 ${bannerHtml}
