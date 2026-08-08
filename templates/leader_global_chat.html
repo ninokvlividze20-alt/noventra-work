@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ლიდერებისა და ადმინის გლობალური ჩატი | Noventra</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding-bottom: 40px; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .chat-box { 
+            background: #111118; 
+            border: 1px solid #222233; 
+            border-radius: 16px; 
+            padding: 15px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5); 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .messages-list { 
+            height: 420px; 
+            overflow-y: auto; 
+            overflow-x: hidden;
+            padding-right: 5px; 
+            margin-bottom: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            scroll-behavior: smooth; 
+        }
+        .message-bubble { 
+            background: #161622; 
+            border: 1px solid #33334d; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            max-width: 85%; 
+            word-break: break-word;
+            overflow-wrap: break-word;
+            box-sizing: border-box;
+        }
+        .message-bubble.my-message { 
+            background: rgba(0, 255, 204, 0.05); 
+            border-color: #00ffcc; 
+            align-self: flex-end; 
+        }
+        .chat-form { 
+            display: flex; 
+            gap: 10px; 
+            align-items: flex-end;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .chat-textarea { 
+            flex: 1; 
+            min-width: 0; 
+            background: #161622; 
+            border: 1px solid #33334d; 
+            color: #fff; 
+            padding: 12px 14px; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            outline: none; 
+            resize: none; 
+            height: 60px; 
+            line-height: 1.4;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .chat-textarea:focus { border-color: #00ffcc; }
+        .chat-btn { 
+            background: #00ffcc; 
+            color: #000; 
+            border: none; 
+            height: 60px; 
+            padding: 0 18px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s;
+            font-size: 14px;
+            white-space: nowrap; 
+            flex-shrink: 0; 
+        }
+        .chat-btn:hover { background: #00cca3; }
+        .btn-back { background: #222233; color: #00ffcc; padding: 8px 14px; text-decoration: none; border-radius: 8px; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2 style="color: #ffcc00; margin: 0; font-size: 18px;">🌐 ლიდერებისა და ადმინის გლობალური ჩატი</h2>
+                <p style="color: #94a3b8; font-size: 12px; margin: 3px 0 0 0;">დახურული სივრცე კაპიტნებისა და ადმინისტრაციისთვის</p>
+            </div>
+            <a href="{{ url_for('leader_dashboard') }}" class="btn-back">← კაპიტნის პანელზე დაბრუნება</a>
+        </div>
+
+        <div class="chat-box">
+            <div class="messages-list" id="messagesList">
+                {% if messages %}
+                    {% for msg in messages %}
+                    <div class="message-bubble {% if current_user.username in msg.username %}my-message{% endif %}">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                            <strong style="color: #00ffcc; font-size: 13px; font-weight: 800;">{{ msg.username }}</strong>
+                            <span style="color: #888; font-size: 11px;">{{ msg.created_at.strftime('%H:%M') if msg.created_at else '' }}</span>
+                        </div>
+                        <div style="color: #fff; font-size: 14px; line-height: 1.5; font-weight: 500;">{{ msg.text }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #777; text-align: center; margin-top: 150px;" id="noMsgText">ჩატი ცარიელია. იყავი პირველი!</p>
+                {% endif %}
+            </div>
+
+            <form method="POST" class="chat-form" id="chatForm">
+                <textarea name="message" id="messageInput" placeholder="დაწერე შეტყობინება..." required class="chat-textarea" autocomplete="off"></textarea>
+                <button type="submit" class="chat-btn">გაგზავნა 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatList = document.getElementById('messagesList');
+        function scrollToBottom() {
+            chatList.scrollTop = chatList.scrollHeight;
+        }
+        window.onload = scrollToBottom;
+
+        // Enter-ით გაგზავნა, Shift+Enter ახალ ხაზზე გადასვლა
+        document.getElementById('messageInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.form.submit();
+            }
+        });
+
+        // რეგიონული ჩატების მსგავსი ლაივ განახლება (ყოველ 3 წამში)
+        function fetchGlobalMessages() {
+            fetch('/api/leader_global_messages')
+                .then(r => r.json())
+                .then(data => {
+                    if(data.success) {
+                        let html = '';
+                        if(data.messages.length === 0) {
+                            html = '<p style="color: #777; text-align: center; margin-top: 150px;">ჩატი ცარიელია. იყავი პირველი!</p>';
+                        } else {
+                            data.messages.forEach(m => {
+                                const isMyMsg = m.username.includes("{{ current_user.username }}");
+                                html += `
+                                <div class="message-bubble ${isMyMsg ? 'my-message' : ''}">
+                                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                                        <strong style="color: #00ffcc; font-size: 13px; font-weight: 800;">${m.username}</strong>
+                                        <span style="color: #888; font-size: 11px;">${m.created_at}</span>
+                                    </div>
+                                    <div style="color: #fff; font-size: 14px; line-height: 1.5; font-weight: 500;">${m.text}</div>
+                                </div>`;
+                            });
+                        }
+                        
+                        const isAtBottom = (chatList.scrollHeight - chatList.scrollTop - chatList.clientHeight) < 100;
+                        if(chatList.innerHTML.trim() !== html.trim()) {
+                            chatList.innerHTML = html;
+                            if(isAtBottom) {
+                                scrollToBottom();
+                            }
+                        }
+                    }
+                }).catch(err => console.log(err));
+        }
+
+        setInterval(fetchGlobalMessages, 3000);
+    </script>
+</body>
+</html>

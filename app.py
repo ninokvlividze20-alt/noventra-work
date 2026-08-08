@@ -63,6 +63,9 @@ class User(db.Model, UserMixin):
     verification_status = db.Column(db.String(20), default='none')
     personal_number = db.Column(db.String(11), nullable=True)
     verification_photo = db.Column(db.Text, nullable=True)
+    
+    # 👈 დამატებული კავშირი კასკადური წაშლისთვის
+    quiz_answers = db.relationship('UserQuizAnswer', backref='user', lazy=True, cascade='all, delete-orphan')
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -151,6 +154,9 @@ class QuizQuestion(db.Model):
     option_3 = db.Column(db.String(150), nullable=False)
     option_4 = db.Column(db.String(150), nullable=False)
     correct_option = db.Column(db.Integer, nullable=False)
+    
+    # 👈 დამატებული კავშირი კასკადური წაშლისთვის
+    user_answers = db.relationship('UserQuizAnswer', backref='quiz', lazy=True, cascade='all, delete-orphan')
 
 # ვიქტორინის API
 @app.route('/api/get_random_quiz')
@@ -1364,6 +1370,22 @@ def admin_delete_partner_sponsor(sponsor_id):
     flash('პარტნიორი წაიშალა კატალოგიდან.', 'success')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/settings/leader_prize', methods=['POST'])
+@login_required
+def admin_update_leader_prize():
+    if not current_user.is_admin:
+        abort(403)
+    new_prize = request.form.get('leader_prize_pool')
+    if new_prize:
+        setting = Settings.query.filter_by(key='leader_prize_pool').first()
+        if setting:
+            setting.value = new_prize
+        else:
+            db.session.add(Settings(key='leader_prize_pool', value=new_prize))
+        db.session.commit()
+        flash("ლიდერების საპრიზო ფონდი განახლდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/api/user_status')
 @login_required
 def api_user_status():
@@ -1400,6 +1422,23 @@ def api_live_leader_stats():
         "success": True,
         "regions": regions_data
     })
+
+# 💬 ლიდერების გლობალური ჩატის API (ლაივ განახლებისთვის)
+@app.route('/api/leader_global_messages')
+@login_required
+def api_leader_global_messages():
+    if current_user.role != 'leader' and not current_user.is_admin:
+        return jsonify({"success": False}), 403
+    
+    messages = Question.query.filter_by(region_id='leaders_global_room').order_by(Question.id.asc()).all()
+    msg_list = [{
+        "id": m.id,
+        "username": m.username,
+        "text": m.text,
+        "created_at": m.created_at.strftime('%H:%M') if m.created_at else ''
+    } for m in messages]
+    
+    return jsonify({"success": True, "messages": msg_list})
 
 # 💬 ლიდერების გლობალური ჩატი
 @app.route('/leader/global_chat', methods=['GET', 'POST'])

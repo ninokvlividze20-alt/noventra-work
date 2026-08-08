@@ -8,55 +8,116 @@
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; margin: 0; padding: 15px; }
         .container { max-width: 1100px; margin: 0 auto; }
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        /* მობილური ადაპტაცია */
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        h1, h2, h3 { color: #00ffcc; margin-top: 0; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .btn-logout { background: #ef4444; color: white; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        .btn-logout:hover { background: #dc2626; }
+        .btn-chat { background: #6366f1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; }
+        .btn-region-chat { background: #10b981; color: white; padding: 10px 15px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-box { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #475569; text-align: center; }
+        .stat-box { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #475569; }
+        .stat-box h4 { margin: 0 0 8px 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; }
         .value { font-size: 20px; font-weight: bold; color: #00ffcc; }
-        .btn-chat { background: #6366f1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 8px; display: inline-block; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+        th { color: #38bdf8; font-size: 13px; text-transform: uppercase; }
+        .badge-leader { background: #fbbf24; color: #78350f; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .badge-player { background: #0284c7; color: #e0f2fe; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- ჰედერი -->
         <div class="header-flex">
-            <div><h1>👑 კაპიტნის პანელი: {{ current_user.region }}</h1></div>
-            <div style="display: flex; gap: 10px;">
+            <div>
+                <h1>👑 კაპიტნის პანელი: {{ current_user.region }}</h1>
+                <p style="color: #94a3b8; margin: 5px 0 0 0;">მოგესალმებით, <strong>{{ current_user.username }}</strong>!</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{{ url_for('region_chat', region_id=current_user.region) }}" class="btn-region-chat">💬 რეგიონის ჩატი</a>
                 <a href="{{ url_for('leader_global_chat') }}" class="btn-chat">🌐 ლიდერების ჩატი</a>
                 <a href="{{ url_for('logout') }}" class="btn-logout">გასვლა</a>
             </div>
         </div>
 
+        <!-- საპრიზო ფონდები -->
         <div class="card">
             <h3>💰 საპრიზო ფონდები</h3>
             <div class="stats-grid">
                 <div class="stat-box"><h4>თქვენი გუნდის ფონდი</h4><div class="value">{{ user_prize_pool }} ₾</div></div>
-                <div class="stat-box"><h4>ლიდერის ბონუსი</h4><div class="value">{{ leader_prize_pool }} ₾</div></div>
+                <div class="stat-box"><h4>ლიდერის ბონუს ფონდი</h4><div class="value">{{ leader_prize_pool }} ₾</div></div>
             </div>
         </div>
 
+        <!-- რეგიონის ზოგადი სტატისტიკა -->
+        <div class="card" style="border-color: #00ffcc;">
+            <h3>📊 რეგიონის სტატისტიკა</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h4>რეგიონის დასახელება</h4>
+                    <div class="value" style="color: #ffcc00;">{{ region_info.region_name if region_info else current_user.region }}</div>
+                </div>
+                <div class="stat-box">
+                    <h4>რეგიონის ჯამური ქულები</h4>
+                    <div class="value">{{ region_info.score if region_info else 0 }}</div>
+                </div>
+            </div>
+            <p style="font-size: 13px; color: #94a3b8; margin-top: 15px; margin-bottom: 0;">
+                💡 <strong>ინფორმაცია კაპიტნისთვის:</strong> პრიზები სეზონის ბოლოს ავტომატურად პროპორციულად ნაწილდება თქვენი რეგიონის იმ ვერიფიცირებულ მოთამაშეებზე, რომლებსაც შესრულებული აქვთ მინიმუმ 5000 კლიკი.
+            </p>
+        </div>
+
+        <!-- ყველა რეგიონის ლაივ რეიტინგი -->
         <div class="card">
-            <h3>🌍 ყველა რეგიონის ლაივ რეიტინგი</h3>
+            <h3>🌍 რეგიონების ლაივ რეიტინგი</h3>
             <div style="overflow-x: auto;">
                 <table id="live-table">
-                    <thead><tr><th>რეგიონი</th><th>ქულები</th></tr></thead>
-                    <tbody id="live-body"></tbody>
+                    <thead>
+                        <tr><th>რეგიონი</th><th>ქულები</th></tr>
+                    </thead>
+                    <tbody id="live-body">
+                        <!-- ჯავასკრიპტი ტვირთავს ლაივ რეჟიმში -->
+                    </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- გუნდის წევრების აქტივობა -->
         <div class="card">
-            <h3>👥 თქვენი გუნდის წევრები</h3>
+            <h3>👥 თქვენი რეგიონის მოთამაშეები (გუნდის წევრები)</h3>
             <div style="overflow-x: auto;">
                 <table>
-                    <thead><tr><th>მომხმარებელი</th><th>კლიკები</th><th>სტატუსი</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>მომხმარებელი (Username)</th>
+                            <th>სახელი / გვარი</th>
+                            <th>ჯამური კლიკები</th>
+                            <th>ბალანსი</th>
+                            <th>სტატუსი</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         {% for member in team_members %}
                         <tr>
-                            <td>{{ member.username }}</td>
-                            <td>{{ member.total_clicks }}</td>
-                            <td>{{ member.role }}</td>
+                            <td>
+                                <strong>{{ member.username }}</strong>
+                                {% if member.id == current_user.id %}<span style="color: #38bdf8; font-size: 11px;">(თქვენ)</span>{% endif %}
+                            </td>
+                            <td>{{ member.full_name if member.full_name else '—' }}</td>
+                            <td style="color: #00ffcc; font-weight: bold; font-family: monospace; font-size: 15px;">{{ member.total_clicks }}</td>
+                            <td>{{ member.balance }} ₾</td>
+                            <td>
+                                {% if member.role == 'leader' %}
+                                    <span class="badge-leader">👑 ლიდერი</span>
+                                {% else %}
+                                    <span class="badge-player">მოთამაშე</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">ამ რეგიონში ჯერ არ არიან აქტიური მომხმარებლები.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -74,7 +135,7 @@
                         const tbody = document.getElementById('live-body');
                         tbody.innerHTML = '';
                         for(let id in data.regions) {
-                            tbody.innerHTML += `<tr><td>${data.regions[id].name}</td><td>${data.regions[id].score}</td></tr>`;
+                            tbody.innerHTML += `<tr><td>${data.regions[id].name}</td><td style="color: #00ffcc; font-weight: bold;">${data.regions[id].score}</td></tr>`;
                         }
                     }
                 });
