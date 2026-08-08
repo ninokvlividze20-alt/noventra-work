@@ -1286,6 +1286,10 @@ with app.app_context():
         db.session.add(Settings(key='prize_pool', value='1200'))
     if not Settings.query.filter_by(key='last_winner').first():
         db.session.add(Settings(key='last_winner', value='იმერეთი'))
+    
+    # 👈 აი ეს ხაზი უნდა დაამატო, რომ ბაზამ არ დაკარგოს ლიდერების ფონდი
+    if not Settings.query.filter_by(key='leader_prize_pool').first():
+        db.session.add(Settings(key='leader_prize_pool', value='500'))
      
     game_status_st = Settings.query.filter_by(key='game_status').first()
     if not game_status_st:
