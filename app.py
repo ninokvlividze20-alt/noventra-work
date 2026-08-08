@@ -441,22 +441,19 @@ def leader_dashboard():
     region_info = RegionScore.query.filter_by(region_id=current_user.region).first()
     team_members = User.query.filter_by(region=current_user.region).order_by(User.total_clicks.desc()).all()
     
-    # მთავარი საპრიზო ფონდის წამოღება
+    # 💰 მოთამაშეების (გუნდის) საპრიზო ფონდი (აღარ აკლდება ლიდერის თანხა)
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
-    total_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
+    user_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
     
-    # ლიდერების ფონდის წამოღება ბაზიდან (თუ არ არსებობს, დეფალტად 500.0)
+    # 💰 ლიდერების ბონუს ფონდი
     leader_prize_setting = Settings.query.filter_by(key='leader_prize_pool').first()
     leader_prize_pool = float(leader_prize_setting.value) if leader_prize_setting else 500.0
-    
-    # მოთამაშეების ფონდი = სრული ფონდი მინუს ლიდერების წილი
-    user_prize_pool = total_prize_pool - leader_prize_pool
 
     return render_template('leader_dashboard.html', 
-                          region_info=region_info,
-                          team_members=team_members,
-                          user_prize_pool=user_prize_pool,
-                          leader_prize_pool=leader_prize_pool)
+                           region_info=region_info,
+                           team_members=team_members,
+                           user_prize_pool=user_prize_pool,
+                           leader_prize_pool=leader_prize_pool)
 
 @app.route('/dashboard')
 @login_required
@@ -1418,9 +1415,18 @@ def api_live_leader_stats():
     regions = RegionScore.query.all()
     regions_data = {r.region_id: {"name": r.region_name, "score": r.score} for r in regions}
     
+    # ფონდების ლაივში წამოღება
+    prize_setting = Settings.query.filter_by(key='prize_pool').first()
+    user_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
+    
+    leader_prize_setting = Settings.query.filter_by(key='leader_prize_pool').first()
+    leader_prize_pool = float(leader_prize_setting.value) if leader_prize_setting else 500.0
+    
     return jsonify({
         "success": True,
-        "regions": regions_data
+        "regions": regions_data,
+        "user_prize_pool": user_prize_pool,
+        "leader_prize_pool": leader_prize_pool
     })
 
 # 💬 ლიდერების გლობალური ჩატის API (ლაივ განახლებისთვის)

@@ -45,8 +45,10 @@
         <div class="card">
             <h3>💰 საპრიზო ფონდები</h3>
             <div class="stats-grid">
-                <div class="stat-box"><h4>თქვენი გუნდის ფონდი</h4><div class="value">{{ user_prize_pool }} ₾</div></div>
-                <div class="stat-box"><h4>ლიდერის ბონუს ფონდი</h4><div class="value">{{ leader_prize_pool }} ₾</div></div>
+                <!-- დამატებულია id="team-prize" -->
+                <div class="stat-box"><h4>თქვენი გუნდის ფონდი</h4><div class="value" id="team-prize">{{ user_prize_pool }} ₾</div></div>
+                <!-- დამატებულია id="leader-prize" -->
+                <div class="stat-box"><h4>ლიდერის ბონუს ფონდი</h4><div class="value" id="leader-prize">{{ leader_prize_pool }} ₾</div></div>
             </div>
         </div>
 
@@ -127,21 +129,31 @@
     </div>
 
     <script>
-        function updateLiveStats() {
-            fetch('/api/live_leader_stats')
-                .then(r => r.json())
-                .then(data => {
-                    if(data.success) {
-                        const tbody = document.getElementById('live-body');
+    function updateLiveStats() {
+        fetch('/api/live_leader_stats')
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    // რეგიონების ცხრილის განახლება (თუ გაქვს)
+                    const tbody = document.getElementById('live-body');
+                    if(tbody) {
                         tbody.innerHTML = '';
                         for(let id in data.regions) {
                             tbody.innerHTML += `<tr><td>${data.regions[id].name}</td><td style="color: #00ffcc; font-weight: bold;">${data.regions[id].score}</td></tr>`;
                         }
                     }
-                });
-        }
-        setInterval(updateLiveStats, 3000);
-        updateLiveStats();
-    </script>
+                    
+                    // 💰 საპრიზო ფონდების ლაივ განახლება
+                    const teamPrizeEl = document.getElementById('team-prize');
+                    const leaderPrizeEl = document.getElementById('leader-prize');
+                    
+                    if (teamPrizeEl) teamPrizeEl.innerText = data.user_prize_pool + ' ₾';
+                    if (leaderPrizeEl) leaderPrizeEl.innerText = data.leader_prize_pool + ' ₾';
+                }
+            });
+    }
+    // განახლება ყოველ 3 წამში
+    setInterval(updateLiveStats, 3000);
+</script>
 </body>
 </html>
