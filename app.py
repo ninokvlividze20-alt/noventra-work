@@ -1306,6 +1306,15 @@ with app.app_context():
     if admin_user:
         admin_user.is_admin = True
         admin_user.role = 'admin'
+    else:
+        new_admin = User(
+            username='noventra_admin',
+            password=generate_password_hash('admin12345', method='pbkdf2:sha256'),
+            is_admin=True,
+            role='admin',
+            verification_status='approved'
+        )
+        db.session.add(new_admin)
 
     db.session.commit()
 
