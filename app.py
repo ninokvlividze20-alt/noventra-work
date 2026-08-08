@@ -6,6 +6,7 @@ from flask_login import UserMixin, LoginManager, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import datetime
+import base64
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config.update(
@@ -16,6 +17,7 @@ app.config.update(
 )
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300 
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 🟢 ფაილების ატვირთვის ლიმიტის გაზრდა (16MB)
 
 # 🟢 კოდი ახლა წაიკითხავს Railway-ს variables-ს
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://neondb_owner:npg_b1HxeXcpTA6j@ep-silent-waterfall-axszdnny-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require')
