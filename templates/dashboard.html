@@ -274,6 +274,54 @@
         </div>
     </div>
 
+    <!-- 👑 რეგიონული ლიდერების ტოპ-სია (პუნქტი 7) -->
+    <div class="card" style="border-color: #00ffcc; margin-top: 20px;">
+        <h3 style="color: #00ffcc;">👑 რეგიონული ლიდერების (კაპიტნების) სია</h3>
+        <p style="font-size: 12px; color: #a1a1aa; margin-bottom: 12px;">გაცანი შენი რეგიონის და სხვა კუთხეების ოფიციალური კაპიტნები, რომლებიც კოორდინაციას უწევენ გუნდებს:</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>რეგიონი</th>
+                        <th>ლიდერი / კაპიტანი</th>
+                        <th>ტელეფონი</th>
+                        <th>ჩატი</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set leaders_lookup = {} %}
+                    {% if all_leaders %}
+                        {% for l in all_leaders %}
+                            {% set _ = leaders_lookup.update({l.region: l}) %}
+                        {% endfor %}
+                    {% endif %}
+
+                    {% for reg in regions %}
+                    {% set lead = leaders_lookup.get(reg.region_id) %}
+                    <tr>
+                        <td style="color: #ffcc00; font-weight: bold;">{{ reg.region_name }}</td>
+                        <td>
+                            {% if lead %}
+                                <strong style="color: #00ffcc;">{{ lead.holder_name if lead.holder_name else lead.username }}</strong>
+                                <br><span style="font-size: 11px; color: #888;">@{{ lead.username }}</span>
+                            {% else %}
+                                <span style="color: #888; font-style: italic;">არ არის დანიშნული</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: #00ffcc; font-family: monospace;">
+                            {{ lead.phone if lead and lead.phone else '—' }}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('region_chat', region_id=reg.region_id) }}" class="btn-sm btn-success" style="padding: 4px 10px; font-size: 11px; text-decoration: none; display: inline-block;">💬 ჩატი</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- 👥 რეგიონის გუნდის წევრების ცოცხალი რეიტინგი (Live Team Stats) -->
     <div style="margin-top: 20px; border-top: 1px solid #222233; padding-top: 15px;">
         <details style="cursor: pointer; background: #161622; padding: 12px 15px; border-radius: 12px; border: 1px solid #33334d;">

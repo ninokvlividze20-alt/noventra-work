@@ -29,6 +29,108 @@
         </div>
     </div>
 
+    <!-- 👑 რეგიონული ლიდერების მართვისა და შექმნის სექცია -->
+    <div class="admin-section" style="border-color: #00ffcc;">
+        <h3>👑 რეგიონული ლიდერების (კაპიტნების) მართვა</h3>
+        <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">აქ შეგიძლია შექმნა ან მართო 12-ვე რეგიონული ლიდერის ანგარიში, მათ არ აქვთ კლიკების უფლება და მართავენ საკუთარ რეგიონებს.</p>
+
+        <!-- ლიდერის დამატების ფორმა -->
+        <form action="{{ url_for('admin_add_leader') }}" method="POST" onsubmit="saveScrollPosition()" style="background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d; margin-bottom: 20px;">
+            <h4 style="color: #ffcc00; margin-top: 0; font-size: 14px; margin-bottom: 12px;">➕ ახალი რეგიონული ლიდერის შექმნა</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+                <div>
+                    <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ნიქნეიმი (Username):</label>
+                    <input type="text" name="username" placeholder="მაგ: leader_tbilisi" required class="input-field">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">პაროლი:</label>
+                    <input type="text" name="password" placeholder="მინ. 6 სიმბოლო" required class="input-field">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">აირჩიე რეგიონი:</label>
+                    <select name="region" class="input-field">
+                        <option value="tbilisi">თბილისი</option>
+                        <option value="imereti">იმერეთი</option>
+                        <option value="adjara">აჭარა</option>
+                        <option value="kakheti">კახეთი</option>
+                        <option value="samegrelo">სამეგრელო</option>
+                        <option value="guria">გურია</option>
+                        <option value="racha_lechkhumi">რაჭა-ლეჩხუმი</option>
+                        <option value="samtskhe_javakheti">სამცხე-ჯავახეთი</option>
+                        <option value="shida_kartli">შიდა ქართლი</option>
+                        <option value="kvemo_kartli">ქვემო ქართლი</option>
+                        <option value="mtskheta_mtianeti">მცხეთა-მთიანეთი</option>
+                        <option value="abkhazia">აფხაზეთი</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">სახელი და გვარი:</label>
+                    <input type="text" name="holder_name" placeholder="ლიდერის სახელი" class="input-field">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #00ffcc; display: block; margin-bottom: 4px;">ტელეფონი:</label>
+                    <input type="text" name="phone" placeholder="599..." class="input-field">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #ffcc00; display: block; margin-bottom: 4px;">საბანკო IBAN:</label>
+                    <input type="text" name="bank_account" placeholder="GE00TB..." class="input-field">
+                </div>
+            </div>
+            <button type="submit" class="btn-sm btn-success" style="width: 100%; padding: 10px;">🚀 ლიდერის ექაუნთის შექმნა</button>
+        </form>
+
+        <!-- არსებული ლიდერების სია -->
+        <h4 style="color: #00ffcc; font-size: 14px; margin-bottom: 10px;">📋 უკვე შექმნილი ლიდერების სია:</h4>
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ნიქნეიმი</th>
+                        <th>რეგიონი</th>
+                        <th>მფლობელი</th>
+                        <th>ტელეფონი</th>
+                        <th>საბანკო ანგარიში</th>
+                        <th>მოქმედება (განახლება)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set leaders_list = [] %}
+                    {% for reg_id, data in users_by_region.items() %}
+                        {% for u in data.users %}
+                            {% if u.role == 'leader' %}
+                                {% set _ = leaders_list.append(u) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+
+                    {% if leaders_list %}
+                        {% for lead in leaders_list %}
+                        <tr>
+                            <form action="{{ url_for('admin_update_leader', leader_id=lead.id) }}" method="POST" onsubmit="saveScrollPosition()">
+                                <td><input type="text" name="username" value="{{ lead.username }}" class="input-field" style="width: 120px;"></td>
+                                <td style="color: #ffcc00; text-transform: uppercase;">{{ lead.region }}</td>
+                                <td><input type="text" name="holder_name" value="{{ lead.holder_name }}" class="input-field" style="width: 130px;" placeholder="სახელი"></td>
+                                <td><input type="text" name="phone" value="{{ lead.phone }}" class="input-field" style="width: 110px;" placeholder="ნომერი"></td>
+                                <td><input type="text" name="bank_account" value="{{ lead.bank_account }}" class="input-field" style="width: 160px; font-family: monospace;" placeholder="IBAN"></td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; align-items: center;">
+                                        <input type="text" name="new_password" placeholder="ახალი პაროლი" class="input-field" style="width: 110px; font-size: 11px;">
+                                        <button type="submit" class="btn-sm btn-success" style="padding: 6px 10px;">შენახვა</button>
+                                    </div>
+                                </td>
+                            </form>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #888; font-size: 12px;">რეგიონული ლიდერები ჯერ არ არიან შექმნილი.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- 🏆 სეზონისა და საპრიზო ფონდის მართვა -->
     <div class="admin-section" style="border-color: #ffcc00;">
         <h3>🏆 სეზონისა და საპრიზო ფონდის მართვა</h3>
@@ -116,7 +218,7 @@
     <div class="admin-section" style="border-color: #00ffcc;">
         <h3>🧮 გამარჯვებული რეგიონის თანხების ავტომატური გადანაწილება</h3>
         <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">სისტემა ავტომატურად ამჟღავნებს ლიდერ რეგიონს, მის აქტიურ მოთამაშეებსა და მათ საბანკო რეკვიზიტებს პროფილებიდან.</p>
-        
+         
         <div style="background: #161622; padding: 15px; border-radius: 12px; border: 1px solid #33334d; margin-top: 15px;">
             <p style="color: #ffcc00; font-size: 14px; margin-top: 0;"><strong>🏆 მიმდინარე ლიდერი რეგიონი:</strong> <span style="color: #00ffcc;">{{ top_region.region_name if top_region else 'არ არის' }}</span> (სულ ქულა: {{ top_region.score if top_region else 0 }} ⚡)</p>
             <p style="color: #fff; font-size: 13px;">საპრიზო ფონდი განაწილებისთვის: <strong style="color: #00ffcc;">{{ current_week_prize_pool }} ₾</strong></p>
@@ -198,7 +300,6 @@
                 </select>
             </div>
 
-            <!-- 🖼️ ფოტოს ატვირთვის ოპტიმიზებული ველი -->
             <div style="grid-column: 1 / -1; background: #161622; border: 2px dashed #33334d; padding: 15px; border-radius: 12px; text-align: center;">
                 <label style="font-size: 12px; color: #00ffcc; display: block; margin-bottom: 8px; font-weight: bold;">
                     📸 ვიქტორინის სარეკლამო ბანერი (რეკომენდებული ზომა: 800 x 450 px)
@@ -355,7 +456,7 @@
     <div class="admin-section" style="margin-top: 20px;">
         <h3>🖼️ რეგიონის სპონსორების მართვა</h3>
         <p style="color: #a1a1aa; font-size: 12px; margin-top: 0;">რეკომენდებული ფოტოს ზომა: მკაცრად პროპორციული **800 x 450 px (16:9)** (.jpg/.png)</p>
-        
+         
         <div class="grid-2" style="align-items: start; gap: 30px;">
             <form action="{{ url_for('admin_update_sponsor') }}" method="POST" enctype="multipart/form-data" onsubmit="saveScrollPosition()" style="display: flex; flex-direction: column; gap: 10px;">
                 <label style="font-size: 11px; color: #00ffcc;">აირჩიე რეგიონი:</label>
@@ -445,6 +546,7 @@
                             </div>
                             <div style="font-size: 11px; display: flex; gap: 10px; align-items: center;">
                                 {% if u.is_admin %}<span style="color: #fff;">[ადმინი]</span>{% endif %}
+                                {% if u.role == 'leader' %}<span style="color: #ffcc00;">[ლიდერი]</span>{% endif %}
                                 {% if u.is_banned %}<span style="color: #ff4757;">[ბანი]</span>{% endif %}
                                 <span style="color: #a1a1aa;">ვერიფიკაცია: {{ u.verification_status | default('არ არის') }}</span>
                                 <span style="color: #00ffcc; font-size: 12px;">▼ გახსნა</span>
@@ -588,11 +690,11 @@ function filterUsers() {
     let input = document.getElementById('userSearchInput');
     let filter = input.value.toLowerCase();
     let regionBlocks = document.querySelectorAll('.region-user-block');
-    
+     
     regionBlocks.forEach(block => {
         let userCards = block.querySelectorAll('.user-collapse-card');
         let hasVisibleUser = false;
-        
+         
         userCards.forEach(card => {
             let usernameSpan = card.querySelector('span'); 
             if (usernameSpan) {
@@ -605,7 +707,7 @@ function filterUsers() {
                 }
             }
         });
-        
+         
         if (filter === "" || hasVisibleUser) {
             block.style.display = "";
         } else {

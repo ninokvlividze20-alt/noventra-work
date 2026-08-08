@@ -13,7 +13,7 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='None',
     SESSION_COOKIE_SECURE=True,
-    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30) # იუზერი სისტემაში დარჩება 30 დღე
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30)
 )
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300 
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
@@ -40,16 +40,17 @@ def allowed_file(filename):
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(50), unique=True, nullable=False) # საიტზე გამოსაჩენი ნიკნეიმი
-    full_name = db.Column(db.String(100), default="") # სრული სახელი და გვარი (მხოლოდ ადმინისთვის/ვერიფიკაციისთვის)
-    email = db.Column(db.String(100), default="")     # მეილის ველი
-    phone = db.Column(db.String(20), unique=True, nullable=False) # ტელეფონი
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    full_name = db.Column(db.String(100), default="")
+    email = db.Column(db.String(100), default="")     
+    phone = db.Column(db.String(20), default="")
     password = db.Column(db.String(255), nullable=False)
     balance = db.Column(db.Float, default=0.0)
     reputation = db.Column(db.Integer, default=100)
     is_admin = db.Column(db.Boolean, default=False)
+    role = db.Column(db.String(20), default='user') # 'user', 'leader', 'admin'
     bank_account = db.Column(db.String(50), default="")
-    holder_name = db.Column(db.String(100), default="") # 🛠️ მიმღების სახელი და გვარი საბანკო გადარიცხვისთვის
+    holder_name = db.Column(db.String(100), default="") 
     clicks_left = db.Column(db.Integer, default=250)
     total_clicks = db.Column(db.Integer, default=0)
     region = db.Column(db.String(50), default="tbilisi")
@@ -59,8 +60,7 @@ class User(db.Model, UserMixin):
     withdrawals = db.relationship('WithdrawalRequest', backref='user', lazy=True)
     last_seen_board = db.Column(db.DateTime, default=db.func.current_timestamp())
     
-    # 🪪 KYC ვერიფიკაციის ველები (შეცვლილია TEXT-ად ბაზის ლიმიტის ასაცილებლად)
-    verification_status = db.Column(db.String(20), default='none') # none, pending, approved
+    verification_status = db.Column(db.String(20), default='none')
     personal_number = db.Column(db.String(11), nullable=True)
     verification_photo = db.Column(db.Text, nullable=True)
 
@@ -118,7 +118,7 @@ class RegionScore(db.Model):
     region_id = db.Column(db.String(50), unique=True, nullable=False)
     region_name = db.Column(db.String(100), nullable=False)
     score = db.Column(db.Integer, default=0)
-    sponsor_image = db.Column(db.Text, default="") # <-- აი ეს ხაზი ჩაამატე!
+    sponsor_image = db.Column(db.Text, default="")
     
 class Settings(db.Model):
     __tablename__ = 'settings'
@@ -126,27 +126,24 @@ class Settings(db.Model):
     key = db.Column(db.String(50), unique=True, nullable=False)
     value = db.Column(db.String(255), nullable=False)
 
-# ----------------- ვიქტორინის მოდელები -----------------
-
 class UserQuizAnswer(db.Model):
     __tablename__ = 'user_quiz_answers'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id'), nullable=False)
 
-# 🏢 საჯარო პარტნიორების / სპონსორების ცხრილი
 class PartnerSponsor(db.Model):
     __tablename__ = 'partner_sponsors'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     website_url = db.Column(db.String(255), nullable=False)
-    logo = db.Column(db.Text, nullable=False) # <-- შეცვლილია TEXT-ად
+    logo = db.Column(db.Text, nullable=False)
 
 class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
     id = db.Column(db.Integer, primary_key=True)
     sponsor_name = db.Column(db.String(100), nullable=False)
-    sponsor_image = db.Column(db.Text, default="") # <-- შეცვლილია TEXT-ად
+    sponsor_image = db.Column(db.Text, default="")
     package_type = db.Column(db.String(20), default="Bronze")
     question_text = db.Column(db.Text, nullable=False)
     option_1 = db.Column(db.String(150), nullable=False)
@@ -155,13 +152,11 @@ class QuizQuestion(db.Model):
     option_4 = db.Column(db.String(150), nullable=False)
     correct_option = db.Column(db.Integer, nullable=False)
 
-# ----------------- ვიქტორინის API-ები -----------------
-
+# ვიქტორინის API
 @app.route('/api/get_random_quiz')
 @login_required
 def get_random_quiz():
     import random
-    
     answered_ids = db.session.query(UserQuizAnswer.quiz_id).filter_by(user_id=current_user.id).all()
     answered_ids = [ans[0] for ans in answered_ids]
     
@@ -171,7 +166,7 @@ def get_random_quiz():
         UserQuizAnswer.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
         questions = QuizQuestion.query.all()
-        
+         
     if not questions:
         return jsonify({"success": False, "message": "კითხვები არ არის ბაზაში"})
     
@@ -180,7 +175,7 @@ def get_random_quiz():
         weight = 3 if q.package_type == 'Gold' else (2 if q.package_type == 'Silver' else 1)
         for _ in range(weight):
             weighted_pool.append(q)
-            
+             
     selected_q = random.choice(weighted_pool)
     
     return jsonify({
@@ -200,7 +195,7 @@ def check_quiz():
     data = request.get_json() or {}
     q_id = data.get('question_id')
     chosen_opt = int(data.get('chosen_option', 0))
-    
+     
     q = QuizQuestion.query.get(q_id)
     if not q:
         return jsonify({"success": False, "message": "კითხვა ვერ მოიძებნა"})
@@ -254,12 +249,11 @@ def load_user(user_id):
 @app.route('/api/check_new_messages')
 @login_required
 def api_check_new_messages():
-    # ვამოწმებთ არის თუ არა მესიჯები მომხმარებლის რეგიონში, რომლებიც მის ბოლო ნახვის დროზე გვიანია
     last_seen = current_user.last_seen_board or datetime.datetime.utcnow()
     new_msg_count = Question.query.filter(
         Question.region_id == current_user.region,
         Question.created_at > last_seen,
-        Question.username != current_user.username # საკუთარ მესიჯებზე რომ არ აინთოს
+        Question.username != current_user.username
     ).count()
 
     return jsonify({
@@ -282,7 +276,7 @@ def profile():
     if request.method == 'POST':
         current_user.phone = request.form.get('phone')
         current_user.bank_account = request.form.get('bank_account')
-        current_user.holder_name = request.form.get('holder_name')  # 🛠️ აი ეს ველი დავამატეთ
+        current_user.holder_name = request.form.get('holder_name')
         db.session.commit()
         flash("მონაცემები წარმატებით დამახსოვრებულია!", "success")
         return redirect(url_for('profile'))
@@ -311,7 +305,6 @@ def region_chat(region_id):
                 flash("მესიჯი არღვევს წესებს!", "danger")
         return redirect(url_for('region_chat', region_id=region_id))
          
-    # 🛠️ აქ ვანახლებთ ბოლო ნახვის დროს, რომ ახალი მესიჯების ინდიკატორი გაქრეს
     current_user.last_seen_board = datetime.datetime.utcnow()
     db.session.commit()
     
@@ -327,13 +320,12 @@ def board():
 def register():
     if request.method == 'POST':
         username = request.form.get('username').strip()
-        full_name = request.form.get('full_name').strip()  # 🛠️ სრული სახელი და გვარი (ვერიფიკაციისთვის)
-        email = request.form.get('email').strip()         # 🛠️ მეილის ველი
+        full_name = request.form.get('full_name').strip()
+        email = request.form.get('email').strip()
         phone = request.form.get('phone').strip()
         password = request.form.get('password')
         region = request.form.get('region')
         
-        # ⚖️ ასაკისა და წესების ვერიფიკაციის შემოწმება
         is_adult = request.form.get('is_adult')
         terms_agreed = request.form.get('terms_agreed')
         
@@ -359,14 +351,14 @@ def register():
              
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
-        # 🛠️ ვუმატებთ full_name-სა და email-ს ბაზაში შესანახად
         new_user = User(
             username=username, 
             full_name=full_name, 
             email=email,
             phone=phone, 
             password=hashed_password, 
-            region=region
+            region=region,
+            role='user'
         )
         
         try:
@@ -378,7 +370,7 @@ def register():
             db.session.rollback()
             import traceback
             return f"<pre>{traceback.format_exc()}</pre>", 500
-            
+             
     return render_template('signup_new.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -388,12 +380,16 @@ def login():
         password = request.form.get('password')
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
-            # 👑 თუ ეს შენი ადმინ ექაუნთია, ავტომატურად ვუწერთ True-ს
             if user.username == 'noventra_admin':
                 user.is_admin = True
+                user.role = 'admin'
                 db.session.commit()
 
-            login_user(user, remember=True) # მუდმივი სესია
+            login_user(user, remember=True)
+            
+            if user.role == 'leader':
+                return redirect(url_for('leader_dashboard'))
+
             return redirect(url_for('dashboard'))
         flash("მომხმარებლის სახელი ან პაროლი არასწორია!", "danger")
     return render_template('login.html')
@@ -410,40 +406,66 @@ def change_password():
     current_password = request.form.get('current_password')
     new_password = request.form.get('new_password')
     confirm_password = request.form.get('confirm_password')
-    
-    # შევამოწმოთ, სწორია თუ არა ძველი პაროლი
+     
     if not check_password_hash(current_user.password, current_password):
         flash("მიმდინარე პაროლი არასწორია!", "danger")
-        return redirect(url_for('dashboard')) # ან იმ გვერდის ლინკი სადაც პაროლის შეცვლაა
-        
+        return redirect(url_for('dashboard'))
+         
     if new_password != confirm_password:
         flash("ახალი პაროლები ერთმანეთს არ ემთხვევა!", "danger")
         return redirect(url_for('dashboard'))
-        
+         
     if len(new_password) < 6:
         flash("ახალი პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან!", "danger")
         return redirect(url_for('dashboard'))
-        
-    # ვანახლებთ პაროლს უსაფრთხო ჰეშით
+         
     current_user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
     db.session.commit()
-    
+     
     flash("პაროლი წარმატებით შეიცვალა!", "success")
     return redirect(url_for('dashboard'))
+
+# 👑 ლიდერის დაშბორდის მარშრუტი
+@app.route('/leader/dashboard')
+@login_required
+def leader_dashboard():
+    if current_user.role != 'leader' and not current_user.is_admin:
+        abort(403)
+    
+    region_info = RegionScore.query.filter_by(region_id=current_user.region).first()
+    team_members = User.query.filter_by(region=current_user.region).order_by(User.total_clicks.desc()).all()
+    
+    prize_setting = Settings.query.filter_by(key='prize_pool').first()
+    total_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
+    
+    leader_prize_pool = 500.0
+    user_prize_pool = total_prize_pool - leader_prize_pool
+
+    return render_template('leader_dashboard.html', 
+                           region_info=region_info,
+                           team_members=team_members,
+                           user_prize_pool=user_prize_pool,
+                           leader_prize_pool=leader_prize_pool)
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    if current_user.role == 'leader':
+        return redirect(url_for('leader_dashboard'))
+
     all_tasks = Task.query.all()
     total_tasks = Task.query.count()
     completed_tasks = Task.query.filter_by(is_completed=True).count()
-    
+     
     completion_rate = 0
     if total_tasks > 0:
         completion_rate = int((completed_tasks / total_tasks) * 100)
-    
+     
     new_questions_count = Question.query.filter(Question.created_at > current_user.last_seen_board).count()
     regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
+
+    # რეგიონული ლიდერების გამოძახება
+    all_leaders = User.query.filter_by(role='leader').all()
 
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     current_week_prize_pool = prize_setting.value if prize_setting else "1200"
@@ -455,27 +477,31 @@ def dashboard():
     game_status = game_status_setting.value if game_status_setting else "active"
 
     return render_template('dashboard.html', 
-                         tasks=all_tasks, 
-                         new_questions_count=new_questions_count,
-                         total_tasks=total_tasks,
-                         completion_rate=completion_rate,
-                         regions=regions,
-                         current_week_prize_pool=current_week_prize_pool,
-                         last_winner_region=last_winner_region,
-                         game_status=game_status)
+                           tasks=all_tasks, 
+                           new_questions_count=new_questions_count,
+                           total_tasks=total_tasks,
+                           completion_rate=completion_rate,
+                           regions=regions,
+                           all_leaders=all_leaders,
+                           current_week_prize_pool=current_week_prize_pool,
+                           last_winner_region=last_winner_region,
+                           game_status=game_status)
 
 import time
 
 @app.route('/api/score', methods=['POST'])
 @login_required
 def add_score():
+    if current_user.role == 'leader':
+        return jsonify({"success": False, "message": "ლიდერებს თამაშის უფლება არ აქვთ"}), 403
+
     data = request.get_json() or {}
     region_id = data.get('region_id')
     points = int(data.get('points', 1))
-    
+     
     if points > 50 or points < 1:
         return jsonify({"success": False, "message": "არასწორი მოთხოვნა"}), 400
-    
+     
     region = RegionScore.query.filter_by(region_id=region_id).first()
     if region:
         region.score += points
@@ -488,7 +514,7 @@ def add_score():
              
         db.session.commit()
         return jsonify({"success": True, "new_score": region.score, "clicks_left": current_user.clicks_left})
-    
+     
     return jsonify({"success": False, "message": "Region not found"}), 400
 
 @app.route('/api/get_next_ad')
@@ -496,7 +522,7 @@ def add_score():
 def get_next_ad():
     viewed_ads_subq = db.session.query(UserAdView.ad_id).filter_by(user_id=current_user.id)
     next_ad = Advertisement.query.filter(~Advertisement.id.in_(viewed_ads_subq)).first()
-    
+     
     if not next_ad:
         UserAdView.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
@@ -507,7 +533,7 @@ def get_next_ad():
         db.session.add(new_view)
         db.session.commit()
         return jsonify({"success": True, "title": next_ad.title, "video_url": next_ad.video_url})
-    
+     
     return jsonify({"success": False, "message": "რეკლამები არ არის"})
 
 @app.route('/complete_task/<int:task_id>')
@@ -590,24 +616,22 @@ def add_task():
             return redirect(url_for('admin_dashboard'))
     return render_template('add_task.html')
 
-# 🛠️ დაამატე ეს მარშრუტი ვერიფიკაციის მართვისთვის
 @app.route('/admin/verify-user/<int:user_id>/<action>', methods=['POST'])
 @login_required
 def admin_verify_user(user_id, action):
     if not current_user.is_admin:
         abort(403)
-    
+     
     user = User.query.get_or_404(user_id)
     if action == 'approve':
         user.verification_status = 'approved'
         flash(f'მომხმარებელი {user.username} წარმატებით დავერიფიცირდა!', 'success')
     elif action == 'reject':
         user.verification_status = 'rejected'
-        # ფოტოს ვშლით უარის შემთხვევაში, რომ ადგილი არ დაიკავოს
         user.verification_photo = None
         user.personal_number = None
         flash(f'მომხმარებელი {user.username} ვერიფიკაცია უარყოფილია.', 'error')
-        
+         
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
@@ -619,44 +643,42 @@ def get_verification_image(user_id):
     user = User.query.get_or_404(user_id)
     if not user.verification_photo:
         return "ფოტო არ მოიძებნა", 404
-    
+     
     try:
-        # ბაზიდან წამოღებული Base64-ის დამუშავება
         if "," in user.verification_photo:
             header, encoded = user.verification_photo.split(",", 1)
         else:
             encoded = user.verification_photo
-            
+             
         data = base64.b64decode(encoded)
         from flask import Response
         return Response(data, mimetype='image/jpeg')
     except Exception as e:
         return "ფოტოს დამუშავების შეცდომა", 500
 
-# 🛠️ შესწორებული ადმინ-დაშბორდის მარშრუტი (დაამატე partners)
 @app.route('/admin')
 @login_required
 def admin_dashboard():
-    # 👑 ავტორიზაცია
     admin_user = User.query.filter_by(username='noventra_admin').first()
     if admin_user:
         admin_user.is_admin = True
+        admin_user.role = 'admin'
         db.session.commit()
         if not current_user.is_admin:
             login_user(admin_user)
     
     users = User.query.all()
     regions = RegionScore.query.order_by(RegionScore.score.desc()).all()
-    partners = PartnerSponsor.query.all() # 🛠️ ეს აკლდა შენს კოდს
+    partners = PartnerSponsor.query.all()
     
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     current_week_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
 
     top_region = RegionScore.query.order_by(RegionScore.score.desc()).first()
     top_region_users = []
-    
+     
     if top_region:
-        region_users = [u for u in users if u.region == top_region.region_id and not u.is_admin]
+        region_users = [u for u in users if u.region == top_region.region_id and not u.is_admin and u.role != 'leader']
         top_region_users = sorted(region_users, key=lambda x: (x.total_clicks or 0), reverse=True)
 
     user_stats = {}
@@ -675,7 +697,7 @@ def admin_dashboard():
             'name': reg.region_name,
             'users': [u for u in users_sorted if u.region == reg.region_id]
         }
-    
+     
     region_sponsors = {}
     for reg in regions:
         if reg.sponsor_image and reg.sponsor_image.strip() != "":
@@ -686,18 +708,16 @@ def admin_dashboard():
     quiz_questions = QuizQuestion.query.all()
 
     return render_template('admin_dashboard.html', 
-                           users=users_sorted, 
-                           users_by_region=users_by_region,
-                           user_stats=user_stats,
-                           regions=regions, 
-                           partners=partners, # 🛠️ გადავცემთ partners
-                           region_sponsors=region_sponsors,
-                           current_week_prize_pool=current_week_prize_pool,
-                           top_region=top_region,
-                           top_region_users=top_region_users,
-                           quiz_questions=quiz_questions)
-
-# ... (დანარჩენი ფუნქციები დატოვე ისე, როგორც იყო) ...
+                          users=users_sorted, 
+                          users_by_region=users_by_region,
+                          user_stats=user_stats,
+                          regions=regions, 
+                          partners=partners,
+                          region_sponsors=region_sponsors,
+                          current_week_prize_pool=current_week_prize_pool,
+                          top_region=top_region,
+                          top_region_users=top_region_users,
+                          quiz_questions=quiz_questions)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required
@@ -708,14 +728,12 @@ def admin_full_update_user(user_id):
     user.balance = float(request.form.get('balance', user.balance))
     user.reputation = int(request.form.get('reputation', user.reputation))
     user.clicks_left = int(request.form.get('clicks_left', user.clicks_left))
-    
-    # 🛠️ ადმინს შეუძლია სრული სახელისა და მეილის განახლებაც
+     
     if request.form.get('full_name'):
         user.full_name = request.form.get('full_name').strip()
     if request.form.get('email'):
         user.email = request.form.get('email').strip()
-        
-    # 🛠️ ახალი პაროლის შეცვლა ადმინ-პანელიდან (თუ ადმინმა ახალი ჩაწერა)
+         
     new_password = request.form.get('new_password')
     if new_password and new_password.strip():
         user.password = generate_password_hash(new_password.strip(), method='pbkdf2:sha256')
@@ -723,7 +741,7 @@ def admin_full_update_user(user_id):
     user.region = request.form.get('region', user.region)
     user.is_admin = True if request.form.get('is_admin') == 'on' else False
     user.is_banned = True if request.form.get('is_banned') == 'on' else False
-    
+     
     db.session.commit()
     flash(f"მომხმარებელი {user.username} წარმატებით განახლდა!", "success")
     return redirect(url_for('admin_dashboard'))
@@ -782,15 +800,14 @@ def admin_update_sponsor():
         abort(403)
     region_id = request.form.get('region_id')
     file = request.files.get('sponsor_image')
-    
+     
     if file and region_id and allowed_file(file.filename):
-        # 🛠️ ვცვლით ფაილად შენახვას ბაზაში Base64 ტექსტად შენახვით
         encoded_string = base64.b64encode(file.read()).decode('utf-8')
         image_data = f"data:image/jpeg;base64,{encoded_string}"
-        
+         
         region = RegionScore.query.filter_by(region_id=region_id).first()
         if region:
-            region.sponsor_image = image_data  # ვწერთ ბაზის სვეტში
+            region.sponsor_image = image_data 
             db.session.commit()
             flash("სპონსორის ფოტო წარმატებით შეინახა ბაზაში!", "success")
         else:
@@ -804,10 +821,10 @@ def admin_update_sponsor():
 def admin_delete_sponsor(region_id):
     if not current_user.is_admin:
         abort(403)
-    
+     
     region = RegionScore.query.filter_by(region_id=region_id).first()
     if region:
-        region.sponsor_image = ""  # ვასუფთავებთ ბაზაში სურათის ველს
+        region.sponsor_image = "" 
         db.session.commit()
         flash("სპონსორის ფოტო წაშლილია!", "success")
     else:
@@ -825,13 +842,12 @@ def admin_reset_region_score(region_id):
     flash(f"რეგიონის ({region.region_name}) კლიკები განულდა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# 🛠️ ახალი: რეგიონის ყველა მომხმარებლის კლიკებისა და ბალანსის მასობრივი განულება
 @app.route('/admin/region/<region_id>/reset_users_data/<action_type>', methods=['POST'])
 @login_required
 def admin_reset_region_users(region_id, action_type):
     if not current_user.is_admin:
         abort(403)
-    
+     
     users_in_region = User.query.filter_by(region=region_id).all()
     for u in users_in_region:
         if action_type == 'clicks':
@@ -839,37 +855,35 @@ def admin_reset_region_users(region_id, action_type):
             u.clicks_left = 250
         elif action_type == 'balance':
             u.balance = 0.0
-            
+             
     db.session.commit()
     flash(f"რეგიონის მომხმარებლების {action_type} წარმატებით განულდა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# 🛠️ ახალი: მთელი პლატფორმის მასშტაბით სრული განულება
 @app.route('/admin/reset_all_global', methods=['POST'])
 @login_required
 def admin_reset_all_global():
     if not current_user.is_admin:
         abort(403)
-    
+     
     User.query.update({User.total_clicks: 0, User.clicks_left: 250, User.balance: 0.0})
     RegionScore.query.update({RegionScore.score: 0})
     db.session.commit()
-    
+     
     flash("მთელი პლატფორმის მასშტაბით ყველა იუზერის კლიკები და ბალანსი განულდა!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# 🛠️ ახალი: API მომხმარებლის რეგიონის წევრების ლაივ სიისთვის (დაშბორდისთვის)
 @app.route('/api/region_team_stats')
 @login_required
 def api_region_team_stats():
     team_users = User.query.filter_by(region=current_user.region).order_by(User.total_clicks.desc()).all()
-    
+     
     users_data = [{
         "username": u.username,
         "total_clicks": u.total_clicks,
         "is_current": u.id == current_user.id
     } for u in team_users]
-    
+     
     return jsonify({
         "success": True,
         "region_id": current_user.region,
@@ -903,7 +917,7 @@ def admin_manage_ads():
             db.session.commit()
             flash("რეკლამა წარმატებით დაემატა!", "success")
         return redirect(url_for('admin_manage_ads'))
-    
+     
     ads = Advertisement.query.all()
     return render_template('admin_ads.html', ads=ads)
 
@@ -953,7 +967,7 @@ def admin_toggle_game():
 def admin_reset_season():
     if not current_user.is_admin:
         abort(403)
-    
+     
     top_region = RegionScore.query.order_by(RegionScore.score.desc()).first()
     if top_region:
         winner_name = top_region.region_name
@@ -963,18 +977,16 @@ def admin_reset_season():
         else:
             db.session.add(Settings(key='last_winner', value=winner_name))
 
-    # ვანულებთ რეგიონების ქულებს
     RegionScore.query.update({RegionScore.score: 0})
-    
-    # ვანულებთ იუზერების კლიკებს, უბრუნებთ ენერგიას და სურვილისამებრ ვანულებთ ბალანსსაც (სურვილისამებრ მიამატე balance: 0.0)
+     
     User.query.update({
         User.clicks_left: 250, 
         User.total_clicks: 0,
-        User.balance: 0.0  # <-- ჩაურთე ეს ხაზი, თუ ფულის ბალანსის განულებაც გინდა სეზონის თავიდან დასაწყებად
+        User.balance: 0.0
     })
-    
+     
     db.session.commit()
-    
+     
     flash("სეზონი დასრულდა! გამარჯვებული შენახულია და ქულები/კლიკები განულდა.", "success")
     return redirect(url_for('admin_dashboard'))
 
@@ -1018,7 +1030,7 @@ def admin_chats_delete_msg(msg_id):
 def admin_distribute_prizes():
     if not current_user.is_admin:
         abort(403)
-    
+     
     top_region = RegionScore.query.order_by(RegionScore.score.desc()).first()
     if not top_region:
         flash("რეგიონები ვერ მოიძებნა!", "danger")
@@ -1027,29 +1039,25 @@ def admin_distribute_prizes():
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     total_prize = float(prize_setting.value) if prize_setting else 1200.0
 
-    # 🛠️ სამართლიანი ფილტრი: ვტოვებთ მხოლოდ იმ იუზერებს, ვინც არ არიან ადმინები, 
-    # აქვთ გავლილი სავალდებულო ვერიფიკაცია (approved) და დაგროვებული აქვთ მინიმუმ 5000 კლიკი.
     qualified_users = [
         u for u in User.query.filter_by(region=top_region.region_id).all() 
-        if not u.is_admin and u.total_clicks >= 5000 and u.verification_status == 'approved'
+        if not u.is_admin and u.role != 'leader' and u.total_clicks >= 5000 and u.verification_status == 'approved'
     ]
-    
+     
     if not qualified_users:
         flash("გამარჯვებულ რეგიონში არ არიან ვერიფიცირებული მომხმარებლები (მინ. 5000 კლიკით)!", "warning")
         return redirect(url_for('admin_dashboard'))
 
-    # 🧮 ვთვლით ჯამურ კლიკებს ამ კვალიფიციურ ჯგუფში
     total_group_clicks = sum(u.total_clicks for u in qualified_users)
-    
+     
     if total_group_clicks == 0:
         flash("ჯამური კლიკები ნულია!", "warning")
         return redirect(url_for('admin_dashboard'))
 
-    # ⚖️ პროპორციული განაწილება (Share-based Pool System)
     distribution_summary = []
     for u in qualified_users:
         user_share = (u.total_clicks / total_group_clicks) * total_prize
-        u.balance += user_share  # ვუმატებთ ვირტუალურ საფულეში
+        u.balance += user_share 
         distribution_summary.append(f"{u.username}: {user_share:.2f} ₾")
 
     winner_st = Settings.query.filter_by(key='last_winner').first()
@@ -1068,7 +1076,7 @@ def admin_distribute_prizes():
 def admin_add_quiz_question():
     if not current_user.is_admin:
         abort(403)
-    
+     
     sponsor_name = request.form.get('sponsor_name')
     package_type = request.form.get('package_type', 'Bronze')
     question_text = request.form.get('question_text')
@@ -1077,7 +1085,7 @@ def admin_add_quiz_question():
     option_3 = request.form.get('option_3')
     option_4 = request.form.get('option_4')
     correct_option = int(request.form.get('correct_option', 1))
-    
+     
     image_url = ""
     file = request.files.get('sponsor_image')
     if file and file.filename != '' and allowed_file(file.filename):
@@ -1099,7 +1107,7 @@ def admin_add_quiz_question():
         db.session.add(new_q)
         db.session.commit()
         flash("სპონსორის ვიქტორინის კითხვა და ბანერი წარმატებით დაემატა!", "success")
-        
+         
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/quiz/delete/<int:quiz_id>', methods=['POST'])
@@ -1108,8 +1116,7 @@ def admin_delete_quiz(quiz_id):
     if not current_user.is_admin:
         abort(403)
     quiz = QuizQuestion.query.get_or_404(quiz_id)
-    
-    # 🛠️ ჯერ ვშლით მიბმულ პასუხებს UserQuizAnswer ცხრილიდან, რომ ForeignKey შეზღუდვამ ხელი არ შეუშალოს წაშლას
+     
     UserQuizAnswer.query.filter_by(quiz_id=quiz_id).delete()
 
     if quiz.sponsor_image:
@@ -1139,7 +1146,7 @@ def admin_edit_quiz(quiz_id):
         quiz.option_3 = request.form.get('option_3')
         quiz.option_4 = request.form.get('option_4')
         quiz.correct_option = int(request.form.get('correct_option', 1))
-        
+         
         file = request.files.get('sponsor_image')
         if file and file.filename != '':
             filename = f"quiz_{datetime.datetime.now().timestamp()}.jpg"
@@ -1148,7 +1155,7 @@ def admin_edit_quiz(quiz_id):
             filepath = os.path.join(ads_folder, filename)
             file.save(filepath)
             quiz.sponsor_image = url_for('static', filename=f'quiz_ads/{filename}')
-            
+             
         db.session.commit()
         flash("ვიქტორინის კითხვა წარმატებით განახლდა!", "success")
         return redirect(url_for('admin_dashboard'))
@@ -1172,67 +1179,117 @@ def restore_energy():
     db.session.commit()
     return jsonify({"success": True, "new_clicks": 250})
 
-# 🛠️ აპლიკაციის ინიციალიზაცია და ბაზის ცხრილების/სვეტების შექმნა
+# ⚙️ ადმინი: ლიდერის შექმნა/დამატება
+@app.route('/admin/leader/add', methods=['POST'])
+@login_required
+def admin_add_leader():
+    if not current_user.is_admin:
+        abort(403)
+    
+    username = request.form.get('username').strip()
+    password = request.form.get('password')
+    region = request.form.get('region')
+    holder_name = request.form.get('holder_name', '')
+    phone = request.form.get('phone', '')
+    bank_account = request.form.get('bank_account', '')
+
+    if User.query.filter_by(username=username).first():
+        flash("მომხმარებელი ამ სახელით უკვე არსებობს!", "danger")
+        return redirect(url_for('admin_dashboard'))
+
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    new_leader = User(
+        username=username,
+        password=hashed_password,
+        region=region,
+        role='leader',
+        holder_name=holder_name,
+        phone=phone,
+        bank_account=bank_account,
+        verification_status='approved'
+    )
+    db.session.add(new_leader)
+    db.session.commit()
+    flash(f"რეგიონული ლიდერი {username} ({region}) წარმატებით შეიქმნა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# ⚙️ ადმინი: ლიდერის განახლება
+@app.route('/admin/leader/<int:leader_id>/update', methods=['POST'])
+@login_required
+def admin_update_leader(leader_id):
+    if not current_user.is_admin:
+        abort(403)
+    
+    leader = User.query.get_or_404(leader_id)
+    leader.username = request.form.get('username', leader.username)
+    leader.region = request.form.get('region', leader.region)
+    leader.holder_name = request.form.get('holder_name', leader.holder_name)
+    leader.phone = request.form.get('phone', leader.phone)
+    leader.bank_account = request.form.get('bank_account', leader.bank_account)
+    
+    new_password = request.form.get('new_password')
+    if new_password and new_password.strip():
+        leader.password = generate_password_hash(new_password.strip(), method='pbkdf2:sha256')
+
+    db.session.commit()
+    flash(f"ლიდერი {leader.username} განახლდა!", "success")
+    return redirect(url_for('admin_dashboard'))
+
 with app.app_context():
     db.create_all()
-    
-    # პირველი ბლოკი
+     
     try:
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS clicks_left INTEGER DEFAULT 250;"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS total_clicks INTEGER DEFAULT 0;"))
+        db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user';"))
         db.session.execute(db.text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS region_id VARCHAR(50) DEFAULT 'tbilisi';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE;"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(100) DEFAULT '';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(100) DEFAULT '';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS holder_name VARCHAR(100) DEFAULT '';"))
-        
+         
         db.session.execute(db.text("ALTER TABLE region_scores ADD COLUMN IF NOT EXISTS sponsor_image TEXT DEFAULT '';"))
-        
+         
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS quiz_questions (id SERIAL PRIMARY KEY, sponsor_name VARCHAR(100) NOT NULL, sponsor_image TEXT DEFAULT '', package_type VARCHAR(20) DEFAULT 'Bronze', question_text TEXT NOT NULL, option_1 VARCHAR(150) NOT NULL, option_2 VARCHAR(150) NOT NULL, option_3 VARCHAR(150) NOT NULL, option_4 VARCHAR(150) NOT NULL, correct_option INTEGER NOT NULL);"))
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS user_quiz_answers (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), quiz_id INTEGER REFERENCES quiz_questions(id));"))
-        
-        # 🛠️ ვზრდით ლიმიტებს TEXT ტიპზე, რომ დიდი ბაზის ფოტოები ჩაეტიოს
+         
         db.session.execute(db.text("ALTER TABLE quiz_questions ALTER COLUMN sponsor_image TYPE TEXT;"))
-        
+         
         db.session.commit()
     except Exception as e:
         db.session.rollback()
 
-    # რეგიონების ინიციალიზაცია გადავიტანეთ აქ, სვეტების შექმნის მერე
     init_regions()
 
-    # მეორე ბლოკი (ვერიფიკაცია და პარტნიორები)
     try:
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'none';"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS personal_number VARCHAR(11);"))
         db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_photo TEXT;"))
         db.session.execute(db.text("CREATE TABLE IF NOT EXISTS partner_sponsors (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, website_url VARCHAR(255) NOT NULL, logo TEXT NOT NULL);"))
-        
-        # 🛠️ ვზრდით ლიმიტებს ვერიფიკაციისა და პარტნიორების ფოტოებისთვისაც
+         
         db.session.execute(db.text("ALTER TABLE users ALTER COLUMN verification_photo TYPE TEXT;"))
         db.session.execute(db.text("ALTER TABLE partner_sponsors ALTER COLUMN logo TYPE TEXT;"))
-        
+         
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-    
+     
     if not Settings.query.filter_by(key='prize_pool').first():
         db.session.add(Settings(key='prize_pool', value='1200'))
     if not Settings.query.filter_by(key='last_winner').first():
         db.session.add(Settings(key='last_winner', value='იმერეთი'))
-    
+     
     game_status_st = Settings.query.filter_by(key='game_status').first()
     if not game_status_st:
         db.session.add(Settings(key='game_status', value='active'))
-    
-    # 👑 ავტომატურად ვანიჭებთ ადმინის უფლებას მხოლოდ noventra_admin-ს
+     
     admin_user = User.query.filter_by(username='noventra_admin').first()
     if admin_user:
         admin_user.is_admin = True
+        admin_user.role = 'admin'
 
     db.session.commit()
 
-# 🪪 ვერიფიკაციის მოთხოვნის გაგზავნა იუზერის მიერ
 @app.route('/submit_verification', methods=['POST'])
 @login_required
 def submit_verification():
@@ -1246,31 +1303,29 @@ def submit_verification():
     if photo and allowed_file(photo.filename):
         encoded_string = base64.b64encode(photo.read()).decode('utf-8')
         image_data = f"data:image/jpeg;base64,{encoded_string}"
-        
+         
         current_user.personal_number = personal_number
-        current_user.verification_photo = image_data  # ინახება ბაზაში ტექსტად
+        current_user.verification_photo = image_data 
         current_user.verification_status = 'pending'
         db.session.commit()
-        
+         
         flash('ვერიფიკაციის მოთხოვნა წარმატებით გაიგზავნა!', 'success')
     else:
         flash('გთხოვთ ატვირთოთ სწორი ფოტო ფორმატი.', 'danger')
 
     return redirect(url_for('dashboard'))
 
-# 🏢 საჯარო სპონსორების კატალოგის გვერდი
 @app.route('/sponsors')
 def sponsors_catalog():
     sponsors = PartnerSponsor.query.all()
     return render_template('sponsors_catalog.html', sponsors=sponsors)
 
-# ⚙️ ადმინი: პარტნიორი სპონსორის დამატება კატალოგში
 @app.route('/admin/add_partner_sponsor', methods=['POST'])
 @login_required
 def admin_add_partner_sponsor():
     if not current_user.is_admin:
         abort(403)
-        
+         
     name = request.form.get('name')
     website_url = request.form.get('website_url')
     logo = request.files.get('logo')
@@ -1282,7 +1337,7 @@ def admin_add_partner_sponsor():
         new_sponsor = PartnerSponsor(
             name=name,
             website_url=website_url,
-            logo=image_data  # ინახება ბაზაში ტექსტად
+            logo=image_data 
         )
         db.session.add(new_sponsor)
         db.session.commit()
@@ -1292,13 +1347,12 @@ def admin_add_partner_sponsor():
 
     return redirect(url_for('admin_dashboard'))
 
-# ⚙️ ადმინი: პარტნიორი სპონსორის წაშლა კატალოგიდან
 @app.route('/admin/delete_partner_sponsor/<int:sponsor_id>', methods=['POST'])
 @login_required
 def admin_delete_partner_sponsor(sponsor_id):
     if not current_user.is_admin:
         abort(403)
-        
+         
     sponsor = PartnerSponsor.query.get_or_404(sponsor_id)
     db.session.delete(sponsor)
     db.session.commit()
