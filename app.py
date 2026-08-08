@@ -5,8 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-import datetime
-import base64
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config.update(
@@ -17,7 +15,10 @@ app.config.update(
 )
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300 
 app.config['SECRET_KEY'] = 'noventra_secret_key_2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_o6plSifKNIc9@ep-damp-thunder-asbmmuxu.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+
+# 🟢 აი აქ ხდება ცვლილება: კოდი ახლა წაიკითხავს Railway-ს variables-ს
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', 'postgresql://neondb_owner:npg_b1HxeXcpTA6j@ep-silent-waterfall-axszdnny-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
