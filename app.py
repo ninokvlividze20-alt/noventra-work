@@ -682,6 +682,10 @@ def admin_dashboard():
     prize_setting = Settings.query.filter_by(key='prize_pool').first()
     current_week_prize_pool = float(prize_setting.value) if prize_setting else 1200.0
 
+    # 🟢 1. დაამატე ეს ორი ხაზი ლიდერების ფონდის წასაკითხად:
+    leader_prize_setting = Settings.query.filter_by(key='leader_prize_pool').first()
+    current_leader_prize_pool = float(leader_prize_setting.value) if leader_prize_setting else 500.0
+
     top_region = RegionScore.query.order_by(RegionScore.score.desc()).first()
     top_region_users = []
      
@@ -716,16 +720,17 @@ def admin_dashboard():
     quiz_questions = QuizQuestion.query.all()
 
     return render_template('admin_dashboard.html', 
-                          users=users_sorted, 
-                          users_by_region=users_by_region,
-                          user_stats=user_stats,
-                          regions=regions, 
-                          partners=partners,
-                          region_sponsors=region_sponsors,
-                          current_week_prize_pool=current_week_prize_pool,
-                          top_region=top_region,
-                          top_region_users=top_region_users,
-                          quiz_questions=quiz_questions)
+                           users=users_sorted, 
+                           users_by_region=users_by_region,
+                           user_stats=user_stats,
+                           regions=regions, 
+                           partners=partners,
+                           region_sponsors=region_sponsors,
+                           current_week_prize_pool=current_week_prize_pool,
+                           current_leader_prize_pool=current_leader_prize_pool, # 🟢 2. მიაბი ეს ცვლადი ტემფლეითს
+                           top_region=top_region,
+                           top_region_users=top_region_users,
+                           quiz_questions=quiz_questions)
 
 @app.route('/admin/user/<int:user_id>/update', methods=['POST'])
 @login_required

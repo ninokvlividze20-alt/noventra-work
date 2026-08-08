@@ -147,12 +147,13 @@
             </form>
 
             <form action="{{ url_for('admin_update_leader_prize') }}" method="POST" onsubmit="saveScrollPosition()">
-                <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">👑 ლიდერების საპრიზო ფონდი (₾):</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" name="leader_prize_pool" value="500" required class="input-field">
-                    <button type="submit" class="btn-sm btn-success" style="padding: 10px 15px;">შენახვა</button>
-                </div>
-            </form>
+    <label style="font-size: 11px; color: #a1a1aa; display: block; margin-bottom: 4px;">👑 ლიდერების საპრიზო ფონდი (₾):</label>
+    <div style="display: flex; gap: 10px;">
+        <!-- value შეიცვალა {{ current_leader_prize_pool }}-ით -->
+        <input type="text" name="leader_prize_pool" value="{{ current_leader_prize_pool | default('500') }}" required class="input-field">
+        <button type="submit" class="btn-sm btn-success" style="padding: 10px 15px;">შენახვა</button>
+    </div>
+</form>
         </div>
 
         <!-- ფუნქციური მართვის სექცია -->
